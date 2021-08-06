@@ -1,0 +1,217 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>深度学习 Deep Learning 基础 | 一只柴犬</title><meta name="keywords" content="李宏毅,深度学习"><meta name="author" content="凯凯超人"><meta name="copyright" content="凯凯超人"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="@[TOC](深度学习 Deep Learning 基础) 深度学习需要明白的几个问题？思路：  什么是深度学习？为什么需要深度学习？深度学习和机器学习的关系？ 深度学习的步骤 确定神经网络模型的损失函数，如何优化模型，即调参问题 如何使用Back Propagation（反向传播） 方法 update DNN（深度神经网络）参数  深度学习的概念什么是深度学习？深度学习（Deep Learnin">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深度学习 Deep Learning 基础">
+<meta property="og:url" content="http://example.com/2021/08/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%20Deep%20Learning%20%E5%9F%BA%E7%A1%80/index.html">
+<meta property="og:site_name" content="一只柴犬">
+<meta property="og:description" content="@[TOC](深度学习 Deep Learning 基础) 深度学习需要明白的几个问题？思路：  什么是深度学习？为什么需要深度学习？深度学习和机器学习的关系？ 深度学习的步骤 确定神经网络模型的损失函数，如何优化模型，即调参问题 如何使用Back Propagation（反向传播） 方法 update DNN（深度神经网络）参数  深度学习的概念什么是深度学习？深度学习（Deep Learnin">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/1.jpg">
+<meta property="article:published_time" content="2021-08-06T14:46:01.000Z">
+<meta property="article:modified_time" content="2021-08-06T14:47:00.021Z">
+<meta property="article:author" content="凯凯超人">
+<meta property="article:tag" content="李宏毅">
+<meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/1.jpg"><link rel="shortcut icon" href="/img/favicon2.png"><link rel="canonical" href="http://example.com/2021/08/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%20Deep%20Learning%20%E5%9F%BA%E7%A1%80/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '深度学习 Deep Learning 基础',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-08-06 22:47:00'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/mycss.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/StaticFile_HEXO@latest/butterfly/css/pool.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/StaticFile_HEXO@latest/butterfly/css/iconfont.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/css/flink.min.css"><meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="一只柴犬" type="application/atom+xml">
+</head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/admin.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">6</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">6</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 清单</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/%E9%9F%B3%E4%B9%90"><i class="fa-fw /music/"></i><span> 0</span></a></li><li><a class="site-page child" href="/%E7%94%B5%E5%BD%B1"><i class="fa-fw /movies/"></i><span> 1</span></a></li><li><a class="site-page child" href="/%E7%85%A7%E7%89%87"><i class="fa-fw /Gallery/"></i><span> 2</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/1.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">一只柴犬</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 清单</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/%E9%9F%B3%E4%B9%90"><i class="fa-fw /music/"></i><span> 0</span></a></li><li><a class="site-page child" href="/%E7%94%B5%E5%BD%B1"><i class="fa-fw /movies/"></i><span> 1</span></a></li><li><a class="site-page child" href="/%E7%85%A7%E7%89%87"><i class="fa-fw /Gallery/"></i><span> 2</span></a></li></ul></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">深度学习 Deep Learning 基础</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-08-06T14:46:01.000Z" title="发表于 2021-08-06 22:46:01">2021-08-06</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-08-06T14:47:00.021Z" title="更新于 2021-08-06 22:47:00">2021-08-06</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80-%E6%9D%8E%E5%AE%8F%E6%AF%85/">机器学习基础-李宏毅</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="深度学习 Deep Learning 基础"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>@[TOC](深度学习 Deep Learning 基础)</p>
+<p><strong>深度学习需要明白的几个问题？</strong><br>思路：</p>
+<ol>
+<li>什么是深度学习？为什么需要深度学习？深度学习和机器学习的关系？</li>
+<li>深度学习的步骤</li>
+<li>确定神经网络模型的损失函数，如何优化模型，即调参问题</li>
+<li>如何使用Back Propagation（反向传播） 方法 update DNN（深度神经网络）参数</li>
+</ol>
+<h1 id="深度学习的概念"><a href="#深度学习的概念" class="headerlink" title="深度学习的概念"></a>深度学习的概念</h1><h2 id="什么是深度学习？"><a href="#什么是深度学习？" class="headerlink" title="什么是深度学习？"></a>什么是深度学习？</h2><p>深度学习（Deep Learning，DL）是指多层的人工神经网络和训练它的方法。一层神经网络会把大量矩阵数字作为输入，通过<strong>非线性激活方法</strong>取权重，再产生另一个数据集合作为输出。这就像生物神经大脑的工作机理一样，通过合适的矩阵数量，多层组织链接一起，形成神经网络“大脑”进行精准复杂的处理，就像人们识别物体标注图片一样。</p>
+<ul>
+<li>深度学习的model是一个深度神经网络结构（neural structure）</li>
+<li>深度学习的“深度”是指神经网络的隐层（hidden layer）数量足够多</li>
+<li>深度学习是<strong>自动提取特征</strong>（Feature extractor），<strong>不需要像逻辑回归那样特征转换</strong>（Feature engineering）</li>
+</ul>
+<h2 id="为什么需要深度学习？-深度学习和机器学习的关系？"><a href="#为什么需要深度学习？-深度学习和机器学习的关系？" class="headerlink" title="为什么需要深度学习？ 深度学习和机器学习的关系？"></a>为什么需要深度学习？ 深度学习和机器学习的关系？</h2><ul>
+<li>传统机器学习的模型结构较简单，很依赖算法工程师做特征工程甚至子模型来提升模型效果。就像我们之前上节那个栗子一样，做多分类的问题，四个角对角是一个类的情况，没办法进行分类，所以只能使用特征工程来进行特征的变换。</li>
+<li>深度学习由于其层次化的结构，理论上可以拟合任意函数，整个复杂结构即可以用来对特征进行自动组合（如图像），也可以用来构建复杂的模型（如nlp领域里的LSTM，能够考虑上下文）。</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/b8b8df57f814494d8199e0e7b708e597.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="深度学习的步骤"><a href="#深度学习的步骤" class="headerlink" title="深度学习的步骤"></a>深度学习的步骤</h1><p>其实和机器学习一样分为三步。<img src="https://img-blog.csdnimg.cn/514f075664384cdcb62f6062fd5bd722.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="Step-1：定义一个神经网络结构（neural-structure）"><a href="#Step-1：定义一个神经网络结构（neural-structure）" class="headerlink" title="Step 1：定义一个神经网络结构（neural structure）"></a>Step 1：定义一个神经网络结构（neural structure）</h2><p>神经网络的创建包括3部分：</p>
+<ol>
+<li>神经网络有多少<strong>隐层（layer）</strong></li>
+<li>每一层有多少<strong>神经元（neuron）</strong></li>
+<li>每个神经元之间如何连接</li>
+</ol>
+<p>常见的出名神经网络<img src="https://img-blog.csdnimg.cn/5394cd49b44545c8ab4b8c1191d69239.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="神经元怎么定义？"><a href="#神经元怎么定义？" class="headerlink" title="神经元怎么定义？"></a>神经元怎么定义？</h3><p>每个神经元都有一个 bias 和一个 function ，每条输入的边都有一个 weight<img src="https://img-blog.csdnimg.cn/52bc001e984c4bdf980921c7f2458fdf.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="一个神经网络的栗子"><a href="#一个神经网络的栗子" class="headerlink" title="一个神经网络的栗子"></a>一个神经网络的栗子</h3><p>下面是一个 3个隐层（layer）、六个神经元（neuron）（每个球都是一个神经元）、全连接<strong>前馈</strong>网络（Fully Connection Feedforward Network）</p>
+<blockquote>
+<p>“<strong>前馈</strong>”是指整个网络中无反馈，信号从输入层向输出层单向传播，可用一个有向无环图表示<br>其实我们常用的网络，都是前馈神经网络，从输入到输出是一个有向图，中间不会有环或者反向传播。<br>当然，我们在训练前馈神经网络的时候，会用到反向传播进行参数调整。但仍不影响整个网络的有向和前馈性质。</p>
+</blockquote>
+<p><img src="https://img-blog.csdnimg.cn/748979f3a3c74e0ab0c19ea60bd13142.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="神经网络如何工作？"><a href="#神经网络如何工作？" class="headerlink" title="神经网络如何工作？"></a>神经网络如何工作？</h3><p><img src="https://img-blog.csdnimg.cn/d685eb4da45646df93096525226bb59f.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>其实 这就是矩阵运算（可以使用GPU加速计算）<img src="https://img-blog.csdnimg.cn/34294cf6a4254049b0f8bbc0aaf631a1.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>总体可以归纳为：<br><img src="https://img-blog.csdnimg.cn/9baa5b003ea04ff7ad3bc25076e2bb58.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="栗子：识别手写数字图像"><a href="#栗子：识别手写数字图像" class="headerlink" title="栗子：识别手写数字图像"></a>栗子：识别手写数字图像</h3><p>从图像中识别是数字几？<br><img src="https://img-blog.csdnimg.cn/5fb1bc809a444ff5bc19325453eb703d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="制作神经网络模型-的FAQ（最容易被问得问题）"><a href="#制作神经网络模型-的FAQ（最容易被问得问题）" class="headerlink" title="制作神经网络模型 的FAQ（最容易被问得问题）"></a>制作神经网络模型 的FAQ（最容易被问得问题）</h3><ul>
+<li>Q1： 神经网络需要几个隐层（layers）？每个层需要多少个神经元呢？<ul>
+<li>反复试验+ 直觉 （说白了就是要慢慢试= = 看经验呗）</li>
+</ul>
+</li>
+<li>Q2：神经网络可以自动确定结构吗？<ul>
+<li>理论上其实是可以的，不过这些方法我们还没学到。Evoluntionary Artifical Neural Networks</li>
+</ul>
+</li>
+<li>Q3：我们可以设计层次之间的结构么？<ul>
+<li>意思就是说例如Layer1 链接 Layer3 这样跳着的 等等。当然可以 CNN就是不按顺序来的，具体看下一节。<br><img src="https://img-blog.csdnimg.cn/6c74000cf96a4af0b33146e9dca6efc3.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+</ul>
+</li>
+</ul>
+<h2 id="Step-2：确定神经网络模型的损失函数"><a href="#Step-2：确定神经网络模型的损失函数" class="headerlink" title="Step 2：确定神经网络模型的损失函数"></a>Step 2：确定神经网络模型的损失函数</h2><p>还是和逻辑回归一样，用<strong>交叉熵损失函数</strong>，调参使得交叉熵损失函数最小，如下图所示：<br><img src="https://img-blog.csdnimg.cn/29c36a171c584a36bead0693b41b9027.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>当然上面只是一个点的，把每个样本结合起来看。 <img src="https://img-blog.csdnimg.cn/ef62afa46f1248a09b17cea823c91513.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>不过这个地方有几个疑问？</p>
+<blockquote>
+<ul>
+<li> Q1：神经网络里面有很多层，所以有很多 <em>w</em> 和 <em>b</em> 调整。那是全体都一次性调整么？</li>
+<li> 答：  <strong>现在不知道啊！</strong></li>
+<li> Q2：上面我是把所有的 交叉熵 都加在一起 然后对 整个大的损失函数进行调参是这样嘛？ 那我的训练样本应该是 各个数字都有是吗？</li>
+<li> 答： <strong>现在不知道啊！</strong></li>
+</ul>
+</blockquote>
+<h2 id="Step-3：如何找到一个最好的函数（最佳参数），即调参"><a href="#Step-3：如何找到一个最好的函数（最佳参数），即调参" class="headerlink" title="Step 3：如何找到一个最好的函数（最佳参数），即调参"></a>Step 3：如何找到一个最好的函数（最佳参数），即调参</h2><p>用的还是 <strong>梯度下降法</strong>  </p>
+<ol>
+<li>随机选取一组参数</li>
+<li>输入所有的训练样本</li>
+<li>然后样本数据不变，参数不断变，用梯度下降法更新参数</li>
+</ol>
+<p><img src="https://img-blog.csdnimg.cn/72b790c9e1764d88bfef2b9f447c36c3.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><img src="https://img-blog.csdnimg.cn/24ebb0869baf46e899e8f509d26ba720.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">凯凯超人</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2021/08/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%20Deep%20Learning%20%E5%9F%BA%E7%A1%80/">http://example.com/2021/08/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%20Deep%20Learning%20%E5%9F%BA%E7%A1%80/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">一只柴犬</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%9D%8E%E5%AE%8F%E6%AF%85/">李宏毅</a><a class="post-meta__tags" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">深度学习</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/1.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2021/08/05/%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92%20Logistic%20Regression/"><img class="next-cover" src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/16.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">逻辑回归 Logistic Regression</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2021/08/04/分类问题 Classification 案例一：神奇宝贝是水系还是普通系？/" title="分类问题 Classification 案例一：神奇宝贝是水系还是普通系？"><img class="cover" src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/15.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-08-04</div><div class="title">分类问题 Classification 案例一：神奇宝贝是水系还是普通系？</div></div></a></div><div><a href="/2021/08/04/梯度下降算法 进阶/" title="梯度下降算法 进阶"><img class="cover" src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/8.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-08-04</div><div class="title">梯度下降算法 进阶</div></div></a></div><div><a href="/2021/08/02/模型误差的来源分析/" title="模型误差的来源分析"><img class="cover" src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/11.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-08-02</div><div class="title">模型误差的来源分析</div></div></a></div><div><a href="/2021/07/31/线性回归Regression 案例一：宝可梦进化CP值/" title="线性回归Regression 案例一：宝可梦进化CP值"><img class="cover" src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/12.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-07-31</div><div class="title">线性回归Regression 案例一：宝可梦进化CP值</div></div></a></div><div><a href="/2021/08/05/逻辑回归 Logistic Regression/" title="逻辑回归 Logistic Regression"><img class="cover" src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/16.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-08-05</div><div class="title">逻辑回归 Logistic Regression</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/admin.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">凯凯超人</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">6</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">6</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/xxxxx" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:xxxxxx@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://gitee.com/×××" target="_blank" title="Gitee"><i class="iconfont gitee"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E6%A6%82%E5%BF%B5"><span class="toc-number">1.</span> <span class="toc-text">深度学习的概念</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%EF%BC%9F"><span class="toc-number">1.1.</span> <span class="toc-text">什么是深度学习？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%EF%BC%9F-%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%92%8C%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%85%B3%E7%B3%BB%EF%BC%9F"><span class="toc-number">1.2.</span> <span class="toc-text">为什么需要深度学习？ 深度学习和机器学习的关系？</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E6%AD%A5%E9%AA%A4"><span class="toc-number">2.</span> <span class="toc-text">深度学习的步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Step-1%EF%BC%9A%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84%EF%BC%88neural-structure%EF%BC%89"><span class="toc-number">2.1.</span> <span class="toc-text">Step 1：定义一个神经网络结构（neural structure）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A5%9E%E7%BB%8F%E5%85%83%E6%80%8E%E4%B9%88%E5%AE%9A%E4%B9%89%EF%BC%9F"><span class="toc-number">2.1.1.</span> <span class="toc-text">神经元怎么定义？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E6%A0%97%E5%AD%90"><span class="toc-number">2.1.2.</span> <span class="toc-text">一个神经网络的栗子</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C%EF%BC%9F"><span class="toc-number">2.1.3.</span> <span class="toc-text">神经网络如何工作？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%97%E5%AD%90%EF%BC%9A%E8%AF%86%E5%88%AB%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E5%9B%BE%E5%83%8F"><span class="toc-number">2.1.4.</span> <span class="toc-text">栗子：识别手写数字图像</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%B6%E4%BD%9C%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B-%E7%9A%84FAQ%EF%BC%88%E6%9C%80%E5%AE%B9%E6%98%93%E8%A2%AB%E9%97%AE%E5%BE%97%E9%97%AE%E9%A2%98%EF%BC%89"><span class="toc-number">2.1.5.</span> <span class="toc-text">制作神经网络模型 的FAQ（最容易被问得问题）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step-2%EF%BC%9A%E7%A1%AE%E5%AE%9A%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0"><span class="toc-number">2.2.</span> <span class="toc-text">Step 2：确定神经网络模型的损失函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Step-3%EF%BC%9A%E5%A6%82%E4%BD%95%E6%89%BE%E5%88%B0%E4%B8%80%E4%B8%AA%E6%9C%80%E5%A5%BD%E7%9A%84%E5%87%BD%E6%95%B0%EF%BC%88%E6%9C%80%E4%BD%B3%E5%8F%82%E6%95%B0%EF%BC%89%EF%BC%8C%E5%8D%B3%E8%B0%83%E5%8F%82"><span class="toc-number">2.3.</span> <span class="toc-text">Step 3：如何找到一个最好的函数（最佳参数），即调参</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/08/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%20Deep%20Learning%20%E5%9F%BA%E7%A1%80/" title="深度学习 Deep Learning 基础"><img src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/1.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="深度学习 Deep Learning 基础"/></a><div class="content"><a class="title" href="/2021/08/06/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%20Deep%20Learning%20%E5%9F%BA%E7%A1%80/" title="深度学习 Deep Learning 基础">深度学习 Deep Learning 基础</a><time datetime="2021-08-06T14:46:01.000Z" title="发表于 2021-08-06 22:46:01">2021-08-06</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/08/05/%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92%20Logistic%20Regression/" title="逻辑回归 Logistic Regression"><img src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/16.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="逻辑回归 Logistic Regression"/></a><div class="content"><a class="title" href="/2021/08/05/%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92%20Logistic%20Regression/" title="逻辑回归 Logistic Regression">逻辑回归 Logistic Regression</a><time datetime="2021-08-05T15:08:06.000Z" title="发表于 2021-08-05 23:08:06">2021-08-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/08/04/%E5%88%86%E7%B1%BB%E9%97%AE%E9%A2%98%20Classification%20%E6%A1%88%E4%BE%8B%E4%B8%80%EF%BC%9A%E7%A5%9E%E5%A5%87%E5%AE%9D%E8%B4%9D%E6%98%AF%E6%B0%B4%E7%B3%BB%E8%BF%98%E6%98%AF%E6%99%AE%E9%80%9A%E7%B3%BB%EF%BC%9F/" title="分类问题 Classification 案例一：神奇宝贝是水系还是普通系？"><img src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/15.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="分类问题 Classification 案例一：神奇宝贝是水系还是普通系？"/></a><div class="content"><a class="title" href="/2021/08/04/%E5%88%86%E7%B1%BB%E9%97%AE%E9%A2%98%20Classification%20%E6%A1%88%E4%BE%8B%E4%B8%80%EF%BC%9A%E7%A5%9E%E5%A5%87%E5%AE%9D%E8%B4%9D%E6%98%AF%E6%B0%B4%E7%B3%BB%E8%BF%98%E6%98%AF%E6%99%AE%E9%80%9A%E7%B3%BB%EF%BC%9F/" title="分类问题 Classification 案例一：神奇宝贝是水系还是普通系？">分类问题 Classification 案例一：神奇宝贝是水系还是普通系？</a><time datetime="2021-08-04T06:21:06.000Z" title="发表于 2021-08-04 14:21:06">2021-08-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/08/04/%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%AE%97%E6%B3%95%20%E8%BF%9B%E9%98%B6/" title="梯度下降算法 进阶"><img src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/8.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="梯度下降算法 进阶"/></a><div class="content"><a class="title" href="/2021/08/04/%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%AE%97%E6%B3%95%20%E8%BF%9B%E9%98%B6/" title="梯度下降算法 进阶">梯度下降算法 进阶</a><time datetime="2021-08-04T05:16:06.000Z" title="发表于 2021-08-04 13:16:06">2021-08-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/08/02/%E6%A8%A1%E5%9E%8B%E8%AF%AF%E5%B7%AE%E7%9A%84%E6%9D%A5%E6%BA%90%E5%88%86%E6%9E%90/" title="模型误差的来源分析"><img src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/11.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="模型误差的来源分析"/></a><div class="content"><a class="title" href="/2021/08/02/%E6%A8%A1%E5%9E%8B%E8%AF%AF%E5%B7%AE%E7%9A%84%E6%9D%A5%E6%BA%90%E5%88%86%E6%9E%90/" title="模型误差的来源分析">模型误差的来源分析</a><time datetime="2021-08-02T05:16:06.000Z" title="发表于 2021-08-02 13:16:06">2021-08-02</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 凯凯超人</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/StaticFile_HEXO@latest/butterfly/js/pool.min.js"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/js/mouse_snow.min.js"><script src="https://cdn.jsdelivr.net/gh/sviptzk/StaticFile_HEXO@latest/butterfly/js/pool.min.js"></script><script src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/js/mouse_snow.min.js"></script><script src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/js/hideMobileSidebar.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
