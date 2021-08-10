@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2021-08-09T14:37:14.552Z</updated>
+  <updated>2021-08-10T16:49:31.112Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,34 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>深度学习 Deep Learning 模型优化</title>
+    <link href="http://example.com/2021/08/10/%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81Deep%EF%BC%9F%E6%B7%B1%E8%80%8C%E4%B8%8D%E6%98%AF%E5%AE%BD/"/>
+    <id>http://example.com/2021/08/10/%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81Deep%EF%BC%9F%E6%B7%B1%E8%80%8C%E4%B8%8D%E6%98%AF%E5%AE%BD/</id>
+    <published>2021-08-10T14:36:01.000Z</published>
+    <updated>2021-08-10T16:49:31.112Z</updated>
+    
+    <content type="html"><![CDATA[<p>@<a href="%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81Deep%EF%BC%9F%E6%B7%B1%E8%80%8C%E4%B8%8D%E6%98%AF%E5%AE%BD">TOC</a></p><blockquote><p><strong>Q：为什么要用要用深度？而不是广度？</strong><br>答：1.因为深度可以用少量的数据，就完成对数据的分类。<br>2.深度，每个层次都是基于上个层次得到的（其实就是学习的过程），我们可以将神经元的数量减少。如果层次很少的话，会导致神经元可能非常多。可以类比逻辑电路。<img src="https://img-blog.csdnimg.cn/3889abe5617e426d91f92e842ba3af83.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p></blockquote><h1 id="模组化"><a href="#模组化" class="headerlink" title="模组化"></a>模组化</h1><p>在比较浅层网络与深层网络时，要让“矮胖”的网络和“高瘦”的网络的参数数目相等，这样比较才公平。<br><strong>但即便是在深层网络参数较少的情况下，深层网络也会比浅层网络表现好。</strong><br>这是因为<font color="red"> 深层”其实相当于“模组化”</font>，第一个隐层是最基本的分类器，第二个隐层是用第一个隐层建造的分类器，以此类推。</p><blockquote><p><strong>举个栗子，为什么说深度好！</strong><br>左边第一幅图可以看到，我们需要分四个类，包括长发女，长发男，短发女，短发男。一共四类，其中长发男的数据样本很少，那区分这个类的能力就非常的弱。<br>这个时候，我们就可以先分为两个神经元，一个区分男女，一个区分长发短发，这样中间加一层，可以使得数据样本少的类 鉴定的效果更好。<br><img src="https://img-blog.csdnimg.cn/dc3ef77e42724c1ebbcb6d0d29067206.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><strong>对于分类一个图像来说，深度使得模块化。</strong><img src="https://img-blog.csdnimg.cn/81cf2b79b06440e789ad2a03937c7e2e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p></blockquote><h1 id="类比逻辑电路"><a href="#类比逻辑电路" class="headerlink" title="类比逻辑电路"></a>类比逻辑电路</h1><p><img src="https://img-blog.csdnimg.cn/8635e890e73f4834900ea683446b9f0a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>浅层网络确实可以表示任意函数，但是使用深层结构更有效率。<br><strong>好比逻辑门电路，用两层逻辑门就可以实现任何布尔函数，但是用多层结构更简单、需要的逻辑门更少。</strong><br><img src="https://img-blog.csdnimg.cn/3889abe5617e426d91f92e842ba3af83.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p><p>神经网络也是如此，单隐层网络可以表示任何连续函数，但是多层结构表示起来更简单、需要的神经元更少，<strong>所以比较不容易overfitting，或只需较少的data。</strong>而且，深层结构可以比较有效率地使用data。</p><h1 id="类比图形"><a href="#类比图形" class="headerlink" title="类比图形"></a>类比图形</h1><p><img src="https://img-blog.csdnimg.cn/e4e96dfdc69b4c47b96640efa2f70be8.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>1层hidden layer与3层hidden layer（相同数目的参数），3层的效果更好。<br>但理论上，3层可达到的效果，1层也能达到：要在1层learn的时候，target从真实label改为3层的output，这样1层的结果会接近3层的结果。</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;@&lt;a href=&quot;%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81Deep%EF%BC%9F%E6%B7%B1%E8%80%8C%E4%B8%8D%E6%98%AF%E5%AE%BD&quot;&gt;TOC&lt;/a&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;st</summary>
+      
+    
+    
+    
+    <category term="机器学习基础-李宏毅" scheme="http://example.com/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80-%E6%9D%8E%E5%AE%8F%E6%AF%85/"/>
+    
+    
+    <category term="深度学习" scheme="http://example.com/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="李宏毅" scheme="http://example.com/tags/%E6%9D%8E%E5%AE%8F%E6%AF%85/"/>
+    
+  </entry>
   
   <entry>
     <title>深度学习 Deep Learning 模型优化</title>
@@ -41,9 +69,9 @@
     <category term="机器学习基础-李宏毅" scheme="http://example.com/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80-%E6%9D%8E%E5%AE%8F%E6%AF%85/"/>
     
     
-    <category term="李宏毅" scheme="http://example.com/tags/%E6%9D%8E%E5%AE%8F%E6%AF%85/"/>
-    
     <category term="深度学习" scheme="http://example.com/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="李宏毅" scheme="http://example.com/tags/%E6%9D%8E%E5%AE%8F%E6%AF%85/"/>
     
     <category term="模型优化" scheme="http://example.com/tags/%E6%A8%A1%E5%9E%8B%E4%BC%98%E5%8C%96/"/>
     
@@ -73,9 +101,9 @@
     <category term="机器学习基础-李宏毅" scheme="http://example.com/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80-%E6%9D%8E%E5%AE%8F%E6%AF%85/"/>
     
     
-    <category term="李宏毅" scheme="http://example.com/tags/%E6%9D%8E%E5%AE%8F%E6%AF%85/"/>
-    
     <category term="深度学习" scheme="http://example.com/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="李宏毅" scheme="http://example.com/tags/%E6%9D%8E%E5%AE%8F%E6%AF%85/"/>
     
     <category term="反向传播" scheme="http://example.com/tags/%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD/"/>
     
@@ -103,9 +131,9 @@
     <category term="机器学习基础-李宏毅" scheme="http://example.com/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80-%E6%9D%8E%E5%AE%8F%E6%AF%85/"/>
     
     
-    <category term="机器学习" scheme="http://example.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"/>
-    
     <category term="李宏毅" scheme="http://example.com/tags/%E6%9D%8E%E5%AE%8F%E6%AF%85/"/>
+    
+    <category term="机器学习" scheme="http://example.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"/>
     
     <category term="分类问题" scheme="http://example.com/tags/%E5%88%86%E7%B1%BB%E9%97%AE%E9%A2%98/"/>
     
@@ -135,9 +163,9 @@
     <category term="机器学习基础-李宏毅" scheme="http://example.com/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80-%E6%9D%8E%E5%AE%8F%E6%AF%85/"/>
     
     
-    <category term="机器学习" scheme="http://example.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"/>
-    
     <category term="李宏毅" scheme="http://example.com/tags/%E6%9D%8E%E5%AE%8F%E6%AF%85/"/>
+    
+    <category term="机器学习" scheme="http://example.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"/>
     
     <category term="分类问题" scheme="http://example.com/tags/%E5%88%86%E7%B1%BB%E9%97%AE%E9%A2%98/"/>
     
@@ -164,9 +192,9 @@
     <category term="机器学习基础-李宏毅" scheme="http://example.com/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80-%E6%9D%8E%E5%AE%8F%E6%AF%85/"/>
     
     
-    <category term="机器学习" scheme="http://example.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"/>
-    
     <category term="李宏毅" scheme="http://example.com/tags/%E6%9D%8E%E5%AE%8F%E6%AF%85/"/>
+    
+    <category term="机器学习" scheme="http://example.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"/>
     
   </entry>
   
@@ -192,9 +220,9 @@
     <category term="机器学习基础-李宏毅" scheme="http://example.com/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80-%E6%9D%8E%E5%AE%8F%E6%AF%85/"/>
     
     
-    <category term="机器学习" scheme="http://example.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"/>
-    
     <category term="李宏毅" scheme="http://example.com/tags/%E6%9D%8E%E5%AE%8F%E6%AF%85/"/>
+    
+    <category term="机器学习" scheme="http://example.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"/>
     
   </entry>
   
@@ -220,9 +248,9 @@
     <category term="机器学习基础-李宏毅" scheme="http://example.com/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80-%E6%9D%8E%E5%AE%8F%E6%AF%85/"/>
     
     
-    <category term="机器学习" scheme="http://example.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"/>
-    
     <category term="李宏毅" scheme="http://example.com/tags/%E6%9D%8E%E5%AE%8F%E6%AF%85/"/>
+    
+    <category term="机器学习" scheme="http://example.com/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"/>
     
     <category term="线性回归" scheme="http://example.com/tags/%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92/"/>
     
