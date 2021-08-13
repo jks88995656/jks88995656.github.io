@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2021-08-12T16:23:22.584Z</updated>
+  <updated>2021-08-13T16:22:57.014Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,36 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>半监督学习 Semi-Supervised</title>
+    <link href="http://example.com/2021/08/13/%E5%8D%8A%E7%9B%91%E7%9D%A3%E5%AD%A6%E4%B9%A0%20Semi-Supervised/"/>
+    <id>http://example.com/2021/08/13/%E5%8D%8A%E7%9B%91%E7%9D%A3%E5%AD%A6%E4%B9%A0%20Semi-Supervised/</id>
+    <published>2021-08-13T14:36:01.000Z</published>
+    <updated>2021-08-13T16:22:57.014Z</updated>
+    
+    <content type="html"><![CDATA[<p>@[TOC](半监督学习 Semi-Supervised )</p><blockquote><p>总结 半监督学习 的要点：<br>Q1：什么是Semi-Supervised？<br>Q2：Semi-Surpervised在生成模型中如何实现的（EM算法）？<br>Q3：Semi-Surpervised基于Low-density Separation（低密度分离）假设是如何实现的？<br>Q4：Semi-Surpervised基于Smoothness Assumption（平滑）假设是如何实现的？</p></blockquote><h1 id="什么是Semi-Supervised？"><a href="#什么是Semi-Supervised？" class="headerlink" title="什么是Semi-Supervised？"></a>什么是Semi-Supervised？</h1><p><img src="https://img-blog.csdnimg.cn/a671d2d30c944294a8b44fad632f7435.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center"><br>大家知道在监督学习里，有一大堆的训练数据（由input和output对组成）。例如上图所示 $x^{j}$是一张图片，$y^{r}$ 是类别的 <em>label</em>。<br><strong>半监督学习是说，在label数据上面，有另外一组unlabeled的数据</strong>，写成$x^{u}$ (只有 input 没有 output )，有U笔 unlabeled 的数据。<br>通常做半监督学习的时候，我们常见的情景是 <strong>unlabeled 的数量远大于labeled 的数量</strong>（U&gt;&gt;R)。</p><blockquote><p><strong>举个栗子：现在我们要做一个猫狗分类</strong></p><ul><li>如果只考虑 labeled data，我们分类的分界线会画在中间；    </li><li>如果把 unlabeled data 也考虑进去，我们可能会根据 unlabeled data 的分布，分界线画成图中的斜线； 　<br>semi-supervised earning使用 unlabel 的方式往往伴随着<strong>一些假设</strong>，学习有没有用，取决于你这个<font color="red"><strong>假设合不合理</strong></font>。（比如灰色的点也可能是个狗不过背景跟猫照片比较像）<img src="https://img-blog.csdnimg.cn/994e98b4ab274acc8f394810b34dc7bf.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li></ul></blockquote><p>半监督学习可以分成两种：</p><ul><li>一种叫做<strong>转换学习</strong>，unlabeled 数据就是 testing set ，使用的是testing set的特征。</li><li>另一种是<strong>归纳学习</strong>，不考虑testing set，学习model的时候不使用testing set。</li></ul><blockquote><p><strong>Q：用 testing set 作为 unlabeled 数据，不是相当于用到了未来数据吗？</strong><br><strong>答</strong>：用了 label 数据才算是用了未来数据，用 testing set 的特征不算是使用未来数据。<br><strong>Q：什么时候使用转换学习或者归纳学习？</strong><br><strong>答</strong>：看 testing set是不是给你了。在一些比赛里，testing set 它是给你的，那么就可以使用转换学习。但在真正的应用中，一般是没有 testing set 的，这时候就只能做归纳学习。<br><strong>Q：为什么使用半监督学习？</strong><br><strong>答</strong>：缺少 lable 的数据，比如图片，收集图片很容易，但是标注label很困难。半监督学习利用未标注数据做一些事。<br><strong>Q：用沙雕的简单日常语言，讲一讲什么是 半监督学习</strong><br><strong>答</strong>：对人类来说，可能也是一直在做半监督学习，比如小孩子会从父母那边做一些监督学习，看到一条狗，问父亲是什么，父亲说是狗。之后小孩子会看到其他东西，有狗有猫，没有人会告诉他这些动物是什么，需要自己学出来。</p></blockquote><h1 id="Semi-Surpervised在生成模型中如何实现的（EM算法）"><a href="#Semi-Surpervised在生成模型中如何实现的（EM算法）" class="headerlink" title="Semi-Surpervised在生成模型中如何实现的（EM算法）"></a>Semi-Surpervised在生成模型中如何实现的（EM算法）</h1><p><img src="https://img-blog.csdnimg.cn/33bc117e72974fe68bb8635b54369078.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p><blockquote><p><strong>Q：在生成模型中为什么使用半监督学习？</strong><br><strong>答</strong>：在监督学习中，有一堆用来训练的样本（就是label），你知道它们分别属于类别1，还是类别2。会去估算类别1和类别2的先验概率<em>P(C1),P(C2)</em> ，然后计算类条件概率 <em>P(x|C1),P(x|C2)</em>  。<br>假设 <em>P(x|Ci)</em> 服从一个高斯分布。 假设类别1的数据是从均值为 <em>μ1</em>，协方差为 <em>Σ</em> 的分布中取出来的，而类别2的数据是从均值为 <em>μ2</em> ，协方差也为 <em>Σ</em> 的分布中取出来的（之前讲过共享协方差，效果会好一点）。<br>然后可以计算后验概率 <em>P(C1|x)</em> ，决定一个决策边界在哪里。<img src="https://img-blog.csdnimg.cn/81307014a68d4ae2a427e46e9212d4eb.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>如果今天有一些未标注数据，如上图绿点，那仍然假设均值和方差是μ1,μ2,Σ显然不合理。<br>如上图左下所示，Σ应该比较接近圆圈（蓝色圆圈），也许在类1采样的时候有问题，所以采样到奇怪的分布（蓝色椭圆）。如上图右下，类2的μ2不应该在橙色椭圆内，而应该在更下面。<br>这样会使先验概率受到影响，本来两个分布，正例数据是一样多，但是加入未标注数据之后，你可能会觉得类2的正例数据更多（先验概率就更大）。总之加入未标注数据后，会影响对均值和协方差的估测，继而影响类条件概率，最后影响了你的决策边界。</p></blockquote><p>通俗的讲，回顾有监督学习中的生成模型，由于data都是有label的，<em>P(Ci)</em> 是已知的，<em>P(x|Ci)</em> 是通过我们基于高斯分布的假设用最大似然估计出来的；现在半监督学习中的生成模型，data的一部分是unlabel的，<em>P(Ci)</em> 是不确定的（隐变量），*P(x|Ci)*的假设模型也不能套用原来的 <em>u</em> 等参数，这时候需要用<font color="red"><strong>EM算法</strong>(Expectation-Maximization algorithm，又译为期望最大化算法)</font></p><h2 id="EM算法-具体怎么做"><a href="#EM算法-具体怎么做" class="headerlink" title="EM算法 具体怎么做"></a>EM算法 具体怎么做</h2><p>EM算法适用于带有无法观测的隐变量的概率模型估计<br>初始化一组参数，如果是二分类任务，就是初始化类1和类2的先验概率、均值和协方差，可以随机初始化，用已经有标注的数据估测，统称为 <em>θ</em></p><ul><li><strong>第一步（E步）</strong>，用labeled data算出来的高斯模型参数 <em>θ</em> 代入公式去求出每一笔未标注数据（unlabeled data）的后验概率（属于类1 的概率）的 *P(C1|Xu)*；</li><li><strong>第二步（M步）</strong>，用<strong>极大似然估计</strong>更新 <em>P(Ci)</em> 以及高斯模型参数 <em>θ</em> ，求出 *P(x|Ci)*，进一步求出新的后验概率 <em>P(Ci|Xu)</em> ，重复这两步直到收敛（似然概率最大）</li><li>至于为什么更新参数是要加入<em>P(Ci|Xu)</em> 这一项，是因为EM算法的思想是把不确定的data用一个概率来表示label，而每一笔不确定的data都有可能来自 类C1 和 类C2，看右下图：<img src="https://img-blog.csdnimg.cn/7035355bb99c4d298af9344cdfb7614c.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="**加粗样式**在这里插入图片描述"></li></ul><blockquote><p>Q：EM 算法背后的理论是什么？<br>答：<strong>原来只有标注数据的时候</strong>，目标是最大化一个似然函数，那么给定θ，每一笔训练数据的似然函数值是可以计算的，然后把所有的似然函数值相加，就是总的似然函数值，然后找 <em>θ</em> 最大化。<em>θ</em> 有显式解，求最大值点（导数为0）。<br><strong>现在加入未标注数据后</strong>，我们不知道未标注数据来自哪一个类别，那么未标注数据出现的概率就是和  C1的联合概率+和C2的联合概率（相当于是$\sum_{C}P(x^{u},C^{i})$ 。接下来目标就是最大化 $P_{\theta }(x^{u})$ ，但是 $P_{\theta }(x^{u})$  的式子是非凸的，所以使用<strong>EM算法求解</strong>。<img src="https://img-blog.csdnimg.cn/5872e4d039e4413295b66b457cec8e23.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p></blockquote><h1 id="Semi-Surpervised基于Low-density-Separation（低密度分离）假设，是如何实现的"><a href="#Semi-Surpervised基于Low-density-Separation（低密度分离）假设，是如何实现的" class="headerlink" title="Semi-Surpervised基于Low-density Separation（低密度分离）假设，是如何实现的"></a>Semi-Surpervised基于Low-density Separation（低密度分离）假设，是如何实现的</h1><p><img src="https://img-blog.csdnimg.cn/ea72d9a8bb3448088c224becd5be516f.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><strong>低密度分离的假设是，不确定的data的label要不是1，要不是0（“非黑即白”）。低密度的意思是，两个Class的分界处是低密度的（分得比较开的）</strong></p><blockquote><p><strong>Q：这个世界是非黑即白的，什么是非黑即白？</strong><br><strong>答</strong>：假设现在有一大堆的data，有标注数据，有非标注数据，在两个类别之间会有一个明显的鸿沟。给一些标注数据，可以把边界分在上图右边的线，也可以把边界分在上图左边的线。但是考虑非标注数据，那么左边的边界会好一点，在边界处，两个类别的密度是低的（不会出现data）</p></blockquote><h2 id="Self-training-Entropy-based-Regularization-基于熵的正则化"><a href="#Self-training-Entropy-based-Regularization-基于熵的正则化" class="headerlink" title="Self-training + Entropy-based Regularization(基于熵的正则化)"></a>Self-training + Entropy-based Regularization(基于熵的正则化)</h2><p>　利用labeled的数据训练（逻辑回归，神经网络，决策树等）出模型f^<em>；<br>   将一组unlabeled的数据代入，得到新的标签，称为Pseudo-label伪标签；<br>   将刚才得到新标签数据的一部分和labeled数据结合到一起，得到训练新的模型，重复以上步骤；<br>　　注：在做regression时是不能用这一招的，主要因为把unlabeled data加入到训练数据中，f</em>并不会受影响</p><h2 id="Semi-supervised-SVM（半监督SVM"><a href="#Semi-supervised-SVM（半监督SVM" class="headerlink" title="Semi-supervised SVM（半监督SVM)"></a>Semi-supervised SVM（半监督SVM)</h2>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;@[TOC](半监督学习 Semi-Supervised )&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;总结 半监督学习 的要点：&lt;br&gt;Q1：什么是Semi-Supervised？&lt;br&gt;Q2：Semi-Surpervised在生成模型中如何实现的（EM算法）？&lt;br&gt;Q3</summary>
+      
+    
+    
+    
+    <category term="机器学习基础-李宏毅" scheme="http://example.com/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80-%E6%9D%8E%E5%AE%8F%E6%AF%85/"/>
+    
+    
+    <category term="深度学习" scheme="http://example.com/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="李宏毅" scheme="http://example.com/tags/%E6%9D%8E%E5%AE%8F%E6%AF%85/"/>
+    
+    <category term="半监督学习" scheme="http://example.com/tags/%E5%8D%8A%E7%9B%91%E7%9D%A3%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
   
   <entry>
     <title>卷积神经网络CNN（Convolutional Neural Network）</title>

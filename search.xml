@@ -76,6 +76,58 @@
       </tags>
   </entry>
   <entry>
+    <title>半监督学习 Semi-Supervised</title>
+    <url>/2021/08/13/%E5%8D%8A%E7%9B%91%E7%9D%A3%E5%AD%A6%E4%B9%A0%20Semi-Supervised/</url>
+    <content><![CDATA[<p>@[TOC](半监督学习 Semi-Supervised )</p>
+<blockquote>
+<p>总结 半监督学习 的要点：<br>Q1：什么是Semi-Supervised？<br>Q2：Semi-Surpervised在生成模型中如何实现的（EM算法）？<br>Q3：Semi-Surpervised基于Low-density Separation（低密度分离）假设是如何实现的？<br>Q4：Semi-Surpervised基于Smoothness Assumption（平滑）假设是如何实现的？</p>
+</blockquote>
+<h1 id="什么是Semi-Supervised？"><a href="#什么是Semi-Supervised？" class="headerlink" title="什么是Semi-Supervised？"></a>什么是Semi-Supervised？</h1><p><img src="https://img-blog.csdnimg.cn/a671d2d30c944294a8b44fad632f7435.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center"><br>大家知道在监督学习里，有一大堆的训练数据（由input和output对组成）。例如上图所示 $x^{j}$是一张图片，$y^{r}$ 是类别的 <em>label</em>。<br><strong>半监督学习是说，在label数据上面，有另外一组unlabeled的数据</strong>，写成$x^{u}$ (只有 input 没有 output )，有U笔 unlabeled 的数据。<br>通常做半监督学习的时候，我们常见的情景是 <strong>unlabeled 的数量远大于labeled 的数量</strong>（U&gt;&gt;R)。</p>
+<blockquote>
+<p><strong>举个栗子：现在我们要做一个猫狗分类</strong></p>
+<ul>
+<li>如果只考虑 labeled data，我们分类的分界线会画在中间；    </li>
+<li>如果把 unlabeled data 也考虑进去，我们可能会根据 unlabeled data 的分布，分界线画成图中的斜线； 　<br>semi-supervised earning使用 unlabel 的方式往往伴随着<strong>一些假设</strong>，学习有没有用，取决于你这个<font color="red"><strong>假设合不合理</strong></font>。（比如灰色的点也可能是个狗不过背景跟猫照片比较像）<img src="https://img-blog.csdnimg.cn/994e98b4ab274acc8f394810b34dc7bf.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+</ul>
+</blockquote>
+<p>半监督学习可以分成两种：</p>
+<ul>
+<li>一种叫做<strong>转换学习</strong>，unlabeled 数据就是 testing set ，使用的是testing set的特征。</li>
+<li>另一种是<strong>归纳学习</strong>，不考虑testing set，学习model的时候不使用testing set。</li>
+</ul>
+<blockquote>
+<p><strong>Q：用 testing set 作为 unlabeled 数据，不是相当于用到了未来数据吗？</strong><br><strong>答</strong>：用了 label 数据才算是用了未来数据，用 testing set 的特征不算是使用未来数据。<br><strong>Q：什么时候使用转换学习或者归纳学习？</strong><br><strong>答</strong>：看 testing set是不是给你了。在一些比赛里，testing set 它是给你的，那么就可以使用转换学习。但在真正的应用中，一般是没有 testing set 的，这时候就只能做归纳学习。<br><strong>Q：为什么使用半监督学习？</strong><br><strong>答</strong>：缺少 lable 的数据，比如图片，收集图片很容易，但是标注label很困难。半监督学习利用未标注数据做一些事。<br><strong>Q：用沙雕的简单日常语言，讲一讲什么是 半监督学习</strong><br><strong>答</strong>：对人类来说，可能也是一直在做半监督学习，比如小孩子会从父母那边做一些监督学习，看到一条狗，问父亲是什么，父亲说是狗。之后小孩子会看到其他东西，有狗有猫，没有人会告诉他这些动物是什么，需要自己学出来。</p>
+</blockquote>
+<h1 id="Semi-Surpervised在生成模型中如何实现的（EM算法）"><a href="#Semi-Surpervised在生成模型中如何实现的（EM算法）" class="headerlink" title="Semi-Surpervised在生成模型中如何实现的（EM算法）"></a>Semi-Surpervised在生成模型中如何实现的（EM算法）</h1><p><img src="https://img-blog.csdnimg.cn/33bc117e72974fe68bb8635b54369078.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<blockquote>
+<p><strong>Q：在生成模型中为什么使用半监督学习？</strong><br><strong>答</strong>：在监督学习中，有一堆用来训练的样本（就是label），你知道它们分别属于类别1，还是类别2。会去估算类别1和类别2的先验概率<em>P(C1),P(C2)</em> ，然后计算类条件概率 <em>P(x|C1),P(x|C2)</em>  。<br>假设 <em>P(x|Ci)</em> 服从一个高斯分布。 假设类别1的数据是从均值为 <em>μ1</em>，协方差为 <em>Σ</em> 的分布中取出来的，而类别2的数据是从均值为 <em>μ2</em> ，协方差也为 <em>Σ</em> 的分布中取出来的（之前讲过共享协方差，效果会好一点）。<br>然后可以计算后验概率 <em>P(C1|x)</em> ，决定一个决策边界在哪里。<img src="https://img-blog.csdnimg.cn/81307014a68d4ae2a427e46e9212d4eb.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>如果今天有一些未标注数据，如上图绿点，那仍然假设均值和方差是μ1,μ2,Σ显然不合理。<br>如上图左下所示，Σ应该比较接近圆圈（蓝色圆圈），也许在类1采样的时候有问题，所以采样到奇怪的分布（蓝色椭圆）。如上图右下，类2的μ2不应该在橙色椭圆内，而应该在更下面。<br>这样会使先验概率受到影响，本来两个分布，正例数据是一样多，但是加入未标注数据之后，你可能会觉得类2的正例数据更多（先验概率就更大）。总之加入未标注数据后，会影响对均值和协方差的估测，继而影响类条件概率，最后影响了你的决策边界。</p>
+</blockquote>
+<p>通俗的讲，回顾有监督学习中的生成模型，由于data都是有label的，<em>P(Ci)</em> 是已知的，<em>P(x|Ci)</em> 是通过我们基于高斯分布的假设用最大似然估计出来的；现在半监督学习中的生成模型，data的一部分是unlabel的，<em>P(Ci)</em> 是不确定的（隐变量），*P(x|Ci)*的假设模型也不能套用原来的 <em>u</em> 等参数，这时候需要用<font color="red"><strong>EM算法</strong>(Expectation-Maximization algorithm，又译为期望最大化算法)</font></p>
+<h2 id="EM算法-具体怎么做"><a href="#EM算法-具体怎么做" class="headerlink" title="EM算法 具体怎么做"></a>EM算法 具体怎么做</h2><p>EM算法适用于带有无法观测的隐变量的概率模型估计<br>初始化一组参数，如果是二分类任务，就是初始化类1和类2的先验概率、均值和协方差，可以随机初始化，用已经有标注的数据估测，统称为 <em>θ</em></p>
+<ul>
+<li><strong>第一步（E步）</strong>，用labeled data算出来的高斯模型参数 <em>θ</em> 代入公式去求出每一笔未标注数据（unlabeled data）的后验概率（属于类1 的概率）的 *P(C1|Xu)*；</li>
+<li><strong>第二步（M步）</strong>，用<strong>极大似然估计</strong>更新 <em>P(Ci)</em> 以及高斯模型参数 <em>θ</em> ，求出 *P(x|Ci)*，进一步求出新的后验概率 <em>P(Ci|Xu)</em> ，重复这两步直到收敛（似然概率最大）</li>
+<li>至于为什么更新参数是要加入<em>P(Ci|Xu)</em> 这一项，是因为EM算法的思想是把不确定的data用一个概率来表示label，而每一笔不确定的data都有可能来自 类C1 和 类C2，看右下图：<img src="https://img-blog.csdnimg.cn/7035355bb99c4d298af9344cdfb7614c.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="**加粗样式**在这里插入图片描述"></li>
+</ul>
+<blockquote>
+<p>Q：EM 算法背后的理论是什么？<br>答：<strong>原来只有标注数据的时候</strong>，目标是最大化一个似然函数，那么给定θ，每一笔训练数据的似然函数值是可以计算的，然后把所有的似然函数值相加，就是总的似然函数值，然后找 <em>θ</em> 最大化。<em>θ</em> 有显式解，求最大值点（导数为0）。<br><strong>现在加入未标注数据后</strong>，我们不知道未标注数据来自哪一个类别，那么未标注数据出现的概率就是和  C1的联合概率+和C2的联合概率（相当于是$\sum_{C}P(x^{u},C^{i})$ 。接下来目标就是最大化 $P_{\theta }(x^{u})$ ，但是 $P_{\theta }(x^{u})$  的式子是非凸的，所以使用<strong>EM算法求解</strong>。<img src="https://img-blog.csdnimg.cn/5872e4d039e4413295b66b457cec8e23.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</blockquote>
+<h1 id="Semi-Surpervised基于Low-density-Separation（低密度分离）假设，是如何实现的"><a href="#Semi-Surpervised基于Low-density-Separation（低密度分离）假设，是如何实现的" class="headerlink" title="Semi-Surpervised基于Low-density Separation（低密度分离）假设，是如何实现的"></a>Semi-Surpervised基于Low-density Separation（低密度分离）假设，是如何实现的</h1><p><img src="https://img-blog.csdnimg.cn/ea72d9a8bb3448088c224becd5be516f.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><strong>低密度分离的假设是，不确定的data的label要不是1，要不是0（“非黑即白”）。低密度的意思是，两个Class的分界处是低密度的（分得比较开的）</strong></p>
+<blockquote>
+<p><strong>Q：这个世界是非黑即白的，什么是非黑即白？</strong><br><strong>答</strong>：假设现在有一大堆的data，有标注数据，有非标注数据，在两个类别之间会有一个明显的鸿沟。给一些标注数据，可以把边界分在上图右边的线，也可以把边界分在上图左边的线。但是考虑非标注数据，那么左边的边界会好一点，在边界处，两个类别的密度是低的（不会出现data）</p>
+</blockquote>
+<h2 id="Self-training-Entropy-based-Regularization-基于熵的正则化"><a href="#Self-training-Entropy-based-Regularization-基于熵的正则化" class="headerlink" title="Self-training + Entropy-based Regularization(基于熵的正则化)"></a>Self-training + Entropy-based Regularization(基于熵的正则化)</h2><p>　利用labeled的数据训练（逻辑回归，神经网络，决策树等）出模型f^<em>；<br>   将一组unlabeled的数据代入，得到新的标签，称为Pseudo-label伪标签；<br>   将刚才得到新标签数据的一部分和labeled数据结合到一起，得到训练新的模型，重复以上步骤；<br>　　注：在做regression时是不能用这一招的，主要因为把unlabeled data加入到训练数据中，f</em>并不会受影响</p>
+<h2 id="Semi-supervised-SVM（半监督SVM"><a href="#Semi-supervised-SVM（半监督SVM" class="headerlink" title="Semi-supervised SVM（半监督SVM)"></a>Semi-supervised SVM（半监督SVM)</h2>]]></content>
+      <categories>
+        <category>机器学习基础-李宏毅</category>
+      </categories>
+      <tags>
+        <tag>深度学习</tag>
+        <tag>李宏毅</tag>
+        <tag>半监督学习</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>梯度下降算法 进阶</title>
     <url>/2021/08/04/%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%AE%97%E6%B3%95%20%E8%BF%9B%E9%98%B6/</url>
     <content><![CDATA[<p>@[TOC](梯度算法 进阶)</p>
@@ -117,6 +169,58 @@
 <h2 id="首先要回顾泰勒公式"><a href="#首先要回顾泰勒公式" class="headerlink" title="首先要回顾泰勒公式"></a>首先要回顾泰勒公式</h2><p><img src="https://img-blog.csdnimg.cn/c9b154d4d14c43c8bf5e2609789bb094.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/205bb83b97d849fc9b8c7451e044fdab.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>二元泰勒：<br><img src="https://img-blog.csdnimg.cn/2efa8bf67ffa419e90221154515a3712.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
 <h2 id="用泰勒展开损失函数"><a href="#用泰勒展开损失函数" class="headerlink" title="用泰勒展开损失函数"></a>用泰勒展开损失函数</h2><p><img src="https://img-blog.csdnimg.cn/3ce8a2749e644d1f978c43d485798dde.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>理解为点乘，反向180度的时候，损失函数才是最小的：<img src="https://img-blog.csdnimg.cn/235fc97c36b74012b0663975ba0dc8a9.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>最终可以表达成：<img src="https://img-blog.csdnimg.cn/83f0037797f64c048376868ee2c21fae.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
 <h1 id="梯度下降算法缺点在哪"><a href="#梯度下降算法缺点在哪" class="headerlink" title="梯度下降算法缺点在哪"></a>梯度下降算法缺点在哪</h1><p>其不仅仅包括可能有找到是局部最优解问题，有可能在中间的时候就有偏微分为0的时候，而这时这个点可能离全局最优解点 很远。<br><img src="https://img-blog.csdnimg.cn/cd31675e6d8e4c83925852218d4f2acc.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+]]></content>
+      <categories>
+        <category>机器学习基础-李宏毅</category>
+      </categories>
+      <tags>
+        <tag>李宏毅</tag>
+        <tag>机器学习</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>模型误差的来源分析</title>
+    <url>/2021/08/02/%E6%A8%A1%E5%9E%8B%E8%AF%AF%E5%B7%AE%E7%9A%84%E6%9D%A5%E6%BA%90%E5%88%86%E6%9E%90/</url>
+    <content><![CDATA[<p>@<a href="%E6%A8%A1%E5%9E%8B%E8%AF%AF%E5%B7%AE%E7%9A%84%E6%9D%A5%E6%BA%90%E5%88%86%E6%9E%90">TOC</a></p>
+<blockquote>
+<p>思路：<br>1、首先，误差的两大来源 <em>bias</em>（偏差） 和 <em>variance</em>（方差） 是指什么<br>2、然后，<em>bias</em>（偏差）和 <em>variance</em>（方差）是怎么产生的<br>3、进一步，如何判断你的模型是 <em>bias大</em>（欠拟合）还是<em>variance大</em>（过拟合），如何解决 ？</p>
+</blockquote>
+<h1 id="模型的两大来源bias（偏差）和variance（方差）"><a href="#模型的两大来源bias（偏差）和variance（方差）" class="headerlink" title="模型的两大来源bias（偏差）和variance（方差）"></a>模型的两大来源bias（偏差）和variance（方差）</h1><blockquote>
+<p>什么是bias和variance呢？<br>思路：</p>
+<ol>
+<li>首先要知道什么是误差</li>
+<li>在了解什么是bias和variance</li>
+</ol>
+</blockquote>
+<h2 id="什么是误差？"><a href="#什么是误差？" class="headerlink" title="什么是误差？"></a>什么是误差？</h2><p><strong>机器学习就是寻找一个函数，然后给它一个输入，就能得到一个理想的输出。</strong><br>f head是理论上找到的最佳函数，f star 是我们用模型预测出来的函数，<strong>两者的差值就是误差</strong>。<img src="https://img-blog.csdnimg.cn/39bb552a5ba348b88a8882c744f74566.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="什么是bias和variance（偏差和方差）"><a href="#什么是bias和variance（偏差和方差）" class="headerlink" title="什么是bias和variance（偏差和方差）"></a>什么是bias和variance（偏差和方差）</h2><h3 id="什么是bias（偏差）？"><a href="#什么是bias（偏差）？" class="headerlink" title="什么是bias（偏差）？"></a>什么是bias（偏差）？</h3><p>举个栗子说明，下图是用一定样本数的均值m来估计假设的随机变量的<strong>平均值u</strong>，这是一种<strong>无偏估计（unbiased）</strong>。<img src="https://img-blog.csdnimg.cn/eaeb2438d6a645d7b1236e6a9df59da8.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>也就是说，<strong>估计值的期望等于假设值</strong>（如上文的E(m)=u），<strong>即为无偏差，反之有偏差（bias）</strong>。<br><strong>当样本数越来越大时，m就越靠近u。</strong></p>
+<h3 id="什么是variance（方差）"><a href="#什么是variance（方差）" class="headerlink" title="什么是variance（方差）"></a>什么是variance（方差）</h3><p><strong>方差表达的是数据的离散程度</strong><img src="https://img-blog.csdnimg.cn/28ad8de1e99b4c91a3f16a1088968ca4.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>这里对于方差的估计是有差估计：<img src="https://img-blog.csdnimg.cn/c9ee7e91fff24cd498b5a21420ad1ed5.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="总结直观理解"><a href="#总结直观理解" class="headerlink" title="总结直观理解"></a>总结直观理解</h3><p>最后，bias和variance的直观理解：<img src="https://img-blog.csdnimg.cn/357d51b0a7f34b06933c5a86c042c8dc.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<ol>
+<li>bias表示的是预测的f bar（f star预测值的期望）与f head（实际正确值）的距离</li>
+<li>variance表示的是每次预测的f star（预测值）与f bar（预测值的期望）的距离（看图）</li>
+</ol>
+<h2 id="bias和variance是怎么产生的"><a href="#bias和variance是怎么产生的" class="headerlink" title="bias和variance是怎么产生的"></a>bias和variance是怎么产生的</h2><blockquote>
+<p>下面结合实际的实验说明，bias和variance是如何产生的。<br>————————————————————————————————————————————————————<br>bias如何知晓？，就要做多次实验，确定多个f star（一次实验一个预测值），然后求出f star 样本集的期望（E(f star)）<br>那么首先，我们虚拟出100个神奇宝贝平行宇宙（相当于设置了100组实验），每个预祝<strong>一个神奇宝贝训练家捕捉10只神奇宝贝</strong>（相当于每组实验10个数据），如下图：<img src="https://img-blog.csdnimg.cn/ef3d6cfdd1ca4c179d091c2f5130a42c.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>然后思考，对于这样的数据，<strong>我们选用什么model比较好</strong> ?<strong>哪一个model最后的bias比较小</strong>？<img src="https://img-blog.csdnimg.cn/c05149fd285d4c96bd182567c2d891fd.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>如上图，不同宇宙的神奇宝贝数据非常随机，项次越高，模型越复杂</p>
+</blockquote>
+<h3 id="方差-variance"><a href="#方差-variance" class="headerlink" title="方差 variance"></a>方差 variance</h3><p><img src="https://img-blog.csdnimg.cn/fea8cce3d3b64a768fbf007ddefe0021.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>对于方差而言，其表示结果的离散程度，项次越高，模型越复杂，则其离散程度肯定是越大的。<strong>因为模型越简单，收到数据的影响也就越低</strong>，比如：我极端一点，f(x)=c，数据根本不会影响model最后的预测值</p>
+<h3 id="偏差-bias"><a href="#偏差-bias" class="headerlink" title="偏差 bias"></a>偏差 bias</h3><p><img src="https://img-blog.csdnimg.cn/ade6e8be3e52487bafd38dd0f8e750a9.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><img src="https://img-blog.csdnimg.cn/759ad31af9b04b6a8cdeb92364abe4f7.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>图中看出，简单model可能并不包含目标，因此会造成较大的bias，而复杂的model是涵盖目标的，所以bias小。</p>
+<h3 id="偏差和方差的总结"><a href="#偏差和方差的总结" class="headerlink" title="偏差和方差的总结"></a>偏差和方差的总结</h3><blockquote>
+<p>简单的模型（次数小），bias会比较大，但variance会比较小，预测值更加集中。<br>复杂的模型（次数大），bias会比较小，但variance会比较大，预测值更加的离散。<br>因此，我们理想中的目标是找到一个平衡点，使bias和variance尽可能小。<img src="https://img-blog.csdnimg.cn/c5a88735d7d94da79046122ca8310740.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</blockquote>
+<h2 id="判断你的模型是bias大（欠拟合）还是variance大（过拟合）并解决"><a href="#判断你的模型是bias大（欠拟合）还是variance大（过拟合）并解决" class="headerlink" title="判断你的模型是bias大（欠拟合）还是variance大（过拟合）并解决"></a>判断你的模型是bias大（欠拟合）还是variance大（过拟合）并解决</h2><h3 id="如何判断"><a href="#如何判断" class="headerlink" title="如何判断"></a>如何判断</h3><p><img src="https://img-blog.csdnimg.cn/c8150c9d246e4b10841294be51ab0f4a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="bias过大（欠拟合）"><a href="#bias过大（欠拟合）" class="headerlink" title="bias过大（欠拟合）"></a>bias过大（欠拟合）</h3><p>需要重新设计模型</p>
+<ol>
+<li>模型考虑的特征没有全，也就是很多其实没有作用。关键特征可能还没考虑到，需要加入进去</li>
+<li>模型应该需要更加的复杂，增加更高的次项。</li>
+</ol>
+<h3 id="variance过大（过拟合）"><a href="#variance过大（过拟合）" class="headerlink" title="variance过大（过拟合）"></a>variance过大（过拟合）</h3><ol>
+<li>需要更多的数据，有些数据不够有特点</li>
+<li>可以增加一个 正则项，加强模型的平滑度，使其预测值分布不要太离散</li>
+</ol>
+<h3 id="解决实际测试比共有数据集误差更大的问题"><a href="#解决实际测试比共有数据集误差更大的问题" class="headerlink" title="解决实际测试比共有数据集误差更大的问题"></a>解决实际测试比共有数据集误差更大的问题</h3><p><img src="https://img-blog.csdnimg.cn/d742c18f9bc04a8ea7981b28a9c2970b.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>将训练集，分为两部分。这叫做2-折交叉验证。一部分还是当做训练样本，帮助我们进行调参；另一部分用作验证，验证我的模型损失如何，是否合理（充当原来共有训练集的作用）。而现在原有训练集的部分用来充当实际样本数据，算出误差值，以便于真正在实际中误差太大。</p>
+<p><img src="https://img-blog.csdnimg.cn/1c0fa7f4983a4dc585448876cab974d4.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
 ]]></content>
       <categories>
         <category>机器学习基础-李宏毅</category>
@@ -221,58 +325,6 @@
         <tag>深度学习</tag>
         <tag>李宏毅</tag>
         <tag>反向传播</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>模型误差的来源分析</title>
-    <url>/2021/08/02/%E6%A8%A1%E5%9E%8B%E8%AF%AF%E5%B7%AE%E7%9A%84%E6%9D%A5%E6%BA%90%E5%88%86%E6%9E%90/</url>
-    <content><![CDATA[<p>@<a href="%E6%A8%A1%E5%9E%8B%E8%AF%AF%E5%B7%AE%E7%9A%84%E6%9D%A5%E6%BA%90%E5%88%86%E6%9E%90">TOC</a></p>
-<blockquote>
-<p>思路：<br>1、首先，误差的两大来源 <em>bias</em>（偏差） 和 <em>variance</em>（方差） 是指什么<br>2、然后，<em>bias</em>（偏差）和 <em>variance</em>（方差）是怎么产生的<br>3、进一步，如何判断你的模型是 <em>bias大</em>（欠拟合）还是<em>variance大</em>（过拟合），如何解决 ？</p>
-</blockquote>
-<h1 id="模型的两大来源bias（偏差）和variance（方差）"><a href="#模型的两大来源bias（偏差）和variance（方差）" class="headerlink" title="模型的两大来源bias（偏差）和variance（方差）"></a>模型的两大来源bias（偏差）和variance（方差）</h1><blockquote>
-<p>什么是bias和variance呢？<br>思路：</p>
-<ol>
-<li>首先要知道什么是误差</li>
-<li>在了解什么是bias和variance</li>
-</ol>
-</blockquote>
-<h2 id="什么是误差？"><a href="#什么是误差？" class="headerlink" title="什么是误差？"></a>什么是误差？</h2><p><strong>机器学习就是寻找一个函数，然后给它一个输入，就能得到一个理想的输出。</strong><br>f head是理论上找到的最佳函数，f star 是我们用模型预测出来的函数，<strong>两者的差值就是误差</strong>。<img src="https://img-blog.csdnimg.cn/39bb552a5ba348b88a8882c744f74566.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h2 id="什么是bias和variance（偏差和方差）"><a href="#什么是bias和variance（偏差和方差）" class="headerlink" title="什么是bias和variance（偏差和方差）"></a>什么是bias和variance（偏差和方差）</h2><h3 id="什么是bias（偏差）？"><a href="#什么是bias（偏差）？" class="headerlink" title="什么是bias（偏差）？"></a>什么是bias（偏差）？</h3><p>举个栗子说明，下图是用一定样本数的均值m来估计假设的随机变量的<strong>平均值u</strong>，这是一种<strong>无偏估计（unbiased）</strong>。<img src="https://img-blog.csdnimg.cn/eaeb2438d6a645d7b1236e6a9df59da8.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p>也就是说，<strong>估计值的期望等于假设值</strong>（如上文的E(m)=u），<strong>即为无偏差，反之有偏差（bias）</strong>。<br><strong>当样本数越来越大时，m就越靠近u。</strong></p>
-<h3 id="什么是variance（方差）"><a href="#什么是variance（方差）" class="headerlink" title="什么是variance（方差）"></a>什么是variance（方差）</h3><p><strong>方差表达的是数据的离散程度</strong><img src="https://img-blog.csdnimg.cn/28ad8de1e99b4c91a3f16a1088968ca4.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>这里对于方差的估计是有差估计：<img src="https://img-blog.csdnimg.cn/c9ee7e91fff24cd498b5a21420ad1ed5.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="总结直观理解"><a href="#总结直观理解" class="headerlink" title="总结直观理解"></a>总结直观理解</h3><p>最后，bias和variance的直观理解：<img src="https://img-blog.csdnimg.cn/357d51b0a7f34b06933c5a86c042c8dc.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<ol>
-<li>bias表示的是预测的f bar（f star预测值的期望）与f head（实际正确值）的距离</li>
-<li>variance表示的是每次预测的f star（预测值）与f bar（预测值的期望）的距离（看图）</li>
-</ol>
-<h2 id="bias和variance是怎么产生的"><a href="#bias和variance是怎么产生的" class="headerlink" title="bias和variance是怎么产生的"></a>bias和variance是怎么产生的</h2><blockquote>
-<p>下面结合实际的实验说明，bias和variance是如何产生的。<br>————————————————————————————————————————————————————<br>bias如何知晓？，就要做多次实验，确定多个f star（一次实验一个预测值），然后求出f star 样本集的期望（E(f star)）<br>那么首先，我们虚拟出100个神奇宝贝平行宇宙（相当于设置了100组实验），每个预祝<strong>一个神奇宝贝训练家捕捉10只神奇宝贝</strong>（相当于每组实验10个数据），如下图：<img src="https://img-blog.csdnimg.cn/ef3d6cfdd1ca4c179d091c2f5130a42c.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>然后思考，对于这样的数据，<strong>我们选用什么model比较好</strong> ?<strong>哪一个model最后的bias比较小</strong>？<img src="https://img-blog.csdnimg.cn/c05149fd285d4c96bd182567c2d891fd.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>如上图，不同宇宙的神奇宝贝数据非常随机，项次越高，模型越复杂</p>
-</blockquote>
-<h3 id="方差-variance"><a href="#方差-variance" class="headerlink" title="方差 variance"></a>方差 variance</h3><p><img src="https://img-blog.csdnimg.cn/fea8cce3d3b64a768fbf007ddefe0021.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>对于方差而言，其表示结果的离散程度，项次越高，模型越复杂，则其离散程度肯定是越大的。<strong>因为模型越简单，收到数据的影响也就越低</strong>，比如：我极端一点，f(x)=c，数据根本不会影响model最后的预测值</p>
-<h3 id="偏差-bias"><a href="#偏差-bias" class="headerlink" title="偏差 bias"></a>偏差 bias</h3><p><img src="https://img-blog.csdnimg.cn/ade6e8be3e52487bafd38dd0f8e750a9.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><img src="https://img-blog.csdnimg.cn/759ad31af9b04b6a8cdeb92364abe4f7.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>图中看出，简单model可能并不包含目标，因此会造成较大的bias，而复杂的model是涵盖目标的，所以bias小。</p>
-<h3 id="偏差和方差的总结"><a href="#偏差和方差的总结" class="headerlink" title="偏差和方差的总结"></a>偏差和方差的总结</h3><blockquote>
-<p>简单的模型（次数小），bias会比较大，但variance会比较小，预测值更加集中。<br>复杂的模型（次数大），bias会比较小，但variance会比较大，预测值更加的离散。<br>因此，我们理想中的目标是找到一个平衡点，使bias和variance尽可能小。<img src="https://img-blog.csdnimg.cn/c5a88735d7d94da79046122ca8310740.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-</blockquote>
-<h2 id="判断你的模型是bias大（欠拟合）还是variance大（过拟合）并解决"><a href="#判断你的模型是bias大（欠拟合）还是variance大（过拟合）并解决" class="headerlink" title="判断你的模型是bias大（欠拟合）还是variance大（过拟合）并解决"></a>判断你的模型是bias大（欠拟合）还是variance大（过拟合）并解决</h2><h3 id="如何判断"><a href="#如何判断" class="headerlink" title="如何判断"></a>如何判断</h3><p><img src="https://img-blog.csdnimg.cn/c8150c9d246e4b10841294be51ab0f4a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="bias过大（欠拟合）"><a href="#bias过大（欠拟合）" class="headerlink" title="bias过大（欠拟合）"></a>bias过大（欠拟合）</h3><p>需要重新设计模型</p>
-<ol>
-<li>模型考虑的特征没有全，也就是很多其实没有作用。关键特征可能还没考虑到，需要加入进去</li>
-<li>模型应该需要更加的复杂，增加更高的次项。</li>
-</ol>
-<h3 id="variance过大（过拟合）"><a href="#variance过大（过拟合）" class="headerlink" title="variance过大（过拟合）"></a>variance过大（过拟合）</h3><ol>
-<li>需要更多的数据，有些数据不够有特点</li>
-<li>可以增加一个 正则项，加强模型的平滑度，使其预测值分布不要太离散</li>
-</ol>
-<h3 id="解决实际测试比共有数据集误差更大的问题"><a href="#解决实际测试比共有数据集误差更大的问题" class="headerlink" title="解决实际测试比共有数据集误差更大的问题"></a>解决实际测试比共有数据集误差更大的问题</h3><p><img src="https://img-blog.csdnimg.cn/d742c18f9bc04a8ea7981b28a9c2970b.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>将训练集，分为两部分。这叫做2-折交叉验证。一部分还是当做训练样本，帮助我们进行调参；另一部分用作验证，验证我的模型损失如何，是否合理（充当原来共有训练集的作用）。而现在原有训练集的部分用来充当实际样本数据，算出误差值，以便于真正在实际中误差太大。</p>
-<p><img src="https://img-blog.csdnimg.cn/1c0fa7f4983a4dc585448876cab974d4.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-]]></content>
-      <categories>
-        <category>机器学习基础-李宏毅</category>
-      </categories>
-      <tags>
-        <tag>李宏毅</tag>
-        <tag>机器学习</tag>
       </tags>
   </entry>
   <entry>
