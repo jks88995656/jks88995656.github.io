@@ -24,110 +24,6 @@
       </tags>
   </entry>
   <entry>
-    <title>分类问题 Classification 案例一：神奇宝贝是水系还是普通系？</title>
-    <url>/2021/08/04/%E5%88%86%E7%B1%BB%E9%97%AE%E9%A2%98%20Classification%20%E6%A1%88%E4%BE%8B%E4%B8%80%EF%BC%9A%E7%A5%9E%E5%A5%87%E5%AE%9D%E8%B4%9D%E6%98%AF%E6%B0%B4%E7%B3%BB%E8%BF%98%E6%98%AF%E6%99%AE%E9%80%9A%E7%B3%BB%EF%BC%9F/</url>
-    <content><![CDATA[<p>@[TOC](分类问题 Classification)</p>
-<blockquote>
-<p>概念：（从概率生成模型到判别模型）<br>概率生成模型：由数据学习联合概率密度分布 <em>P(X,Y)</em> ，然后求出条件概率分布<em>P(Y|X)</em> 作为预测的模型。例如：朴素贝叶斯、隐马尔可夫（em算法）<br>判别模型：由数据直接学习决策函数 <em>Y=f(X)</em> 或者条件概率分布 <em>P(Y|X)</em>  作为预测的模型。例如：k近邻法、感知机、决策树、逻辑回归、线性回归、最大熵模型、支持向量机(SVM)、提升方法、条件随机场（CRF）</p>
-</blockquote>
-<p><strong>分类问题的思路</strong></p>
-<ol>
-<li>分类问题及其解决方法的讨论<pre><code> 1. 首先，什么是分类问题？
- 2. 接着，分类问题该如何解决呢？
-</code></pre>
-</li>
-<li>建立概率生成模型的步骤（以朴素贝叶斯分类器为例）<br>step1：求先验概率<br>step2：确定<strong>数据属于哪一个分布，用最大似然估计出分布函数的参数</strong><br>step3：求出后验概率</li>
-<li>生成模型解决分类问题的总结以及逻辑回归方法（判别模型）的引出</li>
-</ol>
-<h1 id="分类问题及其解决方法的讨论"><a href="#分类问题及其解决方法的讨论" class="headerlink" title="分类问题及其解决方法的讨论"></a>分类问题及其解决方法的讨论</h1><h2 id="什么是分类问题？"><a href="#什么是分类问题？" class="headerlink" title="什么是分类问题？"></a>什么是分类问题？</h2><p><img src="https://img-blog.csdnimg.cn/06b2e30dc04b4fa1a871ee3acee382c3.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>说白了 就是输入一个事务的一些参数特征，通过数学模型，可以得到这个东西是什么。 这也包括二分问题（结果是由两面）与多分问题。</p>
-<p>案例：<br>举个栗子，输入一个神奇宝贝，输出：他是属于什么属性的？ <strong>这是一个典型的多分问题，因为属性有好几种啊。</strong><br><img src="https://img-blog.csdnimg.cn/d6dd520c2c1b4c8d9e6396369b5b1f56.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>举个栗子，输入一个神奇宝贝图片，输出：他是可达鸭么？ <strong>这是一个典型的二分问题，因为结果只有两种 是还是不是。</strong><br>举个栗子，假设有两个类别（水系和普通系），每个类别有不同的精灵，现在我抓到一个精灵，那么它是属于水系和普通系的概率分别是多少。这也是个<strong>典型的二分问题</strong>。</p>
-<h2 id="如何解决分类问题？"><a href="#如何解决分类问题？" class="headerlink" title="如何解决分类问题？"></a>如何解决分类问题？</h2><h3 id="如何解决二分问题？"><a href="#如何解决二分问题？" class="headerlink" title="如何解决二分问题？"></a>如何解决二分问题？</h3><h4 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h4><p>对于二分类问题，定义一个function也就是数学model，<strong>当输出函数值大于0就划分为<em>类别1</em>，否则就为<em>类别2</em>.</strong> <strong>而损失函数定义为在测试数据上误分类的次数</strong>。<img src="https://img-blog.csdnimg.cn/3ee112c779004e5da28ca9878930b369.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h4 id="那这个function我到底怎么定义呢？"><a href="#那这个function我到底怎么定义呢？" class="headerlink" title="那这个function我到底怎么定义呢？"></a>那这个function我到底怎么定义呢？</h4><p>实际上，可以将其定义为一个<strong>概率模型</strong>。<br>它可以是一个<strong>条件概率模型 <em>P(C1 | X)</em></strong>,当  <em><strong>P(C1 | X) &gt; 0.5</strong></em> ,比如在神奇宝贝二分问题中，我们定义X是这张图片的参数，而C1表示是可达鸭，整个的意思就变为了在这些图片参数的条件下这张图片是可达鸭的概率是多少，概率大于一半，说明确实很有可能就是可达鸭。或者对于第二个栗子，同样的可以规定**条件概率模型 *P(C2 | X)***，表示在捕捉了一个精灵后，他的参数条件下，是水系的概率是多少？（这边C2表示，捕捉的是水系）</p>
-<p>这边我们以栗子2为例，假如我们捕捉了一只神奇宝贝(其实他就是可达鸭)，问他是水系的概率是多少？（理论上其实，他就是水系的，但机器需要通过概率论去推，需要包括以下的概率推导）<br><img src="https://img-blog.csdnimg.cn/dfa3d538674d4dcd8cb32ccbd52ea7f2.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<blockquote>
-<p>如上图所示： 　 x就表示是可达鸭<br>先验概率：这里是P(C1)——训练样本中的精灵是水系的概率;同理P(C2)——训练样本中的精灵是普通系的概率<br>——————————————————————————————————————————————————————————————————<br>*P(x | C1)*：这里是指在水系中是可达鸭的概率<br>*P(x | C2)*：这里是指在普通系中是可达鸭的概率<br>两者可以用<strong>最大似然估计法</strong>求出——————————————————————————————————————————————————————————————————<br>后验概率：这里指抓到的神奇宝贝可达鸭是水系的概率。其用贝叶斯公式算出，公式如上图所示</p>
-</blockquote>
-<h5 id="求先验概率-P-C1-：训练样本中的精灵是水系的概率"><a href="#求先验概率-P-C1-：训练样本中的精灵是水系的概率" class="headerlink" title="求先验概率 P(C1)：训练样本中的精灵是水系的概率"></a>求先验概率 P(C1)：训练样本中的精灵是水系的概率</h5><p>根据训练样本，分别算出水系和普通系的概率<br><img src="https://img-blog.csdnimg.cn/67108f6b24044efbb896cb62ac2bd2c0.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h5 id="选择概率分布函数，用最大似然估计出分布函数的参数（就是调参）"><a href="#选择概率分布函数，用最大似然估计出分布函数的参数（就是调参）" class="headerlink" title="选择概率分布函数，用最大似然估计出分布函数的参数（就是调参）"></a>选择概率分布函数，用最大似然估计出分布函数的参数（就是调参）</h5><blockquote>
-<p>注：</p>
-<ul>
-<li>当样本数据x取实数值时，采用正太分布(高斯分布)</li>
-<li>当每种特征的数值都在0-1内时，采用伯努利分布</li>
-<li>当每种特征取值在{1, 2 , 3 , …，K}，采用多项式分布（Multinomial Distribution）</li>
-</ul>
-</blockquote>
-<ol>
-<li>　首先，我们目标是求水系样本中的79个精灵中，抓到其中一种神奇宝贝的概率 <strong>P(x | C1)</strong> ，那么这个概率应该是跟精灵的属性有关的。<br>这里我们选择<strong>两种属性（物防和法防）讨论</strong>，此时数据中（x,水系）中的x应该是一个神奇宝贝<strong>向量（[x1物防，x2法防] , 水系）。</strong><br><img src="https://img-blog.csdnimg.cn/4eaa50360e3e4c8492b900326980f697.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
-<li>2、然后，这里选择正太分布（二维）：也就是说在水系样本中的79个精灵中，抓到其中一种精灵的概率 <em>P( x | C1)</em> 呈正太分布。<br><img src="https://img-blog.csdnimg.cn/86f5ab53fd124a47918b1da54cef4c3a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
-<li>接着，用最大似然估计法算出分布函数的参数<br>似然函数<em>L</em>：x1,x2…x79同时出现的概率函数。<br>最大似然估计：使似然函数最大时的参数估计。<img src="https://img-blog.csdnimg.cn/8ea6f6da88ba4657999c75674b70170b.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>调整的参数<br><img src="https://img-blog.csdnimg.cn/528ff3d528f04fcb8a799f08f3712f4a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><h5 id="最后求出后验概率-即P-C1-x-抓到的可达鸭是水系的概率"><a href="#最后求出后验概率-即P-C1-x-抓到的可达鸭是水系的概率" class="headerlink" title="最后求出后验概率 即P(C1 | x): 抓到的可达鸭是水系的概率"></a>最后求出后验概率 即P(C1 | x): 抓到的可达鸭是水系的概率</h5>利用的就是贝叶斯公式。<br>整体每个部分的逻辑可以看下图所示：<img src="https://img-blog.csdnimg.cn/e1d5794c439749dc8e2286bfe3af4ea3.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><h4 id="效果不好的解决方法"><a href="#效果不好的解决方法" class="headerlink" title="效果不好的解决方法"></a>效果不好的解决方法</h4></li>
-</ol>
-<p><strong>实验结果</strong><br><img src="https://img-blog.csdnimg.cn/67640ca1732f41189f0bc43688a71a0e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>分类后，准确率并不高。理论上考虑其他因素，即增加维度可以增大准确率。但效果还是不佳，这该怎么办。<br><img src="https://img-blog.csdnimg.cn/841b72c2ccb243df9a91141dc200370f.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>实验结果<br><img src="https://img-blog.csdnimg.cn/0b0ee16c14424df59cf27c80a49a0e1b.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h2 id="生成模型解决分类问题的总结以及逻辑回归方法（判别模型）的引出"><a href="#生成模型解决分类问题的总结以及逻辑回归方法（判别模型）的引出" class="headerlink" title="生成模型解决分类问题的总结以及逻辑回归方法（判别模型）的引出"></a>生成模型解决分类问题的总结以及逻辑回归方法（判别模型）的引出</h2><h3 id="回到如何用机器学习的三大步骤解决分类问题："><a href="#回到如何用机器学习的三大步骤解决分类问题：" class="headerlink" title="回到如何用机器学习的三大步骤解决分类问题："></a>回到如何用机器学习的三大步骤解决分类问题：</h3><p><img src="https://img-blog.csdnimg.cn/b62ddf0753f84cce856bf1991f2d1f81.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="逻辑回归方法（判别模型）的引出"><a href="#逻辑回归方法（判别模型）的引出" class="headerlink" title="逻辑回归方法（判别模型）的引出"></a>逻辑回归方法（判别模型）的引出</h3><p><img src="https://img-blog.csdnimg.cn/5b57d3ebf742485eb514f106dba3de5a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="化简推到一下（纯数学）"><a href="#化简推到一下（纯数学）" class="headerlink" title="化简推到一下（纯数学）"></a>化简推到一下（纯数学）</h3><p><img src="https://img-blog.csdnimg.cn/f2323d6bd8474f5891cf63af3f18c47e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><img src="https://img-blog.csdnimg.cn/e8faa78abb0641adae81388745601c13.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>所以其实不用考虑，N1，N2，μ1，μ2，∑的值。 直接就是w和b两个参数，这也是为什么之前，我们将∑按权值分配后，图像由线性分类的原因。</p>
-]]></content>
-      <categories>
-        <category>机器学习基础-李宏毅</category>
-      </categories>
-      <tags>
-        <tag>李宏毅</tag>
-        <tag>机器学习</tag>
-        <tag>分类问题</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>半监督学习 Semi-Supervised</title>
-    <url>/2021/08/13/%E5%8D%8A%E7%9B%91%E7%9D%A3%E5%AD%A6%E4%B9%A0%20Semi-Supervised/</url>
-    <content><![CDATA[<p>@[TOC](半监督学习 Semi-Supervised )</p>
-<blockquote>
-<p>总结 半监督学习 的要点：<br>Q1：什么是Semi-Supervised？<br>Q2：Semi-Surpervised在生成模型中如何实现的（EM算法）？<br>Q3：Semi-Surpervised基于Low-density Separation（低密度分离）假设是如何实现的？<br>Q4：Semi-Surpervised基于Smoothness Assumption（平滑）假设是如何实现的？</p>
-</blockquote>
-<h1 id="什么是Semi-Supervised？"><a href="#什么是Semi-Supervised？" class="headerlink" title="什么是Semi-Supervised？"></a>什么是Semi-Supervised？</h1><p><img src="https://img-blog.csdnimg.cn/a671d2d30c944294a8b44fad632f7435.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center"><br>大家知道在监督学习里，有一大堆的训练数据（由input和output对组成）。例如上图所示 $x^{j}$是一张图片，$y^{r}$ 是类别的 <em>label</em>。<br><strong>半监督学习是说，在label数据上面，有另外一组unlabeled的数据</strong>，写成$x^{u}$ (只有 input 没有 output )，有U笔 unlabeled 的数据。<br>通常做半监督学习的时候，我们常见的情景是 <strong>unlabeled 的数量远大于labeled 的数量</strong>（U&gt;&gt;R)。</p>
-<blockquote>
-<p><strong>举个栗子：现在我们要做一个猫狗分类</strong></p>
-<ul>
-<li>如果只考虑 labeled data，我们分类的分界线会画在中间；    </li>
-<li>如果把 unlabeled data 也考虑进去，我们可能会根据 unlabeled data 的分布，分界线画成图中的斜线； 　<br>semi-supervised earning使用 unlabel 的方式往往伴随着<strong>一些假设</strong>，学习有没有用，取决于你这个<font color="red"><strong>假设合不合理</strong></font>。（比如灰色的点也可能是个狗不过背景跟猫照片比较像）<img src="https://img-blog.csdnimg.cn/994e98b4ab274acc8f394810b34dc7bf.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
-</ul>
-</blockquote>
-<p>半监督学习可以分成两种：</p>
-<ul>
-<li>一种叫做<strong>转换学习</strong>，unlabeled 数据就是 testing set ，使用的是testing set的特征。</li>
-<li>另一种是<strong>归纳学习</strong>，不考虑testing set，学习model的时候不使用testing set。</li>
-</ul>
-<blockquote>
-<p><strong>Q：用 testing set 作为 unlabeled 数据，不是相当于用到了未来数据吗？</strong><br><strong>答</strong>：用了 label 数据才算是用了未来数据，用 testing set 的特征不算是使用未来数据。<br><strong>Q：什么时候使用转换学习或者归纳学习？</strong><br><strong>答</strong>：看 testing set是不是给你了。在一些比赛里，testing set 它是给你的，那么就可以使用转换学习。但在真正的应用中，一般是没有 testing set 的，这时候就只能做归纳学习。<br><strong>Q：为什么使用半监督学习？</strong><br><strong>答</strong>：缺少 lable 的数据，比如图片，收集图片很容易，但是标注label很困难。半监督学习利用未标注数据做一些事。<br><strong>Q：用沙雕的简单日常语言，讲一讲什么是 半监督学习</strong><br><strong>答</strong>：对人类来说，可能也是一直在做半监督学习，比如小孩子会从父母那边做一些监督学习，看到一条狗，问父亲是什么，父亲说是狗。之后小孩子会看到其他东西，有狗有猫，没有人会告诉他这些动物是什么，需要自己学出来。</p>
-</blockquote>
-<h1 id="Semi-Surpervised在生成模型中如何实现的（EM算法）"><a href="#Semi-Surpervised在生成模型中如何实现的（EM算法）" class="headerlink" title="Semi-Surpervised在生成模型中如何实现的（EM算法）"></a>Semi-Surpervised在生成模型中如何实现的（EM算法）</h1><p><img src="https://img-blog.csdnimg.cn/33bc117e72974fe68bb8635b54369078.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<blockquote>
-<p><strong>Q：在生成模型中为什么使用半监督学习？</strong><br><strong>答</strong>：在监督学习中，有一堆用来训练的样本（就是label），你知道它们分别属于类别1，还是类别2。会去估算类别1和类别2的先验概率<em>P(C1),P(C2)</em> ，然后计算类条件概率 <em>P(x|C1),P(x|C2)</em>  。<br>假设 <em>P(x|Ci)</em> 服从一个高斯分布。 假设类别1的数据是从均值为 <em>μ1</em>，协方差为 <em>Σ</em> 的分布中取出来的，而类别2的数据是从均值为 <em>μ2</em> ，协方差也为 <em>Σ</em> 的分布中取出来的（之前讲过共享协方差，效果会好一点）。<br>然后可以计算后验概率 <em>P(C1|x)</em> ，决定一个决策边界在哪里。<img src="https://img-blog.csdnimg.cn/81307014a68d4ae2a427e46e9212d4eb.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>如果今天有一些未标注数据，如上图绿点，那仍然假设均值和方差是μ1,μ2,Σ显然不合理。<br>如上图左下所示，Σ应该比较接近圆圈（蓝色圆圈），也许在类1采样的时候有问题，所以采样到奇怪的分布（蓝色椭圆）。如上图右下，类2的μ2不应该在橙色椭圆内，而应该在更下面。<br>这样会使先验概率受到影响，本来两个分布，正例数据是一样多，但是加入未标注数据之后，你可能会觉得类2的正例数据更多（先验概率就更大）。总之加入未标注数据后，会影响对均值和协方差的估测，继而影响类条件概率，最后影响了你的决策边界。</p>
-</blockquote>
-<p>通俗的讲，回顾有监督学习中的生成模型，由于data都是有label的，<em>P(Ci)</em> 是已知的，<em>P(x|Ci)</em> 是通过我们基于高斯分布的假设用最大似然估计出来的；现在半监督学习中的生成模型，data的一部分是unlabel的，<em>P(Ci)</em> 是不确定的（隐变量），*P(x|Ci)*的假设模型也不能套用原来的 <em>u</em> 等参数，这时候需要用<font color="red"><strong>EM算法</strong>(Expectation-Maximization algorithm，又译为期望最大化算法)</font></p>
-<h2 id="EM算法-具体怎么做"><a href="#EM算法-具体怎么做" class="headerlink" title="EM算法 具体怎么做"></a>EM算法 具体怎么做</h2><p>EM算法适用于带有无法观测的隐变量的概率模型估计<br>初始化一组参数，如果是二分类任务，就是初始化类1和类2的先验概率、均值和协方差，可以随机初始化，用已经有标注的数据估测，统称为 <em>θ</em></p>
-<ul>
-<li><strong>第一步（E步）</strong>，用labeled data算出来的高斯模型参数 <em>θ</em> 代入公式去求出每一笔未标注数据（unlabeled data）的后验概率（属于类1 的概率）的 *P(C1|Xu)*；</li>
-<li><strong>第二步（M步）</strong>，用<strong>极大似然估计</strong>更新 <em>P(Ci)</em> 以及高斯模型参数 <em>θ</em> ，求出 *P(x|Ci)*，进一步求出新的后验概率 <em>P(Ci|Xu)</em> ，重复这两步直到收敛（似然概率最大）</li>
-<li>至于为什么更新参数是要加入<em>P(Ci|Xu)</em> 这一项，是因为EM算法的思想是把不确定的data用一个概率来表示label，而每一笔不确定的data都有可能来自 类C1 和 类C2，看右下图：<img src="https://img-blog.csdnimg.cn/7035355bb99c4d298af9344cdfb7614c.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="**加粗样式**在这里插入图片描述"></li>
-</ul>
-<blockquote>
-<p>Q：EM 算法背后的理论是什么？<br>答：<strong>原来只有标注数据的时候</strong>，目标是最大化一个似然函数，那么给定θ，每一笔训练数据的似然函数值是可以计算的，然后把所有的似然函数值相加，就是总的似然函数值，然后找 <em>θ</em> 最大化。<em>θ</em> 有显式解，求最大值点（导数为0）。<br><strong>现在加入未标注数据后</strong>，我们不知道未标注数据来自哪一个类别，那么未标注数据出现的概率就是和  C1的联合概率+和C2的联合概率（相当于是$\sum_{C}P(x^{u},C^{i})$ 。接下来目标就是最大化 $P_{\theta }(x^{u})$ ，但是 $P_{\theta }(x^{u})$  的式子是非凸的，所以使用<strong>EM算法求解</strong>。<img src="https://img-blog.csdnimg.cn/5872e4d039e4413295b66b457cec8e23.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-</blockquote>
-<h1 id="Semi-Surpervised基于Low-density-Separation（低密度分离）假设，是如何实现的"><a href="#Semi-Surpervised基于Low-density-Separation（低密度分离）假设，是如何实现的" class="headerlink" title="Semi-Surpervised基于Low-density Separation（低密度分离）假设，是如何实现的"></a>Semi-Surpervised基于Low-density Separation（低密度分离）假设，是如何实现的</h1><p><img src="https://img-blog.csdnimg.cn/ea72d9a8bb3448088c224becd5be516f.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><strong>低密度分离的假设是，不确定的data的label要不是1，要不是0（“非黑即白”）。低密度的意思是，两个Class的分界处是低密度的（分得比较开的）</strong></p>
-<blockquote>
-<p><strong>Q：这个世界是非黑即白的，什么是非黑即白？</strong><br><strong>答</strong>：假设现在有一大堆的data，有标注数据，有非标注数据，在两个类别之间会有一个明显的鸿沟。给一些标注数据，可以把边界分在上图右边的线，也可以把边界分在上图左边的线。但是考虑非标注数据，那么左边的边界会好一点，在边界处，两个类别的密度是低的（不会出现data）</p>
-</blockquote>
-<h2 id="Self-training-Entropy-based-Regularization-基于熵的正则化"><a href="#Self-training-Entropy-based-Regularization-基于熵的正则化" class="headerlink" title="Self-training + Entropy-based Regularization(基于熵的正则化)"></a>Self-training + Entropy-based Regularization(基于熵的正则化)</h2><p>　利用labeled的数据训练（逻辑回归，神经网络，决策树等）出模型f^<em>；<br>   将一组unlabeled的数据代入，得到新的标签，称为Pseudo-label伪标签；<br>   将刚才得到新标签数据的一部分和labeled数据结合到一起，得到训练新的模型，重复以上步骤；<br>　　注：在做regression时是不能用这一招的，主要因为把unlabeled data加入到训练数据中，f</em>并不会受影响</p>
-<h2 id="Semi-supervised-SVM（半监督SVM"><a href="#Semi-supervised-SVM（半监督SVM" class="headerlink" title="Semi-supervised SVM（半监督SVM)"></a>Semi-supervised SVM（半监督SVM)</h2>]]></content>
-      <categories>
-        <category>机器学习基础-李宏毅</category>
-      </categories>
-      <tags>
-        <tag>深度学习</tag>
-        <tag>李宏毅</tag>
-        <tag>半监督学习</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>梯度下降算法 进阶</title>
     <url>/2021/08/04/%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%AE%97%E6%B3%95%20%E8%BF%9B%E9%98%B6/</url>
     <content><![CDATA[<p>@[TOC](梯度算法 进阶)</p>
@@ -231,6 +127,58 @@
       </tags>
   </entry>
   <entry>
+    <title>分类问题 Classification 案例一：神奇宝贝是水系还是普通系？</title>
+    <url>/2021/08/04/%E5%88%86%E7%B1%BB%E9%97%AE%E9%A2%98%20Classification%20%E6%A1%88%E4%BE%8B%E4%B8%80%EF%BC%9A%E7%A5%9E%E5%A5%87%E5%AE%9D%E8%B4%9D%E6%98%AF%E6%B0%B4%E7%B3%BB%E8%BF%98%E6%98%AF%E6%99%AE%E9%80%9A%E7%B3%BB%EF%BC%9F/</url>
+    <content><![CDATA[<p>@[TOC](分类问题 Classification)</p>
+<blockquote>
+<p>概念：（从概率生成模型到判别模型）<br>概率生成模型：由数据学习联合概率密度分布 <em>P(X,Y)</em> ，然后求出条件概率分布<em>P(Y|X)</em> 作为预测的模型。例如：朴素贝叶斯、隐马尔可夫（em算法）<br>判别模型：由数据直接学习决策函数 <em>Y=f(X)</em> 或者条件概率分布 <em>P(Y|X)</em>  作为预测的模型。例如：k近邻法、感知机、决策树、逻辑回归、线性回归、最大熵模型、支持向量机(SVM)、提升方法、条件随机场（CRF）</p>
+</blockquote>
+<p><strong>分类问题的思路</strong></p>
+<ol>
+<li>分类问题及其解决方法的讨论<pre><code> 1. 首先，什么是分类问题？
+ 2. 接着，分类问题该如何解决呢？
+</code></pre>
+</li>
+<li>建立概率生成模型的步骤（以朴素贝叶斯分类器为例）<br>step1：求先验概率<br>step2：确定<strong>数据属于哪一个分布，用最大似然估计出分布函数的参数</strong><br>step3：求出后验概率</li>
+<li>生成模型解决分类问题的总结以及逻辑回归方法（判别模型）的引出</li>
+</ol>
+<h1 id="分类问题及其解决方法的讨论"><a href="#分类问题及其解决方法的讨论" class="headerlink" title="分类问题及其解决方法的讨论"></a>分类问题及其解决方法的讨论</h1><h2 id="什么是分类问题？"><a href="#什么是分类问题？" class="headerlink" title="什么是分类问题？"></a>什么是分类问题？</h2><p><img src="https://img-blog.csdnimg.cn/06b2e30dc04b4fa1a871ee3acee382c3.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>说白了 就是输入一个事务的一些参数特征，通过数学模型，可以得到这个东西是什么。 这也包括二分问题（结果是由两面）与多分问题。</p>
+<p>案例：<br>举个栗子，输入一个神奇宝贝，输出：他是属于什么属性的？ <strong>这是一个典型的多分问题，因为属性有好几种啊。</strong><br><img src="https://img-blog.csdnimg.cn/d6dd520c2c1b4c8d9e6396369b5b1f56.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>举个栗子，输入一个神奇宝贝图片，输出：他是可达鸭么？ <strong>这是一个典型的二分问题，因为结果只有两种 是还是不是。</strong><br>举个栗子，假设有两个类别（水系和普通系），每个类别有不同的精灵，现在我抓到一个精灵，那么它是属于水系和普通系的概率分别是多少。这也是个<strong>典型的二分问题</strong>。</p>
+<h2 id="如何解决分类问题？"><a href="#如何解决分类问题？" class="headerlink" title="如何解决分类问题？"></a>如何解决分类问题？</h2><h3 id="如何解决二分问题？"><a href="#如何解决二分问题？" class="headerlink" title="如何解决二分问题？"></a>如何解决二分问题？</h3><h4 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h4><p>对于二分类问题，定义一个function也就是数学model，<strong>当输出函数值大于0就划分为<em>类别1</em>，否则就为<em>类别2</em>.</strong> <strong>而损失函数定义为在测试数据上误分类的次数</strong>。<img src="https://img-blog.csdnimg.cn/3ee112c779004e5da28ca9878930b369.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h4 id="那这个function我到底怎么定义呢？"><a href="#那这个function我到底怎么定义呢？" class="headerlink" title="那这个function我到底怎么定义呢？"></a>那这个function我到底怎么定义呢？</h4><p>实际上，可以将其定义为一个<strong>概率模型</strong>。<br>它可以是一个<strong>条件概率模型 <em>P(C1 | X)</em></strong>,当  <em><strong>P(C1 | X) &gt; 0.5</strong></em> ,比如在神奇宝贝二分问题中，我们定义X是这张图片的参数，而C1表示是可达鸭，整个的意思就变为了在这些图片参数的条件下这张图片是可达鸭的概率是多少，概率大于一半，说明确实很有可能就是可达鸭。或者对于第二个栗子，同样的可以规定**条件概率模型 *P(C2 | X)***，表示在捕捉了一个精灵后，他的参数条件下，是水系的概率是多少？（这边C2表示，捕捉的是水系）</p>
+<p>这边我们以栗子2为例，假如我们捕捉了一只神奇宝贝(其实他就是可达鸭)，问他是水系的概率是多少？（理论上其实，他就是水系的，但机器需要通过概率论去推，需要包括以下的概率推导）<br><img src="https://img-blog.csdnimg.cn/dfa3d538674d4dcd8cb32ccbd52ea7f2.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<blockquote>
+<p>如上图所示： 　 x就表示是可达鸭<br>先验概率：这里是P(C1)——训练样本中的精灵是水系的概率;同理P(C2)——训练样本中的精灵是普通系的概率<br>——————————————————————————————————————————————————————————————————<br>*P(x | C1)*：这里是指在水系中是可达鸭的概率<br>*P(x | C2)*：这里是指在普通系中是可达鸭的概率<br>两者可以用<strong>最大似然估计法</strong>求出——————————————————————————————————————————————————————————————————<br>后验概率：这里指抓到的神奇宝贝可达鸭是水系的概率。其用贝叶斯公式算出，公式如上图所示</p>
+</blockquote>
+<h5 id="求先验概率-P-C1-：训练样本中的精灵是水系的概率"><a href="#求先验概率-P-C1-：训练样本中的精灵是水系的概率" class="headerlink" title="求先验概率 P(C1)：训练样本中的精灵是水系的概率"></a>求先验概率 P(C1)：训练样本中的精灵是水系的概率</h5><p>根据训练样本，分别算出水系和普通系的概率<br><img src="https://img-blog.csdnimg.cn/67108f6b24044efbb896cb62ac2bd2c0.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h5 id="选择概率分布函数，用最大似然估计出分布函数的参数（就是调参）"><a href="#选择概率分布函数，用最大似然估计出分布函数的参数（就是调参）" class="headerlink" title="选择概率分布函数，用最大似然估计出分布函数的参数（就是调参）"></a>选择概率分布函数，用最大似然估计出分布函数的参数（就是调参）</h5><blockquote>
+<p>注：</p>
+<ul>
+<li>当样本数据x取实数值时，采用正太分布(高斯分布)</li>
+<li>当每种特征的数值都在0-1内时，采用伯努利分布</li>
+<li>当每种特征取值在{1, 2 , 3 , …，K}，采用多项式分布（Multinomial Distribution）</li>
+</ul>
+</blockquote>
+<ol>
+<li>　首先，我们目标是求水系样本中的79个精灵中，抓到其中一种神奇宝贝的概率 <strong>P(x | C1)</strong> ，那么这个概率应该是跟精灵的属性有关的。<br>这里我们选择<strong>两种属性（物防和法防）讨论</strong>，此时数据中（x,水系）中的x应该是一个神奇宝贝<strong>向量（[x1物防，x2法防] , 水系）。</strong><br><img src="https://img-blog.csdnimg.cn/4eaa50360e3e4c8492b900326980f697.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+<li>2、然后，这里选择正太分布（二维）：也就是说在水系样本中的79个精灵中，抓到其中一种精灵的概率 <em>P( x | C1)</em> 呈正太分布。<br><img src="https://img-blog.csdnimg.cn/86f5ab53fd124a47918b1da54cef4c3a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+<li>接着，用最大似然估计法算出分布函数的参数<br>似然函数<em>L</em>：x1,x2…x79同时出现的概率函数。<br>最大似然估计：使似然函数最大时的参数估计。<img src="https://img-blog.csdnimg.cn/8ea6f6da88ba4657999c75674b70170b.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>调整的参数<br><img src="https://img-blog.csdnimg.cn/528ff3d528f04fcb8a799f08f3712f4a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><h5 id="最后求出后验概率-即P-C1-x-抓到的可达鸭是水系的概率"><a href="#最后求出后验概率-即P-C1-x-抓到的可达鸭是水系的概率" class="headerlink" title="最后求出后验概率 即P(C1 | x): 抓到的可达鸭是水系的概率"></a>最后求出后验概率 即P(C1 | x): 抓到的可达鸭是水系的概率</h5>利用的就是贝叶斯公式。<br>整体每个部分的逻辑可以看下图所示：<img src="https://img-blog.csdnimg.cn/e1d5794c439749dc8e2286bfe3af4ea3.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><h4 id="效果不好的解决方法"><a href="#效果不好的解决方法" class="headerlink" title="效果不好的解决方法"></a>效果不好的解决方法</h4></li>
+</ol>
+<p><strong>实验结果</strong><br><img src="https://img-blog.csdnimg.cn/67640ca1732f41189f0bc43688a71a0e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>分类后，准确率并不高。理论上考虑其他因素，即增加维度可以增大准确率。但效果还是不佳，这该怎么办。<br><img src="https://img-blog.csdnimg.cn/841b72c2ccb243df9a91141dc200370f.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>实验结果<br><img src="https://img-blog.csdnimg.cn/0b0ee16c14424df59cf27c80a49a0e1b.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="生成模型解决分类问题的总结以及逻辑回归方法（判别模型）的引出"><a href="#生成模型解决分类问题的总结以及逻辑回归方法（判别模型）的引出" class="headerlink" title="生成模型解决分类问题的总结以及逻辑回归方法（判别模型）的引出"></a>生成模型解决分类问题的总结以及逻辑回归方法（判别模型）的引出</h2><h3 id="回到如何用机器学习的三大步骤解决分类问题："><a href="#回到如何用机器学习的三大步骤解决分类问题：" class="headerlink" title="回到如何用机器学习的三大步骤解决分类问题："></a>回到如何用机器学习的三大步骤解决分类问题：</h3><p><img src="https://img-blog.csdnimg.cn/b62ddf0753f84cce856bf1991f2d1f81.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="逻辑回归方法（判别模型）的引出"><a href="#逻辑回归方法（判别模型）的引出" class="headerlink" title="逻辑回归方法（判别模型）的引出"></a>逻辑回归方法（判别模型）的引出</h3><p><img src="https://img-blog.csdnimg.cn/5b57d3ebf742485eb514f106dba3de5a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="化简推到一下（纯数学）"><a href="#化简推到一下（纯数学）" class="headerlink" title="化简推到一下（纯数学）"></a>化简推到一下（纯数学）</h3><p><img src="https://img-blog.csdnimg.cn/f2323d6bd8474f5891cf63af3f18c47e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><img src="https://img-blog.csdnimg.cn/e8faa78abb0641adae81388745601c13.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>所以其实不用考虑，N1，N2，μ1，μ2，∑的值。 直接就是w和b两个参数，这也是为什么之前，我们将∑按权值分配后，图像由线性分类的原因。</p>
+]]></content>
+      <categories>
+        <category>机器学习基础-李宏毅</category>
+      </categories>
+      <tags>
+        <tag>李宏毅</tag>
+        <tag>机器学习</tag>
+        <tag>分类问题</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>深度学习 Deep Learning 基础</title>
     <url>/2021/08/07/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%20Deep%20Learning%20%E5%9F%BA%E7%A1%80/</url>
     <content><![CDATA[<p>@[TOC](深度学习 Deep Learning 基础)</p>
@@ -325,95 +273,6 @@
         <tag>深度学习</tag>
         <tag>李宏毅</tag>
         <tag>反向传播</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>线性回归Regression 案例一：宝可梦进化CP值</title>
-    <url>/2021/07/31/%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92Regression%20%E6%A1%88%E4%BE%8B%E4%B8%80%EF%BC%9A%E5%AE%9D%E5%8F%AF%E6%A2%A6%E8%BF%9B%E5%8C%96CP%E5%80%BC/</url>
-    <content><![CDATA[<p>@[TOC](线性回归Regression 案例一：宝可梦进化CP值)</p>
-<blockquote>
-<p>本栗子：预测Pokemon精灵攻击力。<br>输入：进化前的CP值、物种（Bulbasaur）、血量（HP）、重量（Weight）、高度（Height）<br>输出：进化后的CP值</p>
-</blockquote>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/d53b2b95d30c7af9574c7a0bbaba2c82.png#pic_center" alt="在这里插入图片描述"></p>
-<h1 id="实现回归的步骤（机器学习的步骤）"><a href="#实现回归的步骤（机器学习的步骤）" class="headerlink" title="实现回归的步骤（机器学习的步骤）"></a>实现回归的步骤（机器学习的步骤）</h1><h2 id="Step1-确定一个model-线性模型"><a href="#Step1-确定一个model-线性模型" class="headerlink" title="Step1 确定一个model - 线性模型"></a>Step1 确定一个model - 线性模型</h2><blockquote>
-<p>输入的特征包括：进化前的CP值（<em>Xcp</em>）、物种（Bulbasaur）（<em>Xs</em>）、血量（HP）（<em>Xhp</em>）、重量（Weight）（<em>Xw</em>）、高度（Height）（<em>Xh</em>）</p>
-</blockquote>
-<p>先从简单的<strong>单个特征</strong> 进化前的CP值（<em>Xcp</em>）开始（<strong>后面改进再考虑多个特征</strong>）。<br><img src="https://img-blog.csdnimg.cn/img_convert/5b4df493600379c7aa0372e103eb7d79.png#pic_center" alt="在这里插入图片描述"></p>
-<h2 id="Step2-goodness-of-function（函数优化）——损失函数"><a href="#Step2-goodness-of-function（函数优化）——损失函数" class="headerlink" title="Step2 goodness of function（函数优化）——损失函数"></a>Step2 goodness of function（函数优化）——损失函数</h2><ol>
-<li>确定model后（案例为线性模型），开始训练数据（使用的为训练样本集）<img src="https://img-blog.csdnimg.cn/img_convert/ebd00bf7bee79841d6c35eac2865fd61.png#pic_center" alt="在这里插入图片描述"></li>
-<li>训练10个训练样本后得到10个的预测进化CP值（<em>y</em>）如下图所示。左侧为训练样本本身真实的进化CP值，右侧为横轴为进化前CP值（<em>Xcp</em>）<img src="https://img-blog.csdnimg.cn/img_convert/fbba4351217b730cd11ca92a7427cd51.png#pic_center" alt="在这里插入图片描述"></li>
-<li><strong>确定损失函数</strong>。损失函数用于评价一个模型的好坏。损失函数的值越小，那么模型越好。<strong>对于本案例，损失函数采用最简单的距离表示</strong>。即求<strong>实际进化后的CP值与模型预测的CP值差</strong>，来判定模型的好坏。<img src="https://img-blog.csdnimg.cn/img_convert/3abae7108681dbad20cc15a952d20bba.png#pic_center" alt="在这里插入图片描述"></li>
-<li>List item</li>
-</ol>
-<h2 id="Step3-best-function（找出最好的一个函数-即调参）——使用梯度下降法"><a href="#Step3-best-function（找出最好的一个函数-即调参）——使用梯度下降法" class="headerlink" title="Step3 best function（找出最好的一个函数 即调参）——使用梯度下降法"></a>Step3 best function（找出最好的一个函数 即调参）——使用梯度下降法</h2><ol>
-<li>案例采用<strong>梯度下降法</strong>来帮助选择 <em>w</em> 和 <em>b</em> 两个参数取何值时损失函数最小，也就意味着构建的模型越准确。 <img src="https://img-blog.csdnimg.cn/img_convert/7d75962cbe0b2dc3c54f370383912138.png#pic_center" alt="在这里插入图片描述"><blockquote>
-<p>什么是梯度下降法？梯度指的是？<br>………………………………………………………………………………………………………<br>梯度？<br>在<strong>单变量的函数</strong>中，梯度其实就是对应点<strong>函数的微分</strong>，代表着这个函数在<strong>某个给定点的切线的斜率</strong><br>在<strong>多变量函数</strong>中，梯度是一个<strong>向量</strong>，向量有方向，梯度的方向就指出了函数在给定点的上升最快的方向  <strong>即例如二维就是 偏导 i + 偏导 j</strong><br>………………………………………………………………………………………………………<br>梯度下降法(SGD  Stochastic gradient descent）？答： “下山最快路径”的一种算法<br>我们是尝试使用偏导来衡量函数随自变量的值变化关系，选择变化更为平缓的那一处  对应的 <em>w</em> 和 <em>b</em> 作为调整后的参数</p>
-</blockquote>
-</li>
-</ol>
-<h3 id="一维视角：只考虑一个参数-w"><a href="#一维视角：只考虑一个参数-w" class="headerlink" title="一维视角：只考虑一个参数 w"></a>一维视角：只考虑一个参数 <em>w</em></h3><p><img src="https://img-blog.csdnimg.cn/3c72961665a942ac87f066a129a30183.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<blockquote>
-<p>如上图  learning rate（学习率）：移动的步长 一般用η来表示<br>………………………………………………………………………………………………………<br>如何寻找一个最合适的 <em>w</em> ？<br>步骤1：随机在横轴上选取一个 <em>w0</em> 。<br>步骤2：计算微分，也就是当前的斜率，根据斜率来判定移动的方向。微分大于0应向右移动（增加 <em>w</em> ）；微分小于0向左移动（减少 <em>w</em> ）<br>步骤3：根据学习率，按步骤2得到的方向移动<br>重复步骤2和步骤3，直到找到<strong>最低点</strong>。横轴即对于的最佳 <em>w</em>  参数<br>………………………………………………………………………………………………………<br>如下图，是经过迭代多次后找到的最佳点（得是全局最优解） 。注：大部分损失函数都为正<br><img src="https://img-blog.csdnimg.cn/588186b690dd43c38a10a80600802ab0.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-</blockquote>
-<h3 id="二维视角：考虑两个参数-w-和-b"><a href="#二维视角：考虑两个参数-w-和-b" class="headerlink" title="二维视角：考虑两个参数 w 和 b"></a>二维视角：考虑两个参数 <em>w</em> 和 <em>b</em></h3><p><img src="https://img-blog.csdnimg.cn/55f2f295750242bfa35f9ac576602194.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<blockquote>
-<p>如何寻找一个最合适的 <em>w</em> ？<br>步骤1：随机在横轴上选取一个 <em>w0</em> ，<em>b0</em> 。<br>步骤2：计算各偏导，也就是当前偏导的斜率，根据斜率来判定移动的方向。微分大于0应向右移动（增加 <em>w</em> 或 <em>b</em>）；微分小于0向左移动（减少 <em>w</em> 或 <em>b</em>）<img src="https://img-blog.csdnimg.cn/6a082b40869947c2a0723b298cd36027.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>步骤3：根据学习率，按步骤2得到的方向移动<br>重复步骤2和步骤3，直到找到<strong>最低点</strong>。横轴即对于的最佳 <em>w</em> 和 <em>b</em>  参数</p>
-</blockquote>
-<p>二维情况：梯度下降法的效果<br>颜色约深的区域代表的损失函数越小？ <strong>为什么呢？</strong><br><img src="https://img-blog.csdnimg.cn/299d0d615f6640a6ae092e51579d09ea.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="梯度算法的优缺点"><a href="#梯度算法的优缺点" class="headerlink" title="梯度算法的优缺点"></a>梯度算法的优缺点</h3><blockquote>
-<p>总结一下梯度下降法：<br>　　　我们要解决使<strong>损失函数<em>L(w,b)</em></strong> 最小时参数的最佳值，梯度下降法是每次update参数值，直到损失函数最小时找到对应最佳的参数<em>w，b</em></p>
-</blockquote>
-<p><strong>缺点1</strong>：求解的未必是全局最优解，有可能是局部最优解。</p>
-<blockquote>
-<p><strong>用下山的例子讲</strong>：<br>　　　比如我们在一座大山上的某处位置，由于我们不知道怎么下山，于是决定走一步算一步，也就是在<strong>每走到一个位置的时候</strong>，<strong>求解当前位置的梯度</strong>，沿着<strong>梯度的负方向</strong>，也就是<strong>当前最陡峭的位置向下走一步</strong>，然后继续求解当前位置梯度，向这一步所在位置沿着最陡峭最易下山的位置走一步。这样一步步的走下去，一直走到觉得我们已经到了山脚。当然这样走下去，<strong>有可能我们不能走到山脚，而是到了某一个局部的山峰低处。</strong><br>………………………………………………………………………………………………………<br>　　　从上面的解释可以看出，<strong>梯度下降不一定能够找到全局的最优解，有可能是一个局部最优解</strong>。当然，如果损失函数是<strong>凸函数</strong>，梯度下降法得到的解就<strong>一定是</strong>全局最优解。</p>
-</blockquote>
-<p><strong>优点1</strong>：无论随机从哪个点出发，得到的最佳参数一定是同一组</p>
-<blockquote>
-<p><strong>用下山的例子讲</strong>：<br>　　　因为山只有一处是最低点，在确保能找到全局最优解的情况下，无论人从山上哪一点出发，一定能找到这特定一处的最低洼处。</p>
-</blockquote>
-<h2 id="Step4-回归结果分析"><a href="#Step4-回归结果分析" class="headerlink" title="Step4 回归结果分析"></a>Step4 回归结果分析</h2><blockquote>
-<p>经过上述三个步骤后，得到了<strong>训练后</strong>的“最佳参数<em>w</em>，<em>b</em>”，那么现在这个模型在<strong>测试集</strong>上是什么表现呢？<br>得到的结果是：<br><strong>测试集的误差比在训练集上得到的损失值大</strong> 这个事非常正常。因为你训练集里面可能有些数据是不典型的，同样测试集中很多也包含了训练集中没有的因素。所以一个函数模型在实际应用中，效果基本上时打折扣的。<strong>一般会采用两种方式来加强这个函数模型</strong>：<br>　　　select another model（选择另一个模型）即增加维度，增加高此项多项式<br>　　　consider the hidden factors（考虑其他隐藏因素）</p>
-</blockquote>
-<h3 id="优化模型方法一：增加高次项（一般用于拟合度不够的情况）"><a href="#优化模型方法一：增加高次项（一般用于拟合度不够的情况）" class="headerlink" title="优化模型方法一：增加高次项（一般用于拟合度不够的情况）"></a>优化模型方法一：增加高次项（一般用于拟合度不够的情况）</h3><p><strong>回到Step1</strong></p>
-<ol>
-<li>尝试二次项、三次项、四次项、五次项…… 右上图为训练集损失，下图是测试集的损失。第五次<strong>过拟合</strong>导致了，测试集损失度很高。<img src="https://img-blog.csdnimg.cn/c707638cef5c4d698813e6acfe4ec172.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/ce26490bbfc64ea6967cd7b8e1e8184d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/166aef516df14c339c45fee48a78e16a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/87e7491ce6a1464dad4c023dc9004274.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
-<li><strong>选择合适的模型</strong>，即我到底要加到几次项呢？</li>
-</ol>
-<blockquote>
-<p>越复杂的模型所包含的函数也就越多，那么它包含理想模型的可能性也就越大，但是如果过分地去拟合理想模型，就会出现<strong>过拟合</strong>的情况。<br><img src="https://img-blog.csdnimg.cn/6a394ba6b4a648a994472d8969668601.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-</blockquote>
-<ol start="3">
-<li>横向比较各个多项次，训练集和测试集的失误。理论上，失误会随着高次项而变小，如果变大，则表示模型<strong>过拟合</strong>了。<img src="https://img-blog.csdnimg.cn/979417ba98f6475d941753e0cb71b91c.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>所以，如上图所示，在为3次的时候，训练集和测试集的误差差值最小。并且4次开始，以及存在过拟合现象了。因此本案例可选择3次项线性模型。</li>
-</ol>
-<h3 id="优化模型方法二：考虑其他隐藏因素"><a href="#优化模型方法二：考虑其他隐藏因素" class="headerlink" title="优化模型方法二：考虑其他隐藏因素"></a>优化模型方法二：考虑其他隐藏因素</h3><p><strong>回到Step1</strong></p>
-<blockquote>
-<p>输入的特征包括：进化前的CP值（<em>Xcp</em>）、物种（Bulbasaur）（<em>Xs</em>）、血量（HP）（<em>Xhp</em>）、重量（Weight）（<em>Xw</em>）、高度（Height）（<em>Xh</em>）<br>除了之前考虑的进化前的CP值（<em>Xcp</em>），其他均为隐藏因素<br>………………………………………………………………………………<br><strong>这里另外考虑的是神奇宝贝的种类</strong>？因为，有时候一个模型恰恰只能符合一种神奇宝贝，也就是<strong>不同神奇宝贝应该有不同的预测模型</strong>。<img src="https://img-blog.csdnimg.cn/72a4aadb2ba24aefb4584a8a8ca2801e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-</blockquote>
-<ol>
-<li>不同的神奇宝贝有不同的预测模型<img src="https://img-blog.csdnimg.cn/46fe5297bddb46a4bd511a7cea422e3a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
-<li>拟合这个模型的曲线，可以看出不同神奇宝贝拟合成了不同的类线性直线<img src="https://img-blog.csdnimg.cn/7a55f95269d642038715e355437600f2.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
-<li>如果还考虑了其他隐藏元素。如图是横轴是对应的隐藏元素，纵轴是对应进化后的CP值。<img src="https://img-blog.csdnimg.cn/591a6aa5537443428687ba15886ab11d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
-<li>如果都采用最高二次项，考虑所有其他的隐藏因素。该案例的数学模型就变成 如图所示的式子。<img src="https://img-blog.csdnimg.cn/0a80407d715e4dcc978bd86dee3451a3.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><blockquote>
-<p> 考虑更多的因素反而出现了过拟合的问题，<strong>说明有些因素跟本次实验的CP值预测没有关系</strong>！<br>………………………………………………………………………………<br><strong>过拟合这么讨厌，到底如何减少过拟合问题呢？往下看！</strong></p>
-</blockquote>
-</li>
-</ol>
-<h3 id="优化模型：防止过拟合（为损失函数加一个正则项）"><a href="#优化模型：防止过拟合（为损失函数加一个正则项）" class="headerlink" title="优化模型：防止过拟合（为损失函数加一个正则项）"></a>优化模型：防止过拟合（为损失函数加一个正则项）</h3><h4 id="正则项是什么"><a href="#正则项是什么" class="headerlink" title="正则项是什么?"></a>正则项是什么?</h4><blockquote>
-<p><strong>方法：正则化</strong>?<br>比如先考虑一个参数w，正则化就是在损失函数上加上一个与w（斜率）相关的值（正则项），那么要是loss function越小的话，w也会越小，w越小就使function更加平滑（function没那么大跳跃）<img src="https://img-blog.csdnimg.cn/7a87a38ed54c438c8af37860e982f775.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-</blockquote>
-<h4 id="正则化的缺点"><a href="#正则化的缺点" class="headerlink" title="正则化的缺点"></a>正则化的缺点</h4><p>正则化虽然能够减少过拟合的现象，但是因为加在损失函数后面的值是平白无故加上去的，所以正则化过度的话会导致<strong>bias偏差增大</strong>   ？？？？<img src="https://img-blog.csdnimg.cn/f4c9ea7efb144c8a89b7fee964b75fa8.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><blockquote>
-<p>1）实现参数的稀疏有什么好处吗？<br>一个好处是可以简化模型，避免过拟合。<strong>因为一个模型中真正重要的参数可能并不多，如果考虑所有的参数起作用，那么可以对训练数据可以预测的很好，但是对测试数据表现性能极差</strong>。另一个好处是参数变少可以使整个模型获得更好的可解释性。<br>2）参数值越小代表模型越简单吗？<br>是的。为什么参数越小，说明模型越简单呢，这是因为越复杂的模型，<strong>越是会尝试对所有的样本进行拟合，甚至包括一些异常样本点</strong>，这就容易造成在<strong>较小的区间里预测值产生较大的波动</strong>，这种较大的波动也反映了在这个区间里的<strong>导数很大</strong>，而<strong>只有较大的参数值才能产生较大的导数。因此复杂的模型，其参数值会比较大。</strong></p>
-</blockquote>
-<p><img src="https://img-blog.csdnimg.cn/9dcfac9366564857a226de8d73bf512e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-]]></content>
-      <categories>
-        <category>机器学习基础-李宏毅</category>
-      </categories>
-      <tags>
-        <tag>李宏毅</tag>
-        <tag>机器学习</tag>
-        <tag>线性回归</tag>
       </tags>
   </entry>
   <entry>
@@ -514,6 +373,236 @@
         <tag>机器学习</tag>
         <tag>分类问题</tag>
         <tag>逻辑回归</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>线性回归Regression 案例一：宝可梦进化CP值</title>
+    <url>/2021/07/31/%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92Regression%20%E6%A1%88%E4%BE%8B%E4%B8%80%EF%BC%9A%E5%AE%9D%E5%8F%AF%E6%A2%A6%E8%BF%9B%E5%8C%96CP%E5%80%BC/</url>
+    <content><![CDATA[<p>@[TOC](线性回归Regression 案例一：宝可梦进化CP值)</p>
+<blockquote>
+<p>本栗子：预测Pokemon精灵攻击力。<br>输入：进化前的CP值、物种（Bulbasaur）、血量（HP）、重量（Weight）、高度（Height）<br>输出：进化后的CP值</p>
+</blockquote>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/d53b2b95d30c7af9574c7a0bbaba2c82.png#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="实现回归的步骤（机器学习的步骤）"><a href="#实现回归的步骤（机器学习的步骤）" class="headerlink" title="实现回归的步骤（机器学习的步骤）"></a>实现回归的步骤（机器学习的步骤）</h1><h2 id="Step1-确定一个model-线性模型"><a href="#Step1-确定一个model-线性模型" class="headerlink" title="Step1 确定一个model - 线性模型"></a>Step1 确定一个model - 线性模型</h2><blockquote>
+<p>输入的特征包括：进化前的CP值（<em>Xcp</em>）、物种（Bulbasaur）（<em>Xs</em>）、血量（HP）（<em>Xhp</em>）、重量（Weight）（<em>Xw</em>）、高度（Height）（<em>Xh</em>）</p>
+</blockquote>
+<p>先从简单的<strong>单个特征</strong> 进化前的CP值（<em>Xcp</em>）开始（<strong>后面改进再考虑多个特征</strong>）。<br><img src="https://img-blog.csdnimg.cn/img_convert/5b4df493600379c7aa0372e103eb7d79.png#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="Step2-goodness-of-function（函数优化）——损失函数"><a href="#Step2-goodness-of-function（函数优化）——损失函数" class="headerlink" title="Step2 goodness of function（函数优化）——损失函数"></a>Step2 goodness of function（函数优化）——损失函数</h2><ol>
+<li>确定model后（案例为线性模型），开始训练数据（使用的为训练样本集）<img src="https://img-blog.csdnimg.cn/img_convert/ebd00bf7bee79841d6c35eac2865fd61.png#pic_center" alt="在这里插入图片描述"></li>
+<li>训练10个训练样本后得到10个的预测进化CP值（<em>y</em>）如下图所示。左侧为训练样本本身真实的进化CP值，右侧为横轴为进化前CP值（<em>Xcp</em>）<img src="https://img-blog.csdnimg.cn/img_convert/fbba4351217b730cd11ca92a7427cd51.png#pic_center" alt="在这里插入图片描述"></li>
+<li><strong>确定损失函数</strong>。损失函数用于评价一个模型的好坏。损失函数的值越小，那么模型越好。<strong>对于本案例，损失函数采用最简单的距离表示</strong>。即求<strong>实际进化后的CP值与模型预测的CP值差</strong>，来判定模型的好坏。<img src="https://img-blog.csdnimg.cn/img_convert/3abae7108681dbad20cc15a952d20bba.png#pic_center" alt="在这里插入图片描述"></li>
+<li>List item</li>
+</ol>
+<h2 id="Step3-best-function（找出最好的一个函数-即调参）——使用梯度下降法"><a href="#Step3-best-function（找出最好的一个函数-即调参）——使用梯度下降法" class="headerlink" title="Step3 best function（找出最好的一个函数 即调参）——使用梯度下降法"></a>Step3 best function（找出最好的一个函数 即调参）——使用梯度下降法</h2><ol>
+<li>案例采用<strong>梯度下降法</strong>来帮助选择 <em>w</em> 和 <em>b</em> 两个参数取何值时损失函数最小，也就意味着构建的模型越准确。 <img src="https://img-blog.csdnimg.cn/img_convert/7d75962cbe0b2dc3c54f370383912138.png#pic_center" alt="在这里插入图片描述"><blockquote>
+<p>什么是梯度下降法？梯度指的是？<br>………………………………………………………………………………………………………<br>梯度？<br>在<strong>单变量的函数</strong>中，梯度其实就是对应点<strong>函数的微分</strong>，代表着这个函数在<strong>某个给定点的切线的斜率</strong><br>在<strong>多变量函数</strong>中，梯度是一个<strong>向量</strong>，向量有方向，梯度的方向就指出了函数在给定点的上升最快的方向  <strong>即例如二维就是 偏导 i + 偏导 j</strong><br>………………………………………………………………………………………………………<br>梯度下降法(SGD  Stochastic gradient descent）？答： “下山最快路径”的一种算法<br>我们是尝试使用偏导来衡量函数随自变量的值变化关系，选择变化更为平缓的那一处  对应的 <em>w</em> 和 <em>b</em> 作为调整后的参数</p>
+</blockquote>
+</li>
+</ol>
+<h3 id="一维视角：只考虑一个参数-w"><a href="#一维视角：只考虑一个参数-w" class="headerlink" title="一维视角：只考虑一个参数 w"></a>一维视角：只考虑一个参数 <em>w</em></h3><p><img src="https://img-blog.csdnimg.cn/3c72961665a942ac87f066a129a30183.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<blockquote>
+<p>如上图  learning rate（学习率）：移动的步长 一般用η来表示<br>………………………………………………………………………………………………………<br>如何寻找一个最合适的 <em>w</em> ？<br>步骤1：随机在横轴上选取一个 <em>w0</em> 。<br>步骤2：计算微分，也就是当前的斜率，根据斜率来判定移动的方向。微分大于0应向右移动（增加 <em>w</em> ）；微分小于0向左移动（减少 <em>w</em> ）<br>步骤3：根据学习率，按步骤2得到的方向移动<br>重复步骤2和步骤3，直到找到<strong>最低点</strong>。横轴即对于的最佳 <em>w</em>  参数<br>………………………………………………………………………………………………………<br>如下图，是经过迭代多次后找到的最佳点（得是全局最优解） 。注：大部分损失函数都为正<br><img src="https://img-blog.csdnimg.cn/588186b690dd43c38a10a80600802ab0.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</blockquote>
+<h3 id="二维视角：考虑两个参数-w-和-b"><a href="#二维视角：考虑两个参数-w-和-b" class="headerlink" title="二维视角：考虑两个参数 w 和 b"></a>二维视角：考虑两个参数 <em>w</em> 和 <em>b</em></h3><p><img src="https://img-blog.csdnimg.cn/55f2f295750242bfa35f9ac576602194.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<blockquote>
+<p>如何寻找一个最合适的 <em>w</em> ？<br>步骤1：随机在横轴上选取一个 <em>w0</em> ，<em>b0</em> 。<br>步骤2：计算各偏导，也就是当前偏导的斜率，根据斜率来判定移动的方向。微分大于0应向右移动（增加 <em>w</em> 或 <em>b</em>）；微分小于0向左移动（减少 <em>w</em> 或 <em>b</em>）<img src="https://img-blog.csdnimg.cn/6a082b40869947c2a0723b298cd36027.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>步骤3：根据学习率，按步骤2得到的方向移动<br>重复步骤2和步骤3，直到找到<strong>最低点</strong>。横轴即对于的最佳 <em>w</em> 和 <em>b</em>  参数</p>
+</blockquote>
+<p>二维情况：梯度下降法的效果<br>颜色约深的区域代表的损失函数越小？ <strong>为什么呢？</strong><br><img src="https://img-blog.csdnimg.cn/299d0d615f6640a6ae092e51579d09ea.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="梯度算法的优缺点"><a href="#梯度算法的优缺点" class="headerlink" title="梯度算法的优缺点"></a>梯度算法的优缺点</h3><blockquote>
+<p>总结一下梯度下降法：<br>　　　我们要解决使<strong>损失函数<em>L(w,b)</em></strong> 最小时参数的最佳值，梯度下降法是每次update参数值，直到损失函数最小时找到对应最佳的参数<em>w，b</em></p>
+</blockquote>
+<p><strong>缺点1</strong>：求解的未必是全局最优解，有可能是局部最优解。</p>
+<blockquote>
+<p><strong>用下山的例子讲</strong>：<br>　　　比如我们在一座大山上的某处位置，由于我们不知道怎么下山，于是决定走一步算一步，也就是在<strong>每走到一个位置的时候</strong>，<strong>求解当前位置的梯度</strong>，沿着<strong>梯度的负方向</strong>，也就是<strong>当前最陡峭的位置向下走一步</strong>，然后继续求解当前位置梯度，向这一步所在位置沿着最陡峭最易下山的位置走一步。这样一步步的走下去，一直走到觉得我们已经到了山脚。当然这样走下去，<strong>有可能我们不能走到山脚，而是到了某一个局部的山峰低处。</strong><br>………………………………………………………………………………………………………<br>　　　从上面的解释可以看出，<strong>梯度下降不一定能够找到全局的最优解，有可能是一个局部最优解</strong>。当然，如果损失函数是<strong>凸函数</strong>，梯度下降法得到的解就<strong>一定是</strong>全局最优解。</p>
+</blockquote>
+<p><strong>优点1</strong>：无论随机从哪个点出发，得到的最佳参数一定是同一组</p>
+<blockquote>
+<p><strong>用下山的例子讲</strong>：<br>　　　因为山只有一处是最低点，在确保能找到全局最优解的情况下，无论人从山上哪一点出发，一定能找到这特定一处的最低洼处。</p>
+</blockquote>
+<h2 id="Step4-回归结果分析"><a href="#Step4-回归结果分析" class="headerlink" title="Step4 回归结果分析"></a>Step4 回归结果分析</h2><blockquote>
+<p>经过上述三个步骤后，得到了<strong>训练后</strong>的“最佳参数<em>w</em>，<em>b</em>”，那么现在这个模型在<strong>测试集</strong>上是什么表现呢？<br>得到的结果是：<br><strong>测试集的误差比在训练集上得到的损失值大</strong> 这个事非常正常。因为你训练集里面可能有些数据是不典型的，同样测试集中很多也包含了训练集中没有的因素。所以一个函数模型在实际应用中，效果基本上时打折扣的。<strong>一般会采用两种方式来加强这个函数模型</strong>：<br>　　　select another model（选择另一个模型）即增加维度，增加高此项多项式<br>　　　consider the hidden factors（考虑其他隐藏因素）</p>
+</blockquote>
+<h3 id="优化模型方法一：增加高次项（一般用于拟合度不够的情况）"><a href="#优化模型方法一：增加高次项（一般用于拟合度不够的情况）" class="headerlink" title="优化模型方法一：增加高次项（一般用于拟合度不够的情况）"></a>优化模型方法一：增加高次项（一般用于拟合度不够的情况）</h3><p><strong>回到Step1</strong></p>
+<ol>
+<li>尝试二次项、三次项、四次项、五次项…… 右上图为训练集损失，下图是测试集的损失。第五次<strong>过拟合</strong>导致了，测试集损失度很高。<img src="https://img-blog.csdnimg.cn/c707638cef5c4d698813e6acfe4ec172.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/ce26490bbfc64ea6967cd7b8e1e8184d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/166aef516df14c339c45fee48a78e16a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/87e7491ce6a1464dad4c023dc9004274.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+<li><strong>选择合适的模型</strong>，即我到底要加到几次项呢？</li>
+</ol>
+<blockquote>
+<p>越复杂的模型所包含的函数也就越多，那么它包含理想模型的可能性也就越大，但是如果过分地去拟合理想模型，就会出现<strong>过拟合</strong>的情况。<br><img src="https://img-blog.csdnimg.cn/6a394ba6b4a648a994472d8969668601.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</blockquote>
+<ol start="3">
+<li>横向比较各个多项次，训练集和测试集的失误。理论上，失误会随着高次项而变小，如果变大，则表示模型<strong>过拟合</strong>了。<img src="https://img-blog.csdnimg.cn/979417ba98f6475d941753e0cb71b91c.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>所以，如上图所示，在为3次的时候，训练集和测试集的误差差值最小。并且4次开始，以及存在过拟合现象了。因此本案例可选择3次项线性模型。</li>
+</ol>
+<h3 id="优化模型方法二：考虑其他隐藏因素"><a href="#优化模型方法二：考虑其他隐藏因素" class="headerlink" title="优化模型方法二：考虑其他隐藏因素"></a>优化模型方法二：考虑其他隐藏因素</h3><p><strong>回到Step1</strong></p>
+<blockquote>
+<p>输入的特征包括：进化前的CP值（<em>Xcp</em>）、物种（Bulbasaur）（<em>Xs</em>）、血量（HP）（<em>Xhp</em>）、重量（Weight）（<em>Xw</em>）、高度（Height）（<em>Xh</em>）<br>除了之前考虑的进化前的CP值（<em>Xcp</em>），其他均为隐藏因素<br>………………………………………………………………………………<br><strong>这里另外考虑的是神奇宝贝的种类</strong>？因为，有时候一个模型恰恰只能符合一种神奇宝贝，也就是<strong>不同神奇宝贝应该有不同的预测模型</strong>。<img src="https://img-blog.csdnimg.cn/72a4aadb2ba24aefb4584a8a8ca2801e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</blockquote>
+<ol>
+<li>不同的神奇宝贝有不同的预测模型<img src="https://img-blog.csdnimg.cn/46fe5297bddb46a4bd511a7cea422e3a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+<li>拟合这个模型的曲线，可以看出不同神奇宝贝拟合成了不同的类线性直线<img src="https://img-blog.csdnimg.cn/7a55f95269d642038715e355437600f2.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+<li>如果还考虑了其他隐藏元素。如图是横轴是对应的隐藏元素，纵轴是对应进化后的CP值。<img src="https://img-blog.csdnimg.cn/591a6aa5537443428687ba15886ab11d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+<li>如果都采用最高二次项，考虑所有其他的隐藏因素。该案例的数学模型就变成 如图所示的式子。<img src="https://img-blog.csdnimg.cn/0a80407d715e4dcc978bd86dee3451a3.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><blockquote>
+<p> 考虑更多的因素反而出现了过拟合的问题，<strong>说明有些因素跟本次实验的CP值预测没有关系</strong>！<br>………………………………………………………………………………<br><strong>过拟合这么讨厌，到底如何减少过拟合问题呢？往下看！</strong></p>
+</blockquote>
+</li>
+</ol>
+<h3 id="优化模型：防止过拟合（为损失函数加一个正则项）"><a href="#优化模型：防止过拟合（为损失函数加一个正则项）" class="headerlink" title="优化模型：防止过拟合（为损失函数加一个正则项）"></a>优化模型：防止过拟合（为损失函数加一个正则项）</h3><h4 id="正则项是什么"><a href="#正则项是什么" class="headerlink" title="正则项是什么?"></a>正则项是什么?</h4><blockquote>
+<p><strong>方法：正则化</strong>?<br>比如先考虑一个参数w，正则化就是在损失函数上加上一个与w（斜率）相关的值（正则项），那么要是loss function越小的话，w也会越小，w越小就使function更加平滑（function没那么大跳跃）<img src="https://img-blog.csdnimg.cn/7a87a38ed54c438c8af37860e982f775.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</blockquote>
+<h4 id="正则化的缺点"><a href="#正则化的缺点" class="headerlink" title="正则化的缺点"></a>正则化的缺点</h4><p>正则化虽然能够减少过拟合的现象，但是因为加在损失函数后面的值是平白无故加上去的，所以正则化过度的话会导致<strong>bias偏差增大</strong>   ？？？？<img src="https://img-blog.csdnimg.cn/f4c9ea7efb144c8a89b7fee964b75fa8.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><blockquote>
+<p>1）实现参数的稀疏有什么好处吗？<br>一个好处是可以简化模型，避免过拟合。<strong>因为一个模型中真正重要的参数可能并不多，如果考虑所有的参数起作用，那么可以对训练数据可以预测的很好，但是对测试数据表现性能极差</strong>。另一个好处是参数变少可以使整个模型获得更好的可解释性。<br>2）参数值越小代表模型越简单吗？<br>是的。为什么参数越小，说明模型越简单呢，这是因为越复杂的模型，<strong>越是会尝试对所有的样本进行拟合，甚至包括一些异常样本点</strong>，这就容易造成在<strong>较小的区间里预测值产生较大的波动</strong>，这种较大的波动也反映了在这个区间里的<strong>导数很大</strong>，而<strong>只有较大的参数值才能产生较大的导数。因此复杂的模型，其参数值会比较大。</strong></p>
+</blockquote>
+<p><img src="https://img-blog.csdnimg.cn/9dcfac9366564857a226de8d73bf512e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+]]></content>
+      <categories>
+        <category>机器学习基础-李宏毅</category>
+      </categories>
+      <tags>
+        <tag>李宏毅</tag>
+        <tag>机器学习</tag>
+        <tag>线性回归</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>半监督学习 Semi-Supervised</title>
+    <url>/2021/08/17/%E5%8D%8A%E7%9B%91%E7%9D%A3%E5%AD%A6%E4%B9%A0%20Semi-Supervised/</url>
+    <content><![CDATA[<p>@[TOC](半监督学习 Semi-Supervised )</p>
+<blockquote>
+<p>总结 半监督学习 的要点：<br>Q1：什么是Semi-Supervised？<br>Q2：Semi-Surpervised在生成模型中如何实现的（EM算法）？<br>Q3：Semi-Surpervised基于Low-density Separation（低密度分离）假设是如何实现的？<br>Q4：Semi-Surpervised基于Smoothness Assumption（平滑）假设是如何实现的？</p>
+</blockquote>
+<h1 id="什么是Semi-Supervised？"><a href="#什么是Semi-Supervised？" class="headerlink" title="什么是Semi-Supervised？"></a>什么是Semi-Supervised？</h1><p><img src="https://img-blog.csdnimg.cn/a671d2d30c944294a8b44fad632f7435.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center"><br>大家知道在监督学习里，有一大堆的训练数据（由input和output对组成）。例如上图所示 $x^{j}$是一张图片，$y^{r}$ 是类别的 <em>label</em>。<br><strong>半监督学习是说，在label数据上面，有另外一组unlabeled的数据</strong>，写成$x^{u}$ (只有 input 没有 output )，有U笔 unlabeled 的数据。<br>通常做半监督学习的时候，我们常见的情景是 <strong>unlabeled 的数量远大于labeled 的数量</strong>（U&gt;&gt;R)。</p>
+<blockquote>
+<p><strong>举个栗子：现在我们要做一个猫狗分类</strong></p>
+<ul>
+<li>如果只考虑 labeled data，我们分类的分界线会画在中间；    </li>
+<li>如果把 unlabeled data 也考虑进去，我们可能会根据 unlabeled data 的分布，分界线画成图中的斜线； 　<br>semi-supervised earning使用 unlabel 的方式往往伴随着<strong>一些假设</strong>，学习有没有用，取决于你这个<font color="red"><strong>假设合不合理</strong></font>。（比如灰色的点也可能是个狗不过背景跟猫照片比较像）<img src="https://img-blog.csdnimg.cn/994e98b4ab274acc8f394810b34dc7bf.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+</ul>
+</blockquote>
+<p>半监督学习可以分成两种：</p>
+<ul>
+<li>一种叫做<strong>转换学习</strong>，unlabeled 数据就是 testing set ，使用的是testing set的特征。</li>
+<li>另一种是<strong>归纳学习</strong>，不考虑testing set，学习model的时候不使用testing set。</li>
+</ul>
+<blockquote>
+<p><strong>Q：用 testing set 作为 unlabeled 数据，不是相当于用到了未来数据吗？</strong><br><strong>答</strong>：用了 label 数据才算是用了未来数据，用 testing set 的特征不算是使用未来数据。<br><strong>Q：什么时候使用转换学习或者归纳学习？</strong><br><strong>答</strong>：看 testing set是不是给你了。在一些比赛里，testing set 它是给你的，那么就可以使用转换学习。但在真正的应用中，一般是没有 testing set 的，这时候就只能做归纳学习。<br><strong>Q：为什么使用半监督学习？</strong><br><strong>答</strong>：缺少 lable 的数据，比如图片，收集图片很容易，但是标注label很困难。半监督学习利用未标注数据做一些事。<br><strong>Q：用沙雕的简单日常语言，讲一讲什么是 半监督学习</strong><br><strong>答</strong>：对人类来说，可能也是一直在做半监督学习，比如小孩子会从父母那边做一些监督学习，看到一条狗，问父亲是什么，父亲说是狗。之后小孩子会看到其他东西，有狗有猫，没有人会告诉他这些动物是什么，需要自己学出来。</p>
+</blockquote>
+<h1 id="Semi-Surpervised在生成模型中如何实现的（EM算法）"><a href="#Semi-Surpervised在生成模型中如何实现的（EM算法）" class="headerlink" title="Semi-Surpervised在生成模型中如何实现的（EM算法）"></a>Semi-Surpervised在生成模型中如何实现的（EM算法）</h1><p><img src="https://img-blog.csdnimg.cn/33bc117e72974fe68bb8635b54369078.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<blockquote>
+<p><strong>Q：在生成模型中为什么使用半监督学习？</strong><br><strong>答</strong>：在监督学习中，有一堆用来训练的样本（就是label），你知道它们分别属于类别1，还是类别2。会去估算类别1和类别2的先验概率<em>P(C1),P(C2)</em> ，然后计算类条件概率 <em>P(x|C1),P(x|C2)</em>  。<br>假设 <em>P(x|Ci)</em> 服从一个高斯分布。 假设类别1的数据是从均值为 <em>μ1</em>，协方差为 <em>Σ</em> 的分布中取出来的，而类别2的数据是从均值为 <em>μ2</em> ，协方差也为 <em>Σ</em> 的分布中取出来的（之前讲过共享协方差，效果会好一点）。<br>然后可以计算后验概率 <em>P(C1|x)</em> ，决定一个决策边界在哪里。<img src="https://img-blog.csdnimg.cn/81307014a68d4ae2a427e46e9212d4eb.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>如果今天有一些未标注数据，如上图绿点，那仍然假设均值和方差是μ1,μ2,Σ显然不合理。<br>如上图左下所示，Σ应该比较接近圆圈（蓝色圆圈），也许在类1采样的时候有问题，所以采样到奇怪的分布（蓝色椭圆）。如上图右下，类2的μ2不应该在橙色椭圆内，而应该在更下面。<br>这样会使先验概率受到影响，本来两个分布，正例数据是一样多，但是加入未标注数据之后，你可能会觉得类2的正例数据更多（先验概率就更大）。总之加入未标注数据后，会影响对均值和协方差的估测，继而影响类条件概率，最后影响了你的决策边界。</p>
+</blockquote>
+<p>通俗的讲，回顾有监督学习中的生成模型，由于data都是有label的，<em>P(Ci)</em> 是已知的，<em>P(x|Ci)</em> 是通过我们基于高斯分布的假设用最大似然估计出来的；现在半监督学习中的生成模型，data的一部分是unlabel的，<em>P(Ci)</em> 是不确定的（隐变量），*P(x|Ci)*的假设模型也不能套用原来的 <em>u</em> 等参数，这时候需要用<font color="red"><strong>EM算法</strong>(Expectation-Maximization algorithm，又译为期望最大化算法)</font></p>
+<h2 id="EM算法-具体怎么做"><a href="#EM算法-具体怎么做" class="headerlink" title="EM算法 具体怎么做"></a>EM算法 具体怎么做</h2><p>EM算法适用于带有无法观测的隐变量的概率模型估计<br>初始化一组参数，如果是二分类任务，就是初始化类1和类2的先验概率、均值和协方差，可以随机初始化，用已经有标注的数据估测，统称为 <em>θ</em></p>
+<ul>
+<li><strong>第一步（E步）</strong>，用labeled data算出来的高斯模型参数 <em>θ</em> 代入公式去求出每一笔未标注数据（unlabeled data）的后验概率（属于类1 的概率）的 *P(C1|Xu)*；</li>
+<li><strong>第二步（M步）</strong>，用<strong>极大似然估计</strong>更新 <em>P(Ci)</em> 以及高斯模型参数 <em>θ</em> ，求出 *P(x|Ci)*，进一步求出新的后验概率 <em>P(Ci|Xu)</em> ，重复这两步直到收敛（似然概率最大）</li>
+<li>至于为什么更新参数是要加入<em>P(Ci|Xu)</em> 这一项，是因为EM算法的思想是把不确定的data用一个概率来表示label，而每一笔不确定的data都有可能来自 类C1 和 类C2，看右下图：<img src="https://img-blog.csdnimg.cn/7035355bb99c4d298af9344cdfb7614c.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="**加粗样式**在这里插入图片描述"></li>
+</ul>
+<blockquote>
+<p>Q：EM 算法背后的理论是什么？<br>答：<strong>原来只有标注数据的时候</strong>，目标是最大化一个似然函数，那么给定θ，每一笔训练数据的似然函数值是可以计算的，然后把所有的似然函数值相加，就是总的似然函数值，然后找 <em>θ</em> 最大化。<em>θ</em> 有显式解，求最大值点（导数为0）。<br><strong>现在加入未标注数据后</strong>，我们不知道未标注数据来自哪一个类别，那么未标注数据出现的概率就是和  C1的联合概率+和C2的联合概率（相当于是$\sum_{C}P(x^{u},C^{i})$ 。接下来目标就是最大化 $P_{\theta }(x^{u})$ ，但是 $P_{\theta }(x^{u})$  的式子是非凸的，所以使用<strong>EM算法求解</strong>。<img src="https://img-blog.csdnimg.cn/5872e4d039e4413295b66b457cec8e23.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</blockquote>
+<h1 id="Semi-Surpervised基于Low-density-Separation（低密度分离）"><a href="#Semi-Surpervised基于Low-density-Separation（低密度分离）" class="headerlink" title="Semi-Surpervised基于Low-density Separation（低密度分离）"></a>Semi-Surpervised基于Low-density Separation（低密度分离）</h1><p><img src="https://img-blog.csdnimg.cn/ea72d9a8bb3448088c224becd5be516f.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><strong>低密度分离的假设是，<font color="red">不确定的data的label要不是1，要不是0（“非黑即白”）。低密度的意思是，两个Class的分界处是低密度的（分得比较开的）</strong></font></p>
+<blockquote>
+<p><strong>Q：这个世界是非黑即白的，什么是非黑即白？</strong><br><strong>答</strong>：假设现在有一大堆的data，有标注数据，有非标注数据，在两个类别之间会有一个明显的鸿沟。给一些标注数据，可以把边界分在上图右边的线，也可以把边界分在上图左边的线。但是考虑非标注数据，那么左边的边界会好一点，在边界处，两个类别的密度是低的（不会出现data）</p>
+</blockquote>
+<h2 id="Self-training-Entropy-based-Regularization-基于熵的正则化"><a href="#Self-training-Entropy-based-Regularization-基于熵的正则化" class="headerlink" title="Self-training + Entropy-based Regularization(基于熵的正则化)"></a>Self-training + Entropy-based Regularization(基于熵的正则化)</h2><h3 id="self-training"><a href="#self-training" class="headerlink" title="self-training"></a>self-training</h3><p><img src="https://img-blog.csdnimg.cn/007143d015a34ef9b00537c7dfc0c066.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>低密度分离最代表性、最简单的方法是self-training，非常直觉。</p>
+<p>我们有一些标注数据，和一些未标注数据。接下来：</p>
+<ul>
+<li>从标注数据训练一个model   f* (用DNN，deep、shallow还是其他机器学习的方法都可以)</li>
+<li>根据f*  标注未标注数据，丢入$x^{u}$ ，得到$y^{u}$  ，${(x^{u} ,y^{u} )}^{R+U}_{u=l}$ 叫做伪标签数据（称为Pseudo-label伪标签）</li>
+<li>接下来，从伪标签数据集移除一些数据加到标注数据集（移除哪些数据需要自己决定，设计一些启发式的规则，或者给权重，有些数据的标签比较确定，那就给大的权重）</li>
+<li>有了更多的标注数据之后，回头再去训练model f*</li>
+</ul>
+<blockquote>
+<p><strong>Q：self-training在回归上有用吗？</strong><br><strong>回归问题用self-training不影响f∗，所以回归问题不能用self-training方法。</strong><img src="https://img-blog.csdnimg.cn/16b0c52a9a89411f80d53e91dc040f16.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>self-training 很像是刚才生成模型里面用的EM算法，唯一的差别是在做 self-training 的时候，用的是<strong>硬标签</strong>，生成模型里用的是<strong>软标签（概率）</strong>。在做 self-training 的时候，会强制分配一个数据属于某一个类别，在生成模型里，使用的是<strong>后验概率</strong>，部分属于类1，部分属于类2。</p>
+</blockquote>
+<h3 id="Entropy-based-Regularization-基于熵的正则化-–-self-training的进阶版"><a href="#Entropy-based-Regularization-基于熵的正则化-–-self-training的进阶版" class="headerlink" title="Entropy-based Regularization(基于熵的正则化) – self-training的进阶版"></a>Entropy-based Regularization(基于熵的正则化) – self-training的进阶版</h3><p><img src="https://img-blog.csdnimg.cn/26e158dbdc714533a4f0173142f2db23.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><strong>熵：一个事件的不确定程度</strong></p>
+<p>Entropy-based Regularization（基于熵的正则化）是self-training的进阶版，self-training里用概率划分类别，可能觉得比较武断，那就可以用Entropy-based的这个方法。</p>
+<p>Entropy-based是说，如果使用神经网络，output是一个分布，我们不去限制output具体属于哪一个类别，而是假设分布很集中（非黑即白的世界）。如上图，假设做5个类别分类的 model：</p>
+<ul>
+<li>第一个 类别1的概率为1，其他类别概率为0，是good</li>
+<li>第二个 类别5的概率为1，其他类别概率为0，是good</li>
+<li>第三个 所有类别的概率很平均，是bad，不符合<strong>低密度分离的假设（非黑即白）</strong></li>
+</ul>
+<blockquote>
+<p><strong>Q：怎么用数值的方法评估分布是集中还是不集中？</strong><br><font color="red"><strong>使用熵，分布的熵告诉你集中还是不集中。可以用 每个类别的概率 乘以 log（每个类别的概率），再对类别个数求和取负数。 这个式子来评估。</strong> </font><br>这个其实就是理解成损失函数，因为这边讲究的是非黑即白，所以其实是一致的。损失函数 也可以用分布的距离来描述。<br>我们希望model的output在标注集上正确，在未标注集上的<strong>熵越小越好</strong>。</p>
+<ul>
+<li>第一个分布，熵为0，分布集中 </li>
+<li>第二个分布，熵也为0，分布集中 </li>
+<li>第三个分布，熵为 ln(5) ，分布比较散</li>
+</ul>
+<p>根据这个目标，重新设计损失函数。原来只是希望model在标注集上的output和label距离越近越好，用交叉熵来评估它们之间的距离。</p>
+</blockquote>
+<ul>
+<li><strong>现在在原来的基础上，加上未标注集的output分布的熵。</strong></li>
+<li>然后在未标注集部分乘上一个权重，来表明偏向标注部分还是未标注部分。</li>
+<li>上图右下的损失函数可以算微分，那就使用<strong>梯度下降最小化这个损失函数</strong>，迭代求解参数。加入未标注部分，作用就类似于正则化（在原来损失函数后加一个L1正则或者L2正则），这里则加入一个未标注集熵来防止过拟合，所以称之为基于熵的正则化。</li>
+</ul>
+<h2 id="Semi-supervised-SVM（半监督SVM"><a href="#Semi-supervised-SVM（半监督SVM" class="headerlink" title="Semi-supervised SVM（半监督SVM)"></a>Semi-supervised SVM（半监督SVM)</h2><p><img src="https://img-blog.csdnimg.cn/ddbfa33ce3a4446581d49d9494a497ed.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<blockquote>
+<p><strong>Q：SVM 支持向量机（Support Vector Machine）是什么？</strong><br>SVM是找边界，给你两个类别的数据，SVM找一个边界，这个边界一方面要有最大的间隔（让两个class分的越开越好），一方面要有最小的分类错误。<br>如上图，假设现在有一些未标注数据，半监督SVM会穷举所有可能的label。<br>上图中，有四笔未标注数据，每笔数据既可以属于 class1，也可以属于 class2，可能的情况如上图右边所示（还有很多种其他的可能）。然后对每个可能的结果，都去做一个SVM，边界如上图红色线。然后再去找让间隔最大，错误最小的那一种结果。在例子里可能是黑色框这种结果。</p>
+</blockquote>
+<h1 id="Semi-Surpervised基于Smoothness-Assumption（平滑性）假设是如何实现的"><a href="#Semi-Surpervised基于Smoothness-Assumption（平滑性）假设是如何实现的" class="headerlink" title="Semi-Surpervised基于Smoothness Assumption（平滑性）假设是如何实现的"></a>Semi-Surpervised基于Smoothness Assumption（平滑性）假设是如何实现的</h1><h2 id="平滑性假设与高密度区域"><a href="#平滑性假设与高密度区域" class="headerlink" title="平滑性假设与高密度区域"></a>平滑性假设与高密度区域</h2><p><font color="red">假设：x的分布是不平均的，在某些地方很集中，在某些地方又很分散。如果 x1 和 x2 在一个高密度的区域很相似的话，两者的标签也会很像。</font></p>
+<blockquote>
+<p><strong>Q：什么叫在高密度区域下呢？</strong><br> 意思是说可以用高密度的路径做连接<img src="https://img-blog.csdnimg.cn/211207011e154abc9dc1609ad946223f.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>举个例子，假设数据的分布如上图右边所示，像一个血轮眼。现在有3笔数据：x1,x2,x3，x1和x2中间是一个高密度区域（x1和x2由一个高密度区域连接），有很多数据(中间想成平原地带，地势平坦，人烟很多)，而x2和x3之间数据稀少(中间想成一座山，人烟稀少)，那么走平原会比走山容易，x2走到x1更容易（更相似）。</p>
+</blockquote>
+<p><strong>Q：举一个现实中，相似图形的栗子？为什么会有高密度区域假设？</strong><br>因为在真实情况下，这个假设成立的可能性很高。<br><img src="https://img-blog.csdnimg.cn/a7767f1d4ea04b788d2f9f17bfcec96f.png#pic_center" alt="在这里插入图片描述"><br>我们考虑手写数字识别的例子，有两个2一个3，如果计算像素点相似度的话，可能上图右边的2和3更像。但是从所有数据中看，<strong>左边的2到右边的2中间会有很多连续的形态</strong>。所以根据平滑度假设，左边的2和右边的2更像，因为右边的2和3之间没有过渡的形态。<br><img src="https://img-blog.csdnimg.cn/dfdb44a5a6af4aad901c4185bd21b74c.png#pic_center" alt="在这里插入图片描述"><br>看人脸识别也是一样的，比如左脸像和右脸像差很多，两个人的左脸像计算像素点相似度的话，可能比同一个人的两张侧脸像更高。但是如果收集到足够多的未标注数据，会找到两个侧脸像的很多过渡形态，根据高密度区域假设，这两张侧脸像就是同一个人。</p>
+<p><img src="https://img-blog.csdnimg.cn/12dc2e73270c49b08efeee9c7c8c1d74.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>高密度区域假设，在文件上非常有用，假如现在要区分天文学和旅游的文章。</p>
+<p>天文学的文章会出现asteroid、bright，而旅游的文章会出现yellowstone、zion。如果未标注文章和标注文章的词语有重叠，那可以很容易分类。但真实情况情况是，未标注文章和标注文章可能没有任何词语重叠，因为世界上的词语太多了，一篇文章词汇不会很多，每篇文章的词语是非常稀疏的。<br><img src="https://img-blog.csdnimg.cn/87bec6b6bb8c4603aacffd11ce899920.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>但是收集到够多的数据的话，就可以说上图d1、d5像，d5、d6像，传播下去就可以说d1、d3是一类，d2、d4是一类。</p>
+<h2 id="方法一：聚类，而后标注（图像上不太行）"><a href="#方法一：聚类，而后标注（图像上不太行）" class="headerlink" title="方法一：聚类，而后标注（图像上不太行）"></a>方法一：聚类，而后标注（图像上不太行）</h2><p><img src="https://img-blog.csdnimg.cn/45202fb11c71422c8437bdd3c23e91a5.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<blockquote>
+<p><strong>Q：如何实践平滑度假设？</strong><br>最简单的方法是聚类、然后标记。<br>假如数据分布如上图，橙色是class 1，绿色是class 2，蓝色是未标注数据。接下来做聚类，可能把所有数据分成3个簇。在簇1里，class 1的label最多，那簇1里所有数据标记为class 1，同样的簇2和簇3都标记为class 2。把标记后的数据拿去learn就结束了。</p>
+<p>这个方式不一定有用，因为要求簇正确，这个方法有效的假设是同一个class的东西聚集在一起。但是在图像里要把同一个class的东西聚集在一起没有那么容易。之前深度学习讲过，不同class的图像可能会很像，同一个class可能会不像，只用像素点做聚类，结果八成是不好的。没办法把同一个class的数据聚集在一起，那未标注数据就没有用。</p>
+<p>所以要有用，就要有一个好的方法来描述一张图像，比如用 <em>Deep Autoencoder</em> 抽特征，然后再做聚类。</p>
+</blockquote>
+<h2 id="方法二：基于图的方法"><a href="#方法二：基于图的方法" class="headerlink" title="方法二：基于图的方法"></a>方法二：基于图的方法</h2><p><img src="https://img-blog.csdnimg.cn/95a83cefc106475f915f00fe756c317b.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center"><br>另一个方法是引入图结构，来表达通过高密度路径进行连接这件事情。</p>
+<p>把现在所有的数据点都建成一个图，每个数据点就是图上的一个点，想办法计算它们之间的奇点，想办法把它们之间的边建出来。</p>
+<p><strong>所谓的高密度路径的意思是说，如果有两个点，在图上是相连的，那它们就是同一个class，如果没有相连，就算距离很近，也走不到。</strong></p>
+<blockquote>
+<p><strong>Q：生活中，如何构建图？</strong><br>有些时候，图的表示可以很自然的得到。</p>
+<ul>
+<li>举例说网页的分类，你有记录网页和网页之间的超链接，那超链接就很自然的告诉你网页是怎么连接的。</li>
+<li>又举例论文的分类，论文和论文之间有引用的关系，这种引用的关系也是另外一种图的边，可以很自然地把这种图画出来。</li>
+</ul>
+</blockquote>
+<h3 id="怎么自己想办法构建图？"><a href="#怎么自己想办法构建图？" class="headerlink" title="怎么自己想办法构建图？*"></a>怎么自己想办法构建图？*</h3><p>其实的图的好坏对结果的影响是非常严重的，但是自己用什么方法做还是很启发的，用自己觉得合适的方式做就可以了。 通常的做法是：</p>
+<p>先定义两个对象之间的相似度，比如图像可以是基于像素点的相似度（可能效果不好），也可以是基于自动编码器抽取出来的特征计算相似度（效果可能好一点）</p>
+<p>定义完相似度后，就可以构建图了（添加边），图有很多种：</p>
+<ul>
+<li>K近邻的图，现在有一大堆数据，可以计算数据与数据之间的相似度，然后设置k例如3，就是3个最相似的点相连</li>
+<li>e-Neighborhood的图，只有相似度超过某个阈值的点才会相连</li>
+</ul>
+<p><strong>所谓的边也不是只有相连和不相连这两种选择，可以给边一些权重，让边跟两个数据点的相似度成正比。</strong>相似度可以用Gaussian Radial Basis Function来定义<img src="https://img-blog.csdnimg.cn/755264db6fe240d798d40d43d90ea95f.png#pic_center"></p>
+<h3 id="怎么计算这个相似度"><a href="#怎么计算这个相似度" class="headerlink" title="怎么计算这个相似度"></a>怎么计算这个相似度</h3><p>可以先算xi,xj的欧式距离，乘以一个参数取负号，再取e为底的指数函数。取exp很有必要，在经验上最后效果比较好。因为取exp，下降速度很快，只有当xi,xj非常靠近时，奇点才会大，距离远一点奇点就会下降很快变得很小。这样才能制造如上图右下方所示的，两个距离近的橙色点有连接，绿色点和橙色点虽然距离也近，但是使用了exp导致只有很近很近的点才有连接，即使远一点点就不会有连接了，有这样的机制才能避免跨海沟的连接(橙色点和绿色点连接)。</p>
+<blockquote>
+<p><img src="https://img-blog.csdnimg.cn/f5e991680cf44ff08f79229892cd8926.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center"><br>基于图的方法是，如果现在在图上面有一些标注数据，比如上图左上方，已经知道了蓝色圈的数据属于class 1，那么跟他们有相连的数据点属于class 1的概率也会上升。每一笔数据会去影响它的邻居。</p>
+<ul>
+<li>光会影响邻居还不够，因为有连接说明本来就很像，那很像的input<br> ，output本来也就很像。这种方法真正的精髓是，<strong>class是会传递的</strong>，虽然一个点没有与标注数据直接相连，但是有连接路径，那么class<br> 1就会随着边传递。</li>
+<li>例如上图右上方，所有数据点构建成一个图（理想的例子），然后有一个蓝色点属于class 1，一个红色点属于class 2。经过基于图的方法，蓝色点会传递，红色点也会传递，如上图右下方所示。</li>
+</ul>
+</blockquote>
+<p><strong>要让基于图的这种半监督学习方法有用的话，一个重要的原则是你的数据要多，如果数据不够多，例如下图所示，中间有断开，那信息就传递不过去。</strong><img src="https://img-blog.csdnimg.cn/9ce410bae05d47f4b6a06931ef349d7a.png#pic_center"></p>
+<h2 id="考试一般的考题，定量的计算图"><a href="#考试一般的考题，定量的计算图" class="headerlink" title="考试一般的考题，定量的计算图"></a>考试一般的考题，定量的计算图</h2><p>定量的使用方式是在这个图的结构上面定一个东西，叫做label的平滑度，来表明这个label有多符合平滑度假设。</p>
+<h3 id="怎么定平滑度？"><a href="#怎么定平滑度？" class="headerlink" title="怎么定平滑度？"></a>怎么定平滑度？</h3><p><img src="https://img-blog.csdnimg.cn/42dc067087334546bbf3a44bdb7f9d88.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>看上图两个例子，这两个例子都有4个数据点，数据点之间连接的数字代表了边的权重。现在给两个例子的数据不同的label，左边例子的label是1,1,1,0，右边例子的label是0,1,1,0，那谁更平滑呢？</p>
+<p>直观感觉就是左边例子更平滑，但我们需要定量描述。常见的方法是，考虑两两相连的点（不管有label还是没有label），在所有的配对上，计算label差值的平方，然后乘上权重 ，最后求和。</p>
+<p>所以左边这个例子的S就是0.5，右边例子的S是3，S越小越平滑。</p>
+<h3 id="用矩阵来表达"><a href="#用矩阵来表达" class="headerlink" title="用矩阵来表达"></a>用矩阵来表达</h3><p><img src="https://img-blog.csdnimg.cn/3993d1ab2b6b4e79baeee94790c115f3.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p><strong>S可以稍微整理下，写成向量形式如上图。</strong></p>
+<p>把y串成一个向量，y包括标注数据和未标注数据，所以有 R+U 维。</p>
+<p><strong>L是*(R+U)×(R+U)*的矩阵，叫做图拉普拉斯，L的定义是 D−W ，W是两两数据点之间的权重，D是W每行值之和（放在对角线）。</strong></p>
+<h3 id="再加一个正则化项"><a href="#再加一个正则化项" class="headerlink" title="再加一个正则化项"></a>再加一个正则化项</h3><p>现在可以用 y转置Ly 来评估现在得到的label有多平滑，<strong>式子里面的y是label的值，取决于神经网络的参数</strong>。那么如果要把平滑度考虑到神经网络里时，就是在原来的损失函数里加上λS（λ是某一个想要调的参数）。λS像一个正则化项，在调整参数时，不只是让标注数据的output跟真正的label越近越好，同时还要让output的label在标注数据和未标注数据上符合平滑度假设。平滑度假设由S衡量。</p>
+<p>不一定要在output上计算平滑度，在深度神经网络里，可以把平滑度计算放在网络的任何地方。你可以假设你的output是平滑度，也可以把某个隐藏层乘上一些别的transform，它也要平滑，也可以要求每个隐藏层的output都是平滑的。</p>
+<h3 id="转换的想法-Better-Representation"><a href="#转换的想法-Better-Representation" class="headerlink" title="转换的想法 Better Representation"></a>转换的想法 Better Representation</h3><p>我们观察到的世界其实是比较复杂的，在背后有一些比较简单的向量，比较简单的东西在操控这个复杂的世界。那只要看透假象，直指核心，就可以让学习变得比较容易。</p>
+<p>例如上图右方剪胡子，胡子的变化是很复杂的，但是胡子受头操控，头的变化是有限的。所以胡子是观测，而头就是Better Representation。</p>
+]]></content>
+      <categories>
+        <category>机器学习基础-李宏毅</category>
+      </categories>
+      <tags>
+        <tag>深度学习</tag>
+        <tag>李宏毅</tag>
+        <tag>半监督学习</tag>
       </tags>
   </entry>
   <entry>
