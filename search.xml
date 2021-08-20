@@ -841,7 +841,9 @@ PCA的实现一般有两种：
 </blockquote>
 <p><img src="https://img-blog.csdnimg.cn/cf51702d73ef4fa3ac7f2dd6c47ec6d6.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
 <h1 id="PCA实例"><a href="#PCA实例" class="headerlink" title="PCA实例"></a>PCA实例</h1><h2 id="手写数字识别"><a href="#手写数字识别" class="headerlink" title="手写数字识别"></a>手写数字识别</h2><p><img src="https://img-blog.csdnimg.cn/9581a527b4a0468f97458d5954e6bb89.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>以把每一张数字图像拆成成分的线性组合，每一个成分也是一张图像（28 × 28 维的向量），所以可以把成分画在图上变成一张图像。</p>
-<font color="blue">通过PCA画出前30个成分如上图所示，白色的地方代表有笔画。用这些成分做线性组合，就可以得到0-9的数字，所以这些成分叫做Eigen-digit。</font> Eigen（本征）是说，这些成分都是协方差矩阵的特征向量。
+<font color="blue">通过PCA画出前30个成分如上图所示，白色的地方代表有笔画。用这些成分做线性组合，就可以得到0-9的数字，所以这些成分叫做Eigen-digit。</font> 
+Eigen（本征）是说，这些成分都是协方差矩阵的特征向量。
+
 
 ## 人脸识别
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/9e97b877a5114592ac90e2b7f5f3c0f6.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center)
@@ -861,6 +863,7 @@ PCA的实现一般有两种：
 你会发现，白色图案类似于笔画，找出来的主成分就成了笔画了。
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/36c61755d6ce40318f4df22c47721ab5.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center)
 看脸的话，会发现如上图所示。比较像脸的一部分，比如人中、眉毛、嘴唇、下巴。
+
 
 ## 宝可梦
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/c19d6fca60984ad6a435fd0750f485fa.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center)
@@ -888,6 +891,7 @@ PCA后选择4个主成分，每个主成分是一个6维向量（因为原来每
 
 把第三、第四主成分画出来如上图最下方，维度是去相关的。
 
+
 ## 矩阵分解-推荐系统
 有时候，你会有两种东西，两种对象，它们之间受到某种共通的潜在因素操控。
 假设现在做一个调查，调查每个人手上买的公仔的数目，有5个宅男同学A,B,C,D,E，横轴的公仔人物是凉宫春日、御坂美琴、小野寺、小唯，调查结果如下图。
@@ -913,7 +917,7 @@ PCA后选择4个主成分，每个主成分是一个6维向量（因为原来每
 <p><strong>Q：矩阵X的每个维度是什么？</strong><br>我们要做的事情就是找一组rA到rE，找一组r1到r4 ，让两个矩阵相乘后和矩阵X越接近越好，就是最小化重构误差。这个就可以用SVD来解，把Σ并到左边或右边变成两个矩阵就可以了。<br><img src="https://img-blog.csdnimg.cn/b2a2e51b938840b49fad8bcf3521f71b.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>有时候有些信息是缺失的，比如上图所示的，你不知道A、B、C手上有没有小野寺，可能在那个地区没有发行，所以不知道发行的话到底会不会买。那用SVD就很怪，也可以把缺失值用0代替，但也很奇怪。</p>
 <p>Q：那有缺失值怎么办呢？<br>可以用梯度下降的方法来做，写一个损失函数，让$r^{i}$（每个人背后的潜在因素）和$r^{j}$（角色背后的潜在因素）的内积和角色购买数量越接近越好。现在重点是，在<br>summation over<br>元素的时候，可以避开缺失的数据，如果值是缺失的，就不计算。有了损失函数后，就可以使用梯度下降了。<img src="https://img-blog.csdnimg.cn/7da15f3364a64482b6e8a8ed3d751acb.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>根据刚才的方法实际计算一下，假设潜在因素的数量是2。那么A到E都是二维的向量，每个角色也是二维的向量。<br>数值代表了属性的程度，把大的用红色框框圈出来，会发现A、B萌同一组属性，C、D、E萌同一种属性，1,2有同样的属性，3,4有同样的属性。没有办法知道每个属性代表什么，要先找出这些潜在因素，再去分析它的结果。有了这些潜在因素数据，就可以用来预测缺失值。已经知道了$r^{A}$和$r^{3}$，那只要$r^{A}$和$r^{3}$做内积就可以了。</p>
 </blockquote>
-<p><img src="https://img-blog.csdnimg.cn/d1cb16fb971b456ebe4b9e64b666e212.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>之前的model可以做得更精致一点，刚才说A背后的潜在因素乘上 春日 背后的潜在因素，得到的结果就是矩阵里的数值。但是事实上，可能还会有其他因素操控这些数值。那么更精确的写法就可以写成 $r^{A}<br>⋅r^{1}+b<em>{A}+b</em>{1}≈5$。$b<em>{A}$是跟 $A$ 有关的标量，代表了 $A$ 有多喜欢买公仔，有的人就是喜欢买公仔，也不是喜欢某个角色。$b</em>{1}$是跟 春日 有关的标量，代表了角色有多想让人购买，这个事情是跟属性无关的，本来人就会买这个角色。</p>
+<p><img src="https://img-blog.csdnimg.cn/d1cb16fb971b456ebe4b9e64b666e212.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>之前的model可以做得更精致一点，刚才说A背后的潜在因素乘上 春日 背后的潜在因素，得到的结果就是矩阵里的数值。但是事实上，可能还会有其他因素操控这些数值。<br>那么更精确的写法就可以写成 $r^{A}⋅r^{1}+b<em>{A}+b</em>{1}≈5$。$b<em>{A}$是跟 $A$ 有关的标量，代表了 $A$ 有多喜欢买公仔，有的人就是喜欢买公仔，也不是喜欢某个角色。$b</em>{1}$是跟 春日 有关的标量，代表了角色有多想让人购买，这个事情是跟属性无关的，本来人就会买这个角色。</p>
 <p>然后修改损失函数如上图所示，使用梯度下降求解即可。</p>
 ]]></content>
       <categories>
