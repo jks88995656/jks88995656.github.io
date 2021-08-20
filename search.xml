@@ -844,26 +844,22 @@ PCA的实现一般有两种：
 <font color="blue">通过PCA画出前30个成分如上图所示，白色的地方代表有笔画。用这些成分做线性组合，就可以得到0-9的数字，所以这些成分叫做Eigen-digit。</font> 
 Eigen（本征）是说，这些成分都是协方差矩阵的特征向量。
 
-
 ## 人脸识别
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/9e97b877a5114592ac90e2b7f5f3c0f6.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center)
 上图右上方有一大堆人脸，找它们前30个主成分。找出来就如上图最下方所示，每张图像都是哀怨的脸，叫做Eigen-face。把这些脸做线性组合，就可以得到所有的脸。
 
 
 > **Q：但这边有没有觉得有问题，因为主成分找出来的是成分，但是现在找出来的几乎都是完整的脸，也不像是成分啊？像前面的数字识别，成分看起来也像是玛雅文字，而不是笔画，看起来也不是成分啊？**
-> ![在这里插入图片描述](https://img-blog.csdnimg.cn/1215e23adb994fd6b8380a73b1e64527.png#pic_center)
-> **答**：仔细想想PCA的特性，$α_{1},α_{2}$ 这种权重可以是任何值，可以是正的，也可以是负的。所以当我们用这些主成分组成一张图像的时候，<font color="blue">可以把这些成分相加，也可以把这些成分相减，这就会导致你找出的东西不见得是一个图的基本的结构。</font>
-> 
-> 比如我画一个9，那可以先画一个8，然后把下面的圆圈减掉，再把一杠加上去。我们不一定是把成分加起来，也可以相减，<font color="blue">所以说就可以先画一个很复杂的图，然后再把多余的东西减掉。这些成分不见得就是类似笔画的这种东西。</font>
+![在这里插入图片描述](https://img-blog.csdnimg.cn/1215e23adb994fd6b8380a73b1e64527.png#pic_center)> **答**：仔细想想PCA的特性，$α_{1},α_{2}$ 这种权重可以是任何值，可以是正的，也可以是负的。所以当我们用这些主成分组成一张图像的时候，<font color="blue">可以把这些成分相加，也可以把这些成分相减，这就会导致你找出的东西不见得是一个图的基本的结构。</font>> > 比如我画一个9，那可以先画一个8，然后把下面的圆圈减掉，再把一杠加上去。我们不一定是把成分加起来，也可以相减，<font color="blue">所以说就可以先画一个很复杂的图，然后再把多余的东西减掉。这些成分不见得就是类似笔画的这种东西。</font>
 > 
 > 如果要得到类似笔画的东西，就要用另一个技术*NMF（非负矩阵分解）*。PCA可以看成是对矩阵X做SVD，SVD就是一种矩阵分解的技术。**如果使用NMF，就会强迫所有成分的权重都是正的，正的好处就是一张图像必须由成分叠加得到，不能说先画一个复杂的东西再去掉一部分，再来就是所有成分的每个维度都必须是正的。**
 
+
+所以在同样的任务上，例如手写数字的测试上，使用NMF时，找出来的主成分会如下图所示。
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/ac0fc298e03847819527bc49a3198b45.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center)
-所以在同样的任务上，例如手写数字的测试上，使用NMF时，找出来的主成分会如上图所示。
 你会发现，白色图案类似于笔画，找出来的主成分就成了笔画了。
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/36c61755d6ce40318f4df22c47721ab5.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center)
 看脸的话，会发现如上图所示。比较像脸的一部分，比如人中、眉毛、嘴唇、下巴。
-
 
 ## 宝可梦
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/c19d6fca60984ad6a435fd0750f485fa.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center)
@@ -875,6 +871,7 @@ Eigen（本征）是说，这些成分都是协方差矩阵的特征向量。
 
 现在的例子里宝可梦是6维的，那就有6 × 6维的协方差矩阵，所以有6个特征值，如上图计算每个特征值比例，结果是0.45，0.18，0.13，0.12，0.07，0.04。那第5、6个主成分的作用比较小，意味着投影数据的方差很小，宝可梦的特性在这两个主成分上信息很少。那么分析宝可梦特性只需要前4个主成分。
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/8fcb23f86b76476e9b66585379b04cbb.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center)
+
 PCA后选择4个主成分，每个主成分是一个6维向量（因为原来每个特征都要投影，那就有6种投影数据）。
 
 每个宝可梦可以想成是4主成分向量做线性组合的结果，且每只宝可梦组合的权重不同。
@@ -917,7 +914,8 @@ PCA后选择4个主成分，每个主成分是一个6维向量（因为原来每
 <p><strong>Q：矩阵X的每个维度是什么？</strong><br>我们要做的事情就是找一组rA到rE，找一组r1到r4 ，让两个矩阵相乘后和矩阵X越接近越好，就是最小化重构误差。这个就可以用SVD来解，把Σ并到左边或右边变成两个矩阵就可以了。<br><img src="https://img-blog.csdnimg.cn/b2a2e51b938840b49fad8bcf3521f71b.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>有时候有些信息是缺失的，比如上图所示的，你不知道A、B、C手上有没有小野寺，可能在那个地区没有发行，所以不知道发行的话到底会不会买。那用SVD就很怪，也可以把缺失值用0代替，但也很奇怪。</p>
 <p>Q：那有缺失值怎么办呢？<br>可以用梯度下降的方法来做，写一个损失函数，让$r^{i}$（每个人背后的潜在因素）和$r^{j}$（角色背后的潜在因素）的内积和角色购买数量越接近越好。现在重点是，在<br>summation over<br>元素的时候，可以避开缺失的数据，如果值是缺失的，就不计算。有了损失函数后，就可以使用梯度下降了。<img src="https://img-blog.csdnimg.cn/7da15f3364a64482b6e8a8ed3d751acb.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>根据刚才的方法实际计算一下，假设潜在因素的数量是2。那么A到E都是二维的向量，每个角色也是二维的向量。<br>数值代表了属性的程度，把大的用红色框框圈出来，会发现A、B萌同一组属性，C、D、E萌同一种属性，1,2有同样的属性，3,4有同样的属性。没有办法知道每个属性代表什么，要先找出这些潜在因素，再去分析它的结果。有了这些潜在因素数据，就可以用来预测缺失值。已经知道了$r^{A}$和$r^{3}$，那只要$r^{A}$和$r^{3}$做内积就可以了。</p>
 </blockquote>
-<p><img src="https://img-blog.csdnimg.cn/d1cb16fb971b456ebe4b9e64b666e212.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>之前的model可以做得更精致一点，刚才说A背后的潜在因素乘上 春日 背后的潜在因素，得到的结果就是矩阵里的数值。但是事实上，可能还会有其他因素操控这些数值。<br>那么更精确的写法就可以写成 $r^{A}⋅r^{1}+b<em>{A}+b</em>{1}≈5$。$b<em>{A}$是跟 $A$ 有关的标量，代表了 $A$ 有多喜欢买公仔，有的人就是喜欢买公仔，也不是喜欢某个角色。$b</em>{1}$是跟 春日 有关的标量，代表了角色有多想让人购买，这个事情是跟属性无关的，本来人就会买这个角色。</p>
+<p><img src="https://img-blog.csdnimg.cn/d1cb16fb971b456ebe4b9e64b666e212.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>之前的model可以做得更精致一点，刚才说A背后的潜在因素乘上 春日 背后的潜在因素，得到的结果就是矩阵里的数值。但是事实上，可能还会有其他因素操控这些数值。<br>那么更精确的写法就可以写成。</p>
+<script type="math/tex; mode=display">r^{A}⋅r^{1}+b_{A}+b_{1}≈5</script><p>$b<em>{A}$是跟 $A$ 有关的标量，代表了 $A$ 有多喜欢买公仔，有的人就是喜欢买公仔，也不是喜欢某个角色。$b</em>{1}$是跟 春日 有关的标量，代表了角色有多想让人购买，这个事情是跟属性无关的，本来人就会买这个角色。</p>
 <p>然后修改损失函数如上图所示，使用梯度下降求解即可。</p>
 ]]></content>
       <categories>
