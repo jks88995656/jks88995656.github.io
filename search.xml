@@ -1,6 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Numpy、Pandas、Matplotlib  常用代码</title>
+    <url>/2021/08/21/Numpy%E3%80%81Pandas%E3%80%81Matplotlib%20%20%E5%B8%B8%E7%94%A8%E4%BB%A3%E7%A0%81/</url>
+    <content><![CDATA[<p>@<a href="Numpy、Pandas、Matplotlib  常用代码">TOC</a></p>
+<h1 id="Numpy-常用代码"><a href="#Numpy-常用代码" class="headerlink" title="Numpy 常用代码"></a>Numpy 常用代码</h1><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># !/usr/bin/python</span></span><br><span class="line"><span class="comment"># -*- coding: UTF-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> numpy</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成数组</span></span><br><span class="line">n = numpy.arange(<span class="number">10</span>)</span><br><span class="line"><span class="built_in">print</span>(n)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;*&quot;</span>*<span class="number">20</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成数组，并做2行3列的分隔</span></span><br><span class="line">m = numpy.array([<span class="number">0</span>,<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>]).reshape(<span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line"><span class="built_in">print</span>(m)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;*&quot;</span>*<span class="number">20</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成数据，分隔成3位数组</span></span><br><span class="line">t = numpy.arange(<span class="number">27</span>).reshape(<span class="number">3</span>, <span class="number">3</span>, <span class="number">3</span>)</span><br><span class="line"><span class="built_in">print</span>(t)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;*&quot;</span>*<span class="number">20</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 加载文本，为int方式</span></span><br><span class="line">tx1 = numpy.loadtxt(<span class="string">&quot;numpy.txt&quot;</span>, delimiter=<span class="string">&quot;,&quot;</span>, dtype=<span class="string">&quot;int&quot;</span>)</span><br><span class="line"><span class="comment"># 横列替换</span></span><br><span class="line">tx2 = numpy.loadtxt(<span class="string">&quot;numpy.txt&quot;</span>, delimiter=<span class="string">&quot;,&quot;</span>, dtype=<span class="string">&quot;int&quot;</span>, unpack=<span class="literal">True</span>)</span><br><span class="line"><span class="built_in">print</span>(tx1)</span><br><span class="line"><span class="built_in">print</span>(tx2)</span><br><span class="line"><span class="comment"># 1:2横截取，[1,2]为选取</span></span><br><span class="line">tx3 = tx1[<span class="number">1</span>:<span class="number">2</span>,[<span class="number">1</span>,<span class="number">2</span>]]</span><br><span class="line"><span class="built_in">print</span>(tx3)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;*&quot;</span>*<span class="number">20</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 竖拼接</span></span><br><span class="line">tx4 = numpy.vstack((tx1, tx2))</span><br><span class="line"><span class="built_in">print</span>(tx4)</span><br><span class="line"><span class="comment"># 横拼接</span></span><br><span class="line">tx5 = numpy.hstack((tx1, tx2))</span><br><span class="line"><span class="built_in">print</span>(tx5)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;*&quot;</span>*<span class="number">20</span>)</span><br></pre></td></tr></table></figure>
+<h1 id="Pandas-常用代码"><a href="#Pandas-常用代码" class="headerlink" title="Pandas 常用代码"></a>Pandas 常用代码</h1><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># !/usr/bin/python</span></span><br><span class="line"><span class="comment"># -*- coding: UTF-8 -*-</span></span><br><span class="line"><span class="keyword">import</span> pandas</span><br><span class="line"><span class="keyword">from</span> matplotlib <span class="keyword">import</span> pyplot</span><br><span class="line"></span><br><span class="line"><span class="comment"># 读取文件</span></span><br><span class="line">df = pandas.read_csv(<span class="string">&quot;BeijingPM20100101_20151231.csv&quot;</span>)</span><br><span class="line"><span class="comment"># 展示</span></span><br><span class="line"><span class="comment"># print(df.head())</span></span><br><span class="line"><span class="comment"># print(df.info())</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 拼接时间</span></span><br><span class="line">period = pandas.PeriodIndex(year=df[<span class="string">&quot;year&quot;</span>], month=df[<span class="string">&quot;month&quot;</span>], day=df[<span class="string">&quot;day&quot;</span>], hour=df[<span class="string">&quot;hour&quot;</span>], freq=<span class="string">&quot;H&quot;</span>)</span><br><span class="line"><span class="comment"># 将时间数据赋值</span></span><br><span class="line">df[<span class="string">&quot;dataTime&quot;</span>] = period</span><br><span class="line"><span class="comment"># 设置索引</span></span><br><span class="line">df.set_index(<span class="string">&quot;dataTime&quot;</span>, inplace=<span class="literal">True</span>)</span><br><span class="line"><span class="comment"># # print(period)</span></span><br><span class="line"><span class="comment"># print(df.head())</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 通过月份统计</span></span><br><span class="line">df = df.resample(<span class="string">&quot;M&quot;</span>).mean()</span><br><span class="line"></span><br><span class="line"><span class="comment"># (统计)缺失</span></span><br><span class="line">data = df[<span class="string">&quot;PM_US Post&quot;</span>].dropna()</span><br><span class="line"></span><br><span class="line"><span class="comment"># pylot展示</span></span><br><span class="line">x = data.index</span><br><span class="line">y = data.values</span><br><span class="line"></span><br><span class="line">pyplot.figure(figsize=(<span class="number">20</span>, <span class="number">8</span>), dpi=<span class="number">80</span>)</span><br><span class="line">pyplot.plot(<span class="built_in">range</span>(<span class="built_in">len</span>(x)), y)</span><br><span class="line">pyplot.xticks(<span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(x), <span class="number">3</span>), x[::<span class="number">3</span>])</span><br><span class="line">pyplot.show()</span><br></pre></td></tr></table></figure>
+<h1 id="Matplotlib-常用代码"><a href="#Matplotlib-常用代码" class="headerlink" title="Matplotlib 常用代码"></a>Matplotlib 常用代码</h1><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># !/usr/bin/python</span></span><br><span class="line"><span class="comment"># -*- coding: UTF-8 -*-</span></span><br><span class="line"><span class="keyword">import</span> matplotlib</span><br><span class="line"><span class="keyword">from</span> matplotlib <span class="keyword">import</span> pyplot</span><br><span class="line"></span><br><span class="line">x = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">7</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">4</span>, <span class="number">6</span>, <span class="number">9</span>, <span class="number">6</span>, <span class="number">2</span>, <span class="number">5</span>, <span class="number">3</span>, <span class="number">9</span>, <span class="number">1</span>, <span class="number">7</span>]</span><br><span class="line">y_1 = [<span class="number">10</span>, <span class="number">15</span>, <span class="number">7</span>, <span class="number">6</span>, <span class="number">13</span>, <span class="number">17</span>, <span class="number">19</span>, <span class="number">1</span>, <span class="number">5</span>, <span class="number">2</span>, <span class="number">15</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">16</span>, <span class="number">8</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="number">17</span>]</span><br><span class="line">y_2 = [<span class="number">17</span>, <span class="number">5</span>, <span class="number">3</span>, <span class="number">8</span>, <span class="number">16</span>, <span class="number">12</span>, <span class="number">11</span>, <span class="number">15</span>, <span class="number">2</span>, <span class="number">5</span>, <span class="number">1</span>, <span class="number">19</span>, <span class="number">17</span>, <span class="number">13</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">15</span>, <span class="number">10</span>]</span><br><span class="line"></span><br><span class="line">pyplot.figure(figsize=(<span class="number">20</span>, <span class="number">12</span>), dpi=<span class="number">50</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 调整字体</span></span><br><span class="line">matplotlib.rc(<span class="string">&quot;font&quot;</span>, family=<span class="string">&quot;MicroSoft YaHei&quot;</span>,weight=<span class="string">&quot;bold&quot;</span>, size=<span class="number">20</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 改变刻度</span></span><br><span class="line"><span class="comment"># pyplot.xticks([ i + 1 for i in range(max(x))], [ &quot;time&quot; + str(i + 1) for i in range(max(x))], rotation=45)</span></span><br><span class="line"><span class="comment"># 第一个参数x轴 第二个展示的内容 rotation 旋转</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 描述</span></span><br><span class="line">pyplot.xlabel(<span class="string">&quot;时间&quot;</span>)</span><br><span class="line">pyplot.ylabel(<span class="string">&quot;温度&quot;</span>)</span><br><span class="line">pyplot.title(<span class="string">&quot;折线图&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 折线图</span></span><br><span class="line">pyplot.plot(x, y_1)</span><br><span class="line"><span class="comment"># pyplot.plot(x, y_2)</span></span><br><span class="line"><span class="comment"># 散点图</span></span><br><span class="line"><span class="comment"># pyplot.scatter(x, y_1)</span></span><br><span class="line"><span class="comment"># pyplot.scatter(x, y_2)</span></span><br><span class="line"><span class="comment"># 柱状图</span></span><br><span class="line"><span class="comment"># pyplot.bar(x, y_1)</span></span><br><span class="line"><span class="comment"># pyplot.bar(x, y_2)</span></span><br><span class="line"><span class="comment"># 横版柱状图</span></span><br><span class="line"><span class="comment"># pyplot.barh(range(len(x)), y_1, height=0.3)</span></span><br><span class="line"><span class="comment"># pyplot.barh(range(len(x)), y_2, height=0.3)</span></span><br><span class="line"><span class="comment"># 直方图</span></span><br><span class="line"><span class="comment"># pyplot.hist(x, (max(x)-min(x))//1)</span></span><br><span class="line">pyplot.xticks(<span class="built_in">range</span>(<span class="built_in">min</span>(x), <span class="built_in">max</span>(x) + <span class="number">1</span>, <span class="number">1</span>))</span><br><span class="line"><span class="comment"># pyplot.grid()</span></span><br><span class="line"><span class="comment"># 保存图片</span></span><br><span class="line"><span class="comment"># pyplot.savefig(&quot;link.png&quot;)</span></span><br><span class="line"></span><br><span class="line">pyplot.show()</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>机器学习基础-李宏毅</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+        <tag>Numpy</tag>
+        <tag>Pandas</tag>
+        <tag>Matplotlib</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>为什么要Deep？深而不是宽</title>
     <url>/2021/08/10/%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81Deep%EF%BC%9F%E6%B7%B1%E8%80%8C%E4%B8%8D%E6%98%AF%E5%AE%BD/</url>
     <content><![CDATA[<p>@<a href="为什么要Deep？深而不是宽">TOC</a></p>
@@ -71,55 +89,6 @@
       </tags>
   </entry>
   <entry>
-    <title>梯度下降算法 进阶</title>
-    <url>/2021/08/04/%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%AE%97%E6%B3%95%20%E8%BF%9B%E9%98%B6/</url>
-    <content><![CDATA[<p>@<a href="梯度算法 进阶">TOC</a></p>
-<h1 id="回顾梯度算法"><a href="#回顾梯度算法" class="headerlink" title="回顾梯度算法"></a>回顾梯度算法</h1><p><strong>是一种迭代的算法，每看一个参数都会更新。</strong><br><img src="https://img-blog.csdnimg.cn/eee493cfe8f24755a2aa3cfd41f486f4.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/62ccf5ddd84348308c79a70233b0da19.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h1 id="学习率η（Learning-Rate）"><a href="#学习率η（Learning-Rate）" class="headerlink" title="学习率η（Learning Rate）"></a>学习率η（Learning Rate）</h1><h2 id="自定义的学习率对参数选择的影响"><a href="#自定义的学习率对参数选择的影响" class="headerlink" title="自定义的学习率对参数选择的影响"></a>自定义的学习率对参数选择的影响</h2><p><img src="https://img-blog.csdnimg.cn/6c39ce49d85048098ac7303a552bc184.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><strong>学习率需要选取合适的值，过小会导致模型调参的速度太慢，但过大会导致错失掉了最佳参数点</strong></p>
-<h2 id="如何调整学习率η？"><a href="#如何调整学习率η？" class="headerlink" title="如何调整学习率η？"></a>如何调整学习率η？</h2><ol>
-<li><p>在最开始的时候，随机点离目标点很远，我们一般会选取一个比较大的学习率；当做了几期后，我们离目标点很近了，所以我们会减小学习率 缩减为 如下图所示的公式<img src="https://img-blog.csdnimg.cn/b9bc45580c004a6cbb708595125b1a1a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-</li>
-<li><p><strong>不同的参数应该设置不同的学习率</strong></p>
-</li>
-</ol>
-<p>下面是常用的 调整学习率的方法：</p>
-<h3 id="Adagrad"><a href="#Adagrad" class="headerlink" title="Adagrad"></a>Adagrad</h3><p>Adagrad是解决不同参数应该使用不同的更新速率的问题。<strong>Adagrad自适应地为各个参数分配不同学习率的算法。</strong></p>
-<blockquote>
-<p><strong>其原理为：</strong><img src="https://img-blog.csdnimg.cn/4423c0afa60f462cb444f37cd1307576.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>里面比较核心的部分在 每次σ的取值。<strong>每次σ规定为之前所有<em>g</em>平方对应的之和的均方根</strong>。例如下图所示：其中 <em>g</em> 是每次的偏导值<img src="https://img-blog.csdnimg.cn/82780afd2b0347ad8505db41024b9f7d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>结合之前说的 <em>η</em> 值的变化 可以得到如下的公式推导：<img src="https://img-blog.csdnimg.cn/cf79f34d94b44c72abdd283ebb0f3431.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-</blockquote>
-<p><strong>提问:</strong>    发现一个现象，本来应该是随着gradient的增大，我们的学习率是希望增大的，也就是图中的g上标t；但是与此同时随着gradient的增大，我们的分母是在逐渐增大，也就对整体学习率是减少的，这是为什么呢？<img src="https://img-blog.csdnimg.cn/64154f52e91f4486be92171800f09815.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>这是因为随着我们更新次数的增大，我们是希望我们的学习率越来越慢。因为我们认为在学习率的最初阶段，我们是距离损失函数最优解很远的，随着更新的次数的增多，<strong>我们认为越来越接近最优解，于是学习速率也随之变慢。</strong>  为什么化简之后是如上这个式子呢，其在图像上的意义是 一阶导数比上二阶数的值。如下图所示：<img src="https://img-blog.csdnimg.cn/90fda3afedce4958a877451546c006e2.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="Stochastic-Gradient-Descent（SGD随机梯度下降法）-？？？"><a href="#Stochastic-Gradient-Descent（SGD随机梯度下降法）-？？？" class="headerlink" title="Stochastic Gradient Descent（SGD随机梯度下降法） ？？？"></a>Stochastic Gradient Descent（SGD随机梯度下降法） ？？？</h3><p>其和 普通的梯度下降算法区别在。普通遍历在求和的时候需要浪费大量时间，进而去掉求和产生了随机梯度下降算法。<img src="https://img-blog.csdnimg.cn/e92e87942f4443cbac50e52369c68151.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>和下图看到的一样：<br><img src="https://img-blog.csdnimg.cn/76673f0f26614df6a9ac37311fe015b1.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<blockquote>
-<p> 只是要注意一下标准的梯度下降和随机梯度下降的区别：</p>
-<ol>
-<li><p>标准下降时在权值更新前汇总所有样例得到的标准梯度，随机下降则是通过考察每次训练实例来更新（<strong>就是随机选择一些按顺序的后续样本点来，而不是全体数据</strong>）。<img src="https://img-blog.csdnimg.cn/32da14cad9bf4a2ba439745929b7ec11.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-</li>
-<li><p>对于步长 <em>η</em> 的取值，标准梯度下降的 <em>η</em> 比随机梯度下降的大。因为标准梯度下降的是使用准确的梯度，理直气壮地走，随机梯度下降<strong>使用的是近似的梯度</strong>，就得小心翼翼地走，怕一不小心误入歧途南辕北辙了。</p>
-</li>
-<li>当损失函数有多个局部极小值时，随机梯度反而更可能避免进入局部极小值中。</li>
-</ol>
-</blockquote>
-<h4 id="小批量随机梯度下降（batch-gradient-descent）"><a href="#小批量随机梯度下降（batch-gradient-descent）" class="headerlink" title="小批量随机梯度下降（batch gradient descent）"></a>小批量随机梯度下降（batch gradient descent）</h4><p>如果在每次迭代中，梯度下降是用整个训练数据集来计算梯度的话，则会带来大量的计算量。因此提出批量梯度下降来进行优化。<strong>每次优化不再是对整体数据集来计算损失，取而代之使用随机采样小批量的样本来计算梯度。</strong><img src="https://img-blog.csdnimg.cn/0d8e8d1e6c234e36b0972e5b95c9f46a.png#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="Feature-Scaling-（特征缩放）"><a href="#Feature-Scaling-（特征缩放）" class="headerlink" title="Feature Scaling （特征缩放）"></a>Feature Scaling （特征缩放）</h3><p>其意思就是说要<strong>将所有特征有相同的规模</strong>。例如下图所示，<em>X2</em> 的范围明显大宇 <em>X1</em>，所以要将 <em>X2</em> 进行缩放。<br><img src="https://img-blog.csdnimg.cn/2b4681ef27884c0bbf400db0624e8740.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h4 id="为什么要做Feature-Scaling？"><a href="#为什么要做Feature-Scaling？" class="headerlink" title="为什么要做Feature Scaling？"></a>为什么要做Feature Scaling？</h4><blockquote>
-<p>为什么要做Feature Scaling？<img src="https://img-blog.csdnimg.cn/456a5666c6bf40b7a1e5f7a8727b529f.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>如左图，<em>X1</em> 和 <em>X2</em> 数值规模大小相差很大，那 <em>W2</em> 这参数的变动会极大的影响损失函数，而 <em>W1</em> 影响度就很小。所以我们<strong>需要对 <em>X2</em> 进行特征缩放，使其与 <em>X1</em> 保持一个规模</strong>。并且其实从图像可以看出，如果按左图来做的话，我们很难找到一组合适的参数集合，因为他梯度下降的方法不是直线的而是曲线；而右图是近乎直线。（<strong>最里面圈的损失函数最小</strong>）</p>
-</blockquote>
-<h4 id="如何实现Feature-Scaling？"><a href="#如何实现Feature-Scaling？" class="headerlink" title="如何实现Feature Scaling？"></a>如何实现Feature Scaling？</h4><p><img src="https://img-blog.csdnimg.cn/f129b6a000c841ec926df684d2c77a15.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p>如上图所示，假如有R个数据样本，每个样本有<em>X1 - Xi</em> 个特征。我们用上面的公式计算出其应该的scale（其实说实在的这不就是化成标准正太分布么）</p>
-<h1 id="梯度下降算法数学总结"><a href="#梯度下降算法数学总结" class="headerlink" title="梯度下降算法数学总结"></a>梯度下降算法数学总结</h1><p>提出问题：如下图所示<strong>（我怎么样才能在红圈里找到最小损失的那个点呢）</strong><img src="https://img-blog.csdnimg.cn/53c25201a11349b6bc3af9e1dfc9fcc6.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h2 id="首先要回顾泰勒公式"><a href="#首先要回顾泰勒公式" class="headerlink" title="首先要回顾泰勒公式"></a>首先要回顾泰勒公式</h2><p><img src="https://img-blog.csdnimg.cn/c9b154d4d14c43c8bf5e2609789bb094.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/205bb83b97d849fc9b8c7451e044fdab.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>二元泰勒：<br><img src="https://img-blog.csdnimg.cn/2efa8bf67ffa419e90221154515a3712.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h2 id="用泰勒展开损失函数"><a href="#用泰勒展开损失函数" class="headerlink" title="用泰勒展开损失函数"></a>用泰勒展开损失函数</h2><p><img src="https://img-blog.csdnimg.cn/3ce8a2749e644d1f978c43d485798dde.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>理解为点乘，反向180度的时候，损失函数才是最小的：<img src="https://img-blog.csdnimg.cn/235fc97c36b74012b0663975ba0dc8a9.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>最终可以表达成：<img src="https://img-blog.csdnimg.cn/83f0037797f64c048376868ee2c21fae.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h1 id="梯度下降算法缺点在哪"><a href="#梯度下降算法缺点在哪" class="headerlink" title="梯度下降算法缺点在哪"></a>梯度下降算法缺点在哪</h1><p>其不仅仅包括可能有找到是局部最优解问题，有可能在中间的时候就有偏微分为0的时候，而这时这个点可能离全局最优解点 很远。<br><img src="https://img-blog.csdnimg.cn/cd31675e6d8e4c83925852218d4f2acc.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-]]></content>
-      <categories>
-        <category>机器学习基础-李宏毅</category>
-      </categories>
-      <tags>
-        <tag>李宏毅</tag>
-        <tag>机器学习</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>模型误差的来源分析</title>
     <url>/2021/08/02/%E6%A8%A1%E5%9E%8B%E8%AF%AF%E5%B7%AE%E7%9A%84%E6%9D%A5%E6%BA%90%E5%88%86%E6%9E%90/</url>
     <content><![CDATA[<p>@<a href="模型误差的来源分析">TOC</a></p>
@@ -162,6 +131,55 @@
 </ol>
 <h3 id="解决实际测试比共有数据集误差更大的问题"><a href="#解决实际测试比共有数据集误差更大的问题" class="headerlink" title="解决实际测试比共有数据集误差更大的问题"></a>解决实际测试比共有数据集误差更大的问题</h3><p><img src="https://img-blog.csdnimg.cn/d742c18f9bc04a8ea7981b28a9c2970b.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>将训练集，分为两部分。这叫做2-折交叉验证。一部分还是当做训练样本，帮助我们进行调参；另一部分用作验证，验证我的模型损失如何，是否合理（充当原来共有训练集的作用）。而现在原有训练集的部分用来充当实际样本数据，算出误差值，以便于真正在实际中误差太大。</p>
 <p><img src="https://img-blog.csdnimg.cn/1c0fa7f4983a4dc585448876cab974d4.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+]]></content>
+      <categories>
+        <category>机器学习基础-李宏毅</category>
+      </categories>
+      <tags>
+        <tag>李宏毅</tag>
+        <tag>机器学习</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>梯度下降算法 进阶</title>
+    <url>/2021/08/04/%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%AE%97%E6%B3%95%20%E8%BF%9B%E9%98%B6/</url>
+    <content><![CDATA[<p>@<a href="梯度算法 进阶">TOC</a></p>
+<h1 id="回顾梯度算法"><a href="#回顾梯度算法" class="headerlink" title="回顾梯度算法"></a>回顾梯度算法</h1><p><strong>是一种迭代的算法，每看一个参数都会更新。</strong><br><img src="https://img-blog.csdnimg.cn/eee493cfe8f24755a2aa3cfd41f486f4.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/62ccf5ddd84348308c79a70233b0da19.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="学习率η（Learning-Rate）"><a href="#学习率η（Learning-Rate）" class="headerlink" title="学习率η（Learning Rate）"></a>学习率η（Learning Rate）</h1><h2 id="自定义的学习率对参数选择的影响"><a href="#自定义的学习率对参数选择的影响" class="headerlink" title="自定义的学习率对参数选择的影响"></a>自定义的学习率对参数选择的影响</h2><p><img src="https://img-blog.csdnimg.cn/6c39ce49d85048098ac7303a552bc184.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><strong>学习率需要选取合适的值，过小会导致模型调参的速度太慢，但过大会导致错失掉了最佳参数点</strong></p>
+<h2 id="如何调整学习率η？"><a href="#如何调整学习率η？" class="headerlink" title="如何调整学习率η？"></a>如何调整学习率η？</h2><ol>
+<li><p>在最开始的时候，随机点离目标点很远，我们一般会选取一个比较大的学习率；当做了几期后，我们离目标点很近了，所以我们会减小学习率 缩减为 如下图所示的公式<img src="https://img-blog.csdnimg.cn/b9bc45580c004a6cbb708595125b1a1a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</li>
+<li><p><strong>不同的参数应该设置不同的学习率</strong></p>
+</li>
+</ol>
+<p>下面是常用的 调整学习率的方法：</p>
+<h3 id="Adagrad"><a href="#Adagrad" class="headerlink" title="Adagrad"></a>Adagrad</h3><p>Adagrad是解决不同参数应该使用不同的更新速率的问题。<strong>Adagrad自适应地为各个参数分配不同学习率的算法。</strong></p>
+<blockquote>
+<p><strong>其原理为：</strong><img src="https://img-blog.csdnimg.cn/4423c0afa60f462cb444f37cd1307576.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>里面比较核心的部分在 每次σ的取值。<strong>每次σ规定为之前所有<em>g</em>平方对应的之和的均方根</strong>。例如下图所示：其中 <em>g</em> 是每次的偏导值<img src="https://img-blog.csdnimg.cn/82780afd2b0347ad8505db41024b9f7d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>结合之前说的 <em>η</em> 值的变化 可以得到如下的公式推导：<img src="https://img-blog.csdnimg.cn/cf79f34d94b44c72abdd283ebb0f3431.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</blockquote>
+<p><strong>提问:</strong>    发现一个现象，本来应该是随着gradient的增大，我们的学习率是希望增大的，也就是图中的g上标t；但是与此同时随着gradient的增大，我们的分母是在逐渐增大，也就对整体学习率是减少的，这是为什么呢？<img src="https://img-blog.csdnimg.cn/64154f52e91f4486be92171800f09815.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>这是因为随着我们更新次数的增大，我们是希望我们的学习率越来越慢。因为我们认为在学习率的最初阶段，我们是距离损失函数最优解很远的，随着更新的次数的增多，<strong>我们认为越来越接近最优解，于是学习速率也随之变慢。</strong>  为什么化简之后是如上这个式子呢，其在图像上的意义是 一阶导数比上二阶数的值。如下图所示：<img src="https://img-blog.csdnimg.cn/90fda3afedce4958a877451546c006e2.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="Stochastic-Gradient-Descent（SGD随机梯度下降法）-？？？"><a href="#Stochastic-Gradient-Descent（SGD随机梯度下降法）-？？？" class="headerlink" title="Stochastic Gradient Descent（SGD随机梯度下降法） ？？？"></a>Stochastic Gradient Descent（SGD随机梯度下降法） ？？？</h3><p>其和 普通的梯度下降算法区别在。普通遍历在求和的时候需要浪费大量时间，进而去掉求和产生了随机梯度下降算法。<img src="https://img-blog.csdnimg.cn/e92e87942f4443cbac50e52369c68151.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>和下图看到的一样：<br><img src="https://img-blog.csdnimg.cn/76673f0f26614df6a9ac37311fe015b1.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<blockquote>
+<p> 只是要注意一下标准的梯度下降和随机梯度下降的区别：</p>
+<ol>
+<li><p>标准下降时在权值更新前汇总所有样例得到的标准梯度，随机下降则是通过考察每次训练实例来更新（<strong>就是随机选择一些按顺序的后续样本点来，而不是全体数据</strong>）。<img src="https://img-blog.csdnimg.cn/32da14cad9bf4a2ba439745929b7ec11.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</li>
+<li><p>对于步长 <em>η</em> 的取值，标准梯度下降的 <em>η</em> 比随机梯度下降的大。因为标准梯度下降的是使用准确的梯度，理直气壮地走，随机梯度下降<strong>使用的是近似的梯度</strong>，就得小心翼翼地走，怕一不小心误入歧途南辕北辙了。</p>
+</li>
+<li>当损失函数有多个局部极小值时，随机梯度反而更可能避免进入局部极小值中。</li>
+</ol>
+</blockquote>
+<h4 id="小批量随机梯度下降（batch-gradient-descent）"><a href="#小批量随机梯度下降（batch-gradient-descent）" class="headerlink" title="小批量随机梯度下降（batch gradient descent）"></a>小批量随机梯度下降（batch gradient descent）</h4><p>如果在每次迭代中，梯度下降是用整个训练数据集来计算梯度的话，则会带来大量的计算量。因此提出批量梯度下降来进行优化。<strong>每次优化不再是对整体数据集来计算损失，取而代之使用随机采样小批量的样本来计算梯度。</strong><img src="https://img-blog.csdnimg.cn/0d8e8d1e6c234e36b0972e5b95c9f46a.png#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="Feature-Scaling-（特征缩放）"><a href="#Feature-Scaling-（特征缩放）" class="headerlink" title="Feature Scaling （特征缩放）"></a>Feature Scaling （特征缩放）</h3><p>其意思就是说要<strong>将所有特征有相同的规模</strong>。例如下图所示，<em>X2</em> 的范围明显大宇 <em>X1</em>，所以要将 <em>X2</em> 进行缩放。<br><img src="https://img-blog.csdnimg.cn/2b4681ef27884c0bbf400db0624e8740.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h4 id="为什么要做Feature-Scaling？"><a href="#为什么要做Feature-Scaling？" class="headerlink" title="为什么要做Feature Scaling？"></a>为什么要做Feature Scaling？</h4><blockquote>
+<p>为什么要做Feature Scaling？<img src="https://img-blog.csdnimg.cn/456a5666c6bf40b7a1e5f7a8727b529f.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>如左图，<em>X1</em> 和 <em>X2</em> 数值规模大小相差很大，那 <em>W2</em> 这参数的变动会极大的影响损失函数，而 <em>W1</em> 影响度就很小。所以我们<strong>需要对 <em>X2</em> 进行特征缩放，使其与 <em>X1</em> 保持一个规模</strong>。并且其实从图像可以看出，如果按左图来做的话，我们很难找到一组合适的参数集合，因为他梯度下降的方法不是直线的而是曲线；而右图是近乎直线。（<strong>最里面圈的损失函数最小</strong>）</p>
+</blockquote>
+<h4 id="如何实现Feature-Scaling？"><a href="#如何实现Feature-Scaling？" class="headerlink" title="如何实现Feature Scaling？"></a>如何实现Feature Scaling？</h4><p><img src="https://img-blog.csdnimg.cn/f129b6a000c841ec926df684d2c77a15.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>如上图所示，假如有R个数据样本，每个样本有<em>X1 - Xi</em> 个特征。我们用上面的公式计算出其应该的scale（其实说实在的这不就是化成标准正太分布么）</p>
+<h1 id="梯度下降算法数学总结"><a href="#梯度下降算法数学总结" class="headerlink" title="梯度下降算法数学总结"></a>梯度下降算法数学总结</h1><p>提出问题：如下图所示<strong>（我怎么样才能在红圈里找到最小损失的那个点呢）</strong><img src="https://img-blog.csdnimg.cn/53c25201a11349b6bc3af9e1dfc9fcc6.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="首先要回顾泰勒公式"><a href="#首先要回顾泰勒公式" class="headerlink" title="首先要回顾泰勒公式"></a>首先要回顾泰勒公式</h2><p><img src="https://img-blog.csdnimg.cn/c9b154d4d14c43c8bf5e2609789bb094.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/205bb83b97d849fc9b8c7451e044fdab.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>二元泰勒：<br><img src="https://img-blog.csdnimg.cn/2efa8bf67ffa419e90221154515a3712.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="用泰勒展开损失函数"><a href="#用泰勒展开损失函数" class="headerlink" title="用泰勒展开损失函数"></a>用泰勒展开损失函数</h2><p><img src="https://img-blog.csdnimg.cn/3ce8a2749e644d1f978c43d485798dde.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>理解为点乘，反向180度的时候，损失函数才是最小的：<img src="https://img-blog.csdnimg.cn/235fc97c36b74012b0663975ba0dc8a9.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>最终可以表达成：<img src="https://img-blog.csdnimg.cn/83f0037797f64c048376868ee2c21fae.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="梯度下降算法缺点在哪"><a href="#梯度下降算法缺点在哪" class="headerlink" title="梯度下降算法缺点在哪"></a>梯度下降算法缺点在哪</h1><p>其不仅仅包括可能有找到是局部最优解问题，有可能在中间的时候就有偏微分为0的时候，而这时这个点可能离全局最优解点 很远。<br><img src="https://img-blog.csdnimg.cn/cd31675e6d8e4c83925852218d4f2acc.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
 ]]></content>
       <categories>
         <category>机器学习基础-李宏毅</category>
@@ -601,134 +619,6 @@
       </tags>
   </entry>
   <entry>
-    <title>卷积神经网络CNN（Convolutional Neural Network）</title>
-    <url>/2021/08/12/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9CCNN%EF%BC%88Convolutional%20Neural%20Network%EF%BC%89/</url>
-    <content><![CDATA[<p>@<a href="卷积神经网络CNN（Convolutional Neural Network）">TOC</a></p>
-<blockquote>
-<p>总结CNN的要点：<br>Q1：什么是CNN？为什么要用CNN？为什么图像处理一般都采用CNN？<br>Q2：实现CNN的步骤？</p>
-<p><font color="red">input——&gt;convolution——&gt;max pooling——&gt;…——&gt;flatten——&gt;fully connected network——&gt;output </font><br>Q3：如何用 <em>keras</em> 搭建一个CNN?<br>Q4：CNN的应用?什么时候适用CNN效果最好？<br>满足三个图像三个特性的时候。但要考虑第三点取子样是否合理。</p>
-</blockquote>
-<h1 id="CNN的概述"><a href="#CNN的概述" class="headerlink" title="CNN的概述"></a>CNN的概述</h1><h2 id="什么是CNN？"><a href="#什么是CNN？" class="headerlink" title="什么是CNN？"></a>什么是CNN？</h2><p>CNN也叫convnet，中文名称为卷积神经网络，是计算机视觉领域常用的一种深度学习模型。</p>
-<h2 id="为什么要用CNN？"><a href="#为什么要用CNN？" class="headerlink" title="为什么要用CNN？"></a>为什么要用CNN？</h2><p>其可以简化DNN模型，可以减少不必要的神经元节点。特别是用在图像处理上。</p>
-<h3 id="为什么图像处理一般都采用CNN？"><a href="#为什么图像处理一般都采用CNN？" class="headerlink" title="为什么图像处理一般都采用CNN？"></a>为什么图像处理一般都采用CNN？</h3><font color="green">**CNN的参数比全连接神经网络少得多**，为什么CNN只用较少的参数就可以用于处理图像呢？</font>
-
-<p>这是因为图像具有以下三点特征：<br>1、一些模式比整张图片小得多，例如“鸟喙”就比整张图片小得多；<img src="https://img-blog.csdnimg.cn/1e9efb0804a64876a33e2794d96039a0.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt=""><br>2、同样的模式可能出现在图像的不同区域，例如“鸟喙”可能出现在图片的左上方也可能出现在图像的中间；<img src="https://img-blog.csdnimg.cn/c4a2de1adb4d4573865ec9f20b9e4a96.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt=""><br>3、对图像的降采样不会改变图像中的物体。<img src="https://img-blog.csdnimg.cn/3e746d5fef0140029fe62095452d8389.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt=""><br><strong>CNN的卷积层的设计对应着前两点，池化层的设计对应着第三点。</strong> 如下图所示：<br><img src="https://img-blog.csdnimg.cn/81dc5d9f161c47b4b7054b5964eda897.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt=""></p>
-<h1 id="实现CNN的步骤"><a href="#实现CNN的步骤" class="headerlink" title="实现CNN的步骤"></a>实现CNN的步骤</h1><p>input——&gt;convolution——&gt;max pooling——&gt;…——&gt;flatten（压平）——&gt;fully connected network——&gt;output</p>
-<h2 id="卷积层（减少训练参数）"><a href="#卷积层（减少训练参数）" class="headerlink" title="卷积层（减少训练参数）"></a>卷积层（减少训练参数）</h2><p><img src="https://img-blog.csdnimg.cn/81dc5d9f161c47b4b7054b5964eda897.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="CNN流程图"></p>
-<ul>
-<li><p>对应Property1：每一个Filter（待训练的参数，即卷积核）代表一个<strong>局部特征探测器</strong>（他是一个可以特点图形的表示器），假设现在两个特征探测器（<em>Filter1</em> 和 <em>Filter2</em>）</p>
-<ul>
-<li><p>卷积核1的结果 值最大的那个点所在的图片部分，就是我们要找的内容<br><img src="https://img-blog.csdnimg.cn/afe8e2823a47491bba71d054aa0ade85.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-</li>
-<li><p>卷积核2的结果。与卷积核1的结构共同组成了 feature map<img src="https://img-blog.csdnimg.cn/c3841af956b24b6d8721af30d207cb4c.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-</li>
-</ul>
-</li>
-</ul>
-<ul>
-<li>对应Property2：用 <em>Filter1</em> 就能探测出在不同位置的同一个flatten，而不需要用不同的Filter</li>
-</ul>
-<p>如果图片是彩色的，也就是说它是三通道的，还没卷积之前，可以说有3个通道（RGB），意味着每一个像素由3个数值表示。如下图所示：<br>卷积核是立方体3×3×3，图片为9×9×3。图片中同样选择卷积核大小，与卷积核累和，但要注意我们并不是把RGB三层，分开算，应该算合为一体的。<img src="https://img-blog.csdnimg.cn/991470ca8069474fabd2088db993f9eb.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="RGB卷积"></p>
-<h3 id="与全连接方式的对比"><a href="#与全连接方式的对比" class="headerlink" title="与全连接方式的对比"></a>与全连接方式的对比</h3><p>全连接层，图像处理的神经网络图如下所示，每个输入与各神经元都有链接（有固定的权值）<img src="https://img-blog.csdnimg.cn/b34b02cb98274e53a6600a5c685d3674.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="全连接层"><br>下面是CNN神经网络图，其主要的目的是减少参数（减少权值数量）。并且可以存在一定的共享权值，下面颜色相同的权值边值应该相同，这样调参可以更快。</p>
-<p><img src="https://img-blog.csdnimg.cn/250d06b21d4546dea59a0a6502d3a3c0.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="CNN"></p>
-<h2 id="池化层（Maxpooling）"><a href="#池化层（Maxpooling）" class="headerlink" title="池化层（Maxpooling）"></a>池化层（Maxpooling）</h2><p>目的是减少每一个特征的维度，也就是减少后面flatten的输入特征数量。Maxpooling这边我们取每个框内的最大点。<img src="https://img-blog.csdnimg.cn/f52e46c700fe492ab79a470370e223ff.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="Maxpooling的规程"><br>在整理一下，变成一个新的feature map</p>
-<p>合计上两步得到：<br><img src="https://img-blog.csdnimg.cn/8065213d0fff4e30b41d596b0cde4d65.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>做一次卷积+池化后，把原来的 <em>6 × 6</em> 图像变成了 <em>2 × 2</em> 图像，<em>2 × 2</em>图像的深度（每个像素点用多少个值表示）<strong>取决于有多少个过滤器，如果有 <em>50</em> 个过滤器，<em>2 × 2</em> 图像就有 <em>50</em> 维</strong>，上图是只用两个过滤器，那就是 <em>2</em> 维。<br>所以上图右边，就是一个新的比较小的图像，每个过滤器代表了一个channel(通道)。</p>
-<h2 id="重复上两步操作"><a href="#重复上两步操作" class="headerlink" title="重复上两步操作"></a>重复上两步操作</h2><p>可多次重复上述两个步骤，将输出的结果变得最小化。</p>
-<blockquote>
-<p><strong>Q: 假设我们第一次卷积的时候，我们有25个卷积核，那输出的结果 feature map中应该有25个矩阵。那请问，第二次卷积的时候，输出的feature map 应该是 25×25=625 个矩阵么？</strong><br>答：不对，做完第一次卷积得到25个矩阵，做完第二次后还是25个矩阵。例如输入是三个通道 <em>(RGB)</em> 的 <em>6 × 6</em> 矩阵数据（即一个立方体，6 × 6  × 3），有两个过滤器（也是立方体，三个通道，<em>3 × 3 × 3</em>），则输出为<em>4  × 4 × 2</em>。（<em>4 = 6-2 ； 2</em>是过滤器个数  <strong>过滤器决定通道数</strong>）<img src="https://img-blog.csdnimg.cn/a4aeaa3dd23d4ff48bce2e89c97553c3.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-</blockquote>
-<p><img src="https://img-blog.csdnimg.cn/e634fad522fe498a9b5cb04557fe7a05.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt=""></p>
-<h2 id="Flatten（压平）"><a href="#Flatten（压平）" class="headerlink" title="Flatten（压平）"></a>Flatten（压平）</h2><p><img src="https://img-blog.csdnimg.cn/699741afda84434985ef450ad1cffeea.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="Flatten"><br>flatten(压平)的意思是，把特征图拉直，然后丢到一个全连接神经网络里。</p>
-<h1 id="CNN-in-Keras"><a href="#CNN-in-Keras" class="headerlink" title="CNN in Keras"></a>CNN in Keras</h1><ul>
-<li>卷积前，一个pixel用多少个数值表示，取决于通道数</li>
-<li>卷积后，一个pixel用多少个数值表示，取决于Filter个数，而通道数决定Filter的高</li>
-<li>上一个卷积层有多少个Filter，下一层卷积input就有多少个通道<br><img src="https://img-blog.csdnimg.cn/75db9d57e892418d9c68b6d52c714c4b.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
-</ul>
-<p><img src="https://img-blog.csdnimg.cn/686fdcfd5a734bfa998f6d84def07fea.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model = Sequential()</span><br><span class="line">model.add(Conv2D(<span class="number">25</span>,<span class="number">3</span>,<span class="number">3</span>),input_shape=(<span class="number">1</span>,<span class="number">28</span>,<span class="number">28</span>))</span><br><span class="line">model.add(MaxPooling2D((<span class="number">2</span>,<span class="number">2</span>)))</span><br><span class="line">model.add(Conv2D(<span class="number">50</span>,<span class="number">3</span>,<span class="number">3</span>))</span><br><span class="line">model.add(MaxPooling2D((<span class="number">2</span>,<span class="number">2</span>)))</span><br><span class="line">model.add(Dense(output_dim=<span class="number">100</span>))</span><br><span class="line">model.add(Activation(<span class="string">&#x27;relu&#x27;</span>))</span><br><span class="line">model.add(Dense(output_dim=<span class="number">10</span>))</span><br><span class="line">model.add(Activation(<span class="string">&#x27;softmax&#x27;</span>))</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p><strong>Q：为什么上图第二次 每个卷积核的 参数是 225？</strong><br>答：因为是 3×3×25  那为什么是25而不是50呢？</p>
-</blockquote>
-<h1 id="CNN在学什么？"><a href="#CNN在学什么？" class="headerlink" title="CNN在学什么？"></a>CNN在学什么？</h1><h2 id="CNN卷积和池化部分在做什么？"><a href="#CNN卷积和池化部分在做什么？" class="headerlink" title="CNN卷积和池化部分在做什么？"></a>CNN卷积和池化部分在做什么？</h2><p><img src="https://img-blog.csdnimg.cn/919125d4f1964cb9b520a639ed94e2e6.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<ul>
-<li>分析第一个层的卷积核是比较容易的，里面每个卷积核就是一个3 <em> 3 的矩阵，对应3 </em> 3 范围内的9个像素点，<strong>只要看到矩阵的值，就知道在检测什么</strong>（有明显的特征）。</li>
-<li>第二层的卷积核没法知道在做什么，虽然也是 <em>3 × 3</em> 的矩阵，总共 50 个。<strong>但是这些卷积核的输入不是像素点，而是在上一层做完卷积和池化后的输出</strong>。就算知道第二层卷积核的矩阵值，也不知道在检测什么。<strong>另外第二层卷积核考虑的不是原图 <em>3 × 3</em> 的像素点，而是比原图 <em>3 × 3</em> 像素点更大的范围，因为在第一层的池化后，压缩了原图 <em>3 × 3</em> 的区域，第二层卷积核是在压缩后的图像里再选取 <em>3 × 3</em>  像素点，相当于扩大了原图检测的范围。</strong></li>
-</ul>
-<blockquote>
-<font color="red">Q：那怎么分析第二层卷积核在做什么？</font>
-
-<p>第二层的50个卷积核，每个卷积核的输出是一个 <em>11 × 11</em> 的矩阵。把第k个卷积核输出拿出来如上图左下，矩阵元素表示为  $a_{ij}^{k}$  (第k个卷积核，第i个行，第j个列)。接下来 定义一个“<em>Degree of the activation of the k-th  filter</em>”（第k个卷积核的激活程度），值代表第k个卷积核的被激活程度（<strong>input和第k个卷积核侦测的东西有多匹配</strong>）。</p>
-<p>第k个卷积核被激活程度表示为：$a^{k}=\sum<em>{i=1}^{11}\sum</em>{j=1}^{11}a_{ij}^{k}$ ，<em>11 × 11</em> 矩阵所有元素值之和。</p>
-<p><strong>Q：找一张图像，可以让第k个卷积核被激活程度最大，如果做到这件事情？</strong><br><strong>称 <em>input</em> 的图像为 <em>x</em>，目标是找一个让 $a^{k}$ 最大的 <em>x</em>，如何找到这个 <em>x</em>？</strong></p>
-<p><font color="red">使用梯度上升</font>，因为我们的目标是最大化 $a^{k}$  。现在是把 <em>x</em> 当做我们要找的参数，对 <em>x</em> 用梯度上升。原来CNN的 <em>input</em> 是固定的，<em>model</em> 的参数使用梯度下降求解。现在反过来，<em>model</em> 的参数是固定的，使用个梯度上升更新 <em>x</em>，让被激活程度最大。</p>
-</blockquote>
-<p><img src="https://img-blog.csdnimg.cn/b5522ea6a04d49bfa39a3f94db140610.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述">上图左下，是随便取12个卷积核后对 <em>x</em> 做梯度上升后的结果，每个卷积核都找到一张图像，这张图像让这个卷积核的被激活程度最高。如果有50个卷积核，理论上可以找50张图像。</p>
-<blockquote>
-<p><strong>Q：这12张图像有一个共同的特征：是某种纹路在图上不断反复。为什么会这样？</strong><br>看第三张图像，都是小小的斜条纹，这意味着第三个卷积核是在检测是否有斜的条纹。因为卷积核考虑的范围是很小的，所以原图像上任何地方出现一个小小的斜纹的话，这个卷积核（过滤器）就会被激活，输出值就会很大。如果原图像所有范围都是这种小小的条纹，那这个卷积核的被激活程度就最大。</p>
-</blockquote>
-<p>你会发现每个过滤器都是在检测某一种图案（某一种线条），例如上图左下第3个过滤器是检测斜条纹，第4个是检测短、直的线条，第6个是检测斜成一定程度的线条等等。</p>
-<font color="red">每个卷积核（过滤器）都在检测不同角度的线条。</font>
-
-<h2 id="全连接的隐藏层都在干什么？"><a href="#全连接的隐藏层都在干什么？" class="headerlink" title="全连接的隐藏层都在干什么？"></a>全连接的隐藏层都在干什么？</h2><p><img src="https://img-blog.csdnimg.cn/cc01d0cb741b4bab93047f401e34b40f.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>做完卷积和池化后，会做flatten(压平)，把压平后的结果丢到神经网络里去。</p>
-<blockquote>
-<p><strong>Q：在这个神经网络的隐藏层里，每个神经元都在干什么？</strong><br>答：如法炮制之前的做法，定义第 <em>j</em> 个神经元的输出是 $a<em>{j}$ ，然后找一张图像 <em>x</em>，使 $a</em>{j}$ 最大。<br>找到的图像如上图左下所示，9张图像，是对应神经元的输出最大。你会发现跟刚才卷积核（过滤器）观察的图案很<strong>不一样</strong>，<font color="red"><strong>卷积核观察的是类似纹路的东西，因为卷积核只考虑了原图像的一部分区域</strong></font>。<br><strong>输出通过压平后，现在每个神经元是去看整张图像</strong>，能使神经元激活程度最高的图像不再是纹路这种小图案，而是一个完整的图形，虽然看起来完全不像是数字，但神经元被激活后也的确在侦测一个完整的数字。</p>
-</blockquote>
-<h2 id="考虑最后的输出？"><a href="#考虑最后的输出？" class="headerlink" title="考虑最后的输出？"></a>考虑最后的输出？</h2><p><img src="https://img-blog.csdnimg.cn/c02bf451565e4f01bacf11dc6922219c.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p>如果最后的输出是10维的，每一维对应一个数字。把某一维拿出来，找一张图像使那个维度的输出最大。例如现在要找一张图像，使输出层上对应数字1的神经元的输出最大，理论上这张图像看起来就是数字1<br>但是实际的图像如上图左边所示，每张图像分别代表0,1,2,3,4,5,6,7,8</p>
-<blockquote>
-<p><strong>Q：那为什么是这种是乱七八糟的雪花状呢，而不是我们能看清的数字呢？</strong><br>答：因为神经网络的视角，他就是和人不一样的。他就认为这些雪花图像是不一样的，对于0-8数字。与我们人的思维不同。<br><img src="https://img-blog.csdnimg.cn/f84a6c6c9e4c468a805407e8bfee004c.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><strong>Q：能不能让这些图像看起来更像数字？</strong><br>我们知道，一张图像是不是一个数字，有一些基本的假设。比如上图左边，人类看起来显示不是数字。那么我们对x做一些<strong>正则项约束</strong>，告诉机器，虽然有些 <em>x</em>（图像） 可以让  <em>y</em>  很大，但是这些 <em>x</em> 的确不是数字。<br><strong>Q：那加些什么约束呢？</strong><br>比如最简单的想法，图像上的白点是有墨水（笔画）的地方，对一个数字来说，有白点的部分是有限的，数字的笔画只占图的一小部分，所以我们要对 <em>x</em> 做一些限制。<br>假设 $x<em>{ij}$ 是图像像素点的值，每张图像有 <em>28 × 28</em> 个像素点。<strong>把所有像素点的值取绝对值并求和（相当于L1正则）</strong>，我们希望找一个 <em>x</em> ，让 $y</em>{i}$ 越大的同时，也让像素点绝对值之和越小。那我们找出来的图像大部分的地方就不是白色的。<br>最后得到的结果如上图右边所示，和左边的图看起来，已经可以隐约看出来是个数字了。</p>
-</blockquote>
-<h1 id="CNN的应用"><a href="#CNN的应用" class="headerlink" title="CNN的应用"></a>CNN的应用</h1><h2 id="Deep-Dream"><a href="#Deep-Dream" class="headerlink" title="Deep Dream"></a>Deep Dream</h2><p>你给机器一张图像，<strong>机器会在这张图像里面，加上它学习到的东西</strong>。<br><img src="https://img-blog.csdnimg.cn/b3c9858f5d9849d8995dd1183150f92e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p>比如把上图丢到CNN里面去，然后把某个卷积核或者某个全连接隐藏层拿出来（一个向量），假设是 $\begin{bmatrix}<br>3.9\<br>-1.5\<br>2.3\<br>:\<br>\end{bmatrix}$</p>
-<p>然后把3.9、2.3调大（本来是正的值调大），-1.5调小（负的值调小），正的更正，负的更负。找一个图像使卷积核或者隐藏层（拿出来的）的输出是调整后的向量。<strong>这么做的意思是让CNN夸大化它看到的东西。</strong><br><img src="https://img-blog.csdnimg.cn/0884c7de1c4e44b2ae5e302590b5ee18.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>找到的图像会变成上图所示，出现很多奇怪的东西。右边看起来是一头熊，原来是一颗石头。对机器来说，本来就觉得石头像一头熊，强化它的认知后，就学习出来更像一头熊的图案。这个就是Deep Dream。</p>
-<h2 id="Deep-Style"><a href="#Deep-Style" class="headerlink" title="Deep Style"></a>Deep Style</h2><p><em>input</em> 一张图像，然后让机器去修改这张图像，让它有另一张图的风格，比如让上图看起来是呐喊。<br><img src="https://img-blog.csdnimg.cn/153f1e11b39943d8b64e7f352c289410.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<blockquote>
-<p><img src="https://img-blog.csdnimg.cn/952a46ca31584df885c1722e5f79912d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><strong>Q：卷积核和过滤器的区别</strong></p>
-<ul>
-<li><p>卷积核就是由<strong>长和宽</strong>来指定的，是一个<strong>二维</strong>的概念。</p>
-<ul>
-<li>过滤器是是由<strong>长、宽和深度</strong>指定的，是一个<strong>三维</strong>的概念。</li>
-<li>过滤器可以看做是卷积核的集合。</li>
-<li>过滤器比卷积核高一个维度——深度。</li>
-</ul>
-<p>——————————————————————————————————</p>
-</li>
-</ul>
-<p><strong>Q：怎么做到图像风格转变呢？</strong><br><strong>把原来的图像丢给CNN，得到CNN过滤器的输出，代表一张图像里有什么样的内容</strong>。 然后把呐喊这张图也丢到CNN里，也得到过滤器的输出，但这时候考虑的不是过滤器输出的绝对值，而是考虑<strong>过滤器和过滤器输出之间的关系</strong>，<strong>这个关系代表了一张图像的风格</strong>。接下来用同一个CNN找一张图像，这张图像的内容像原图像的内容（过滤器的输出类似），同时这张图像的风格像呐喊的风格（过滤器输出之间的关系类似）。<br><strong>找一张图片同时<font color="red">最大化</font>内容和风格（使用<font color="red">梯度上升更新参数</font>），得到的结果就像两张图片结合一样。</strong></p>
-</blockquote>
-<h2 id="CNN应用在围棋上"><a href="#CNN应用在围棋上" class="headerlink" title="CNN应用在围棋上"></a>CNN应用在围棋上</h2><p><img src="https://img-blog.csdnimg.cn/d2233ab8dcdf4ca8ad1e4dc4ebf550b6.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>要让机器下围棋，不一定要用CNN，一般的神经网络也可以做这件事情。只要学习一个网络，也就是找一个函数，输入是棋盘，输出是棋盘上的位置，根据棋盘的盘势，判断下一步落子的位置。<br>输入是<em>19 ×19</em> 向量，向量每一维是棋盘上的一个位置（是黑子则值为1，是白子则值为-1，反之则为0），丢到一个全连接的神经网络，输出也是<em>19 ×19</em> 的向量（每一维对应棋盘一个位置），那这样机器就可以学会下围棋了。</p>
-<h3 id="为什么CNN可以用在下围棋上？"><a href="#为什么CNN可以用在下围棋上？" class="headerlink" title="为什么CNN可以用在下围棋上？"></a>为什么CNN可以用在下围棋上？</h3><p>但实际采用CNN会得到更好的效果！为什么呢？<br>之前举的例子都是把CNN用在图像上面，<em>input</em> 是一个矩阵。用到下棋上，只要把 <em>19 ×19</em>  的向量表示为 <em>19 ×19</em>  的矩阵。对CNN来说，<strong>就是把棋盘和棋子当成一个图像，然后输出下一步落子的位置</strong>。</p>
-<blockquote>
-<p><img src="https://img-blog.csdnimg.cn/604669df79b5475aa23db1f14d14b3e5.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>收集很多棋谱，告诉CNN，看到落子在5之五，输出天元的位置为1，其他位置为0<br>看到5之五和天元都有棋子，输出就是5之五的位置为1，其他位置为0<br>这个是监督的部分，AlphaGo还有强化学习的部分</p>
-</blockquote>
-<h2 id="总结一下什么时候用CNN-为什么围棋适用？"><a href="#总结一下什么时候用CNN-为什么围棋适用？" class="headerlink" title="总结一下什么时候用CNN?为什么围棋适用？"></a>总结一下什么时候用CNN?为什么围棋适用？</h2><p><strong>图像要有该有的特性，开头讲过的根据<font color="red">三个特性</font>设计出了CNN的网络结构，在处理图像的时候特别有效。</strong></p>
-<blockquote>
-<p><strong>Q：为什么围棋很适用CNN？</strong><img src="https://img-blog.csdnimg.cn/36ddc9027bbe4537b72ff41a6553c1dd.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>答：因为围棋有一些特性和图像处理是很相似的。</p>
-<p><font color="red">围棋是有图像的第一个和第二个特性</font></p>
-<ul>
-<li><p><strong>在一张图像上面，有一些图案是比整张图像小的，比如鸟嘴。在围棋也有同样的现象</strong>，比如看到一些棋子摆放的图案，就要做一些相应的事情（比如上图黑子叫吃的时候，白子要落在下方保证不被吃）。不需要看整个棋盘，只需要看一个小小的范围，就可以侦测白子是不是属于被叫吃的状态。<br>AlphaGo里第一层的过滤器就是用的 5 × 5 过滤器，显然设计这个过滤器的人觉得围棋上最基本的图案在 5 × 5 范围内就可以被侦测出来。</p>
-</li>
-<li><p>图<strong>像还有个特性是相同的图案会出现在不同的区域，在围棋上也有同样的特征。</strong>例如叫吃的图案，可以出现在棋盘左上角，也可以出现在棋盘右下角，图案代表了同样的意义（叫吃），所以可以用同一个检测器来处理这些在不同位置的图案。</p>
-</li>
-</ul>
-<p>Q：困惑的是图像的第三个特性，对原图像做子采样不会影响人看到的这张图像的样子，基于第三个特性有了池化层，但Alpha<br>并没有采用池化层（就是做子采样）？<br><strong>因为不能做子采样。比如丢弃棋盘的奇数行和偶数列，想想也应该是不可以的。</strong></p>
-<p>也许AlphaGo里的CNN架构有特殊的地方。AlphaGo论文附录里描述了它的网络结构，input是一个<em>19 ×19 ×48</em> 的图像，<em>19<br>×19</em> 是棋盘可以理解，<strong>但48是怎么来的？</strong><br>对AlphaGo来说，把每一个位置都用48个值来描述（卷积后有48个通道）。本来我们只要描述一个位置是不是白子、黑子就可以了，而AlphaGo加上了领域知识（看这个位置是不是出于叫吃的状态等等）。</p>
-<p>AlphaGo有做zero padding(零填充)，在原来<em>19 ×19</em> 的图像外围补上 <em>0</em> 值变成 <em>23 × 23</em> 的图像，第一层用的是 <em>5 × 5</em> 过滤器，总共 <em>k</em> 个过滤器（paper里用的是192个过滤器），步长<em>stride=1</em>，有用到 <em>ReLu</em> 作为激活函数，有2到12层的过滤器层，最后变成 <em>21 × 21</em> 的图像，接下来再使用 <em>3 × 3</em> 的过滤器，步长 <em>stride=1</em>。最后发现AlphaGo没有使用池化，针对围棋特性设计CNN结构的时候，是不需要池化这个结构的。</p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>机器学习基础-李宏毅</category>
-      </categories>
-      <tags>
-        <tag>深度学习</tag>
-        <tag>李宏毅</tag>
-        <tag>CNN</tag>
-        <tag>卷积核</tag>
-        <tag>过滤器</tag>
-        <tag>Maxpooling</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>无监督学习（Unsupervised Learning）之 聚类与降维</title>
     <url>/2021/08/19/%E6%97%A0%E7%9B%91%E7%9D%A3%E5%AD%A6%E4%B9%A0%EF%BC%88Unsupervised%20Learning%EF%BC%89%E4%B9%8B%20%E8%81%9A%E7%B1%BB%E4%B8%8E%E9%99%8D%E7%BB%B4/</url>
     <content><![CDATA[<p>@<a href="无监督学习 Unsupervised  Learning">TOC</a></p>
@@ -930,6 +820,134 @@ PCA后选择4个主成分，每个主成分是一个6维向量（因为原来每
         <tag>PCA</tag>
         <tag>K-means</tag>
         <tag>HAC</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>卷积神经网络CNN（Convolutional Neural Network）</title>
+    <url>/2021/08/12/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9CCNN%EF%BC%88Convolutional%20Neural%20Network%EF%BC%89/</url>
+    <content><![CDATA[<p>@<a href="卷积神经网络CNN（Convolutional Neural Network）">TOC</a></p>
+<blockquote>
+<p>总结CNN的要点：<br>Q1：什么是CNN？为什么要用CNN？为什么图像处理一般都采用CNN？<br>Q2：实现CNN的步骤？</p>
+<p><font color="red">input——&gt;convolution——&gt;max pooling——&gt;…——&gt;flatten——&gt;fully connected network——&gt;output </font><br>Q3：如何用 <em>keras</em> 搭建一个CNN?<br>Q4：CNN的应用?什么时候适用CNN效果最好？<br>满足三个图像三个特性的时候。但要考虑第三点取子样是否合理。</p>
+</blockquote>
+<h1 id="CNN的概述"><a href="#CNN的概述" class="headerlink" title="CNN的概述"></a>CNN的概述</h1><h2 id="什么是CNN？"><a href="#什么是CNN？" class="headerlink" title="什么是CNN？"></a>什么是CNN？</h2><p>CNN也叫convnet，中文名称为卷积神经网络，是计算机视觉领域常用的一种深度学习模型。</p>
+<h2 id="为什么要用CNN？"><a href="#为什么要用CNN？" class="headerlink" title="为什么要用CNN？"></a>为什么要用CNN？</h2><p>其可以简化DNN模型，可以减少不必要的神经元节点。特别是用在图像处理上。</p>
+<h3 id="为什么图像处理一般都采用CNN？"><a href="#为什么图像处理一般都采用CNN？" class="headerlink" title="为什么图像处理一般都采用CNN？"></a>为什么图像处理一般都采用CNN？</h3><font color="green">**CNN的参数比全连接神经网络少得多**，为什么CNN只用较少的参数就可以用于处理图像呢？</font>
+
+<p>这是因为图像具有以下三点特征：<br>1、一些模式比整张图片小得多，例如“鸟喙”就比整张图片小得多；<img src="https://img-blog.csdnimg.cn/1e9efb0804a64876a33e2794d96039a0.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt=""><br>2、同样的模式可能出现在图像的不同区域，例如“鸟喙”可能出现在图片的左上方也可能出现在图像的中间；<img src="https://img-blog.csdnimg.cn/c4a2de1adb4d4573865ec9f20b9e4a96.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt=""><br>3、对图像的降采样不会改变图像中的物体。<img src="https://img-blog.csdnimg.cn/3e746d5fef0140029fe62095452d8389.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt=""><br><strong>CNN的卷积层的设计对应着前两点，池化层的设计对应着第三点。</strong> 如下图所示：<br><img src="https://img-blog.csdnimg.cn/81dc5d9f161c47b4b7054b5964eda897.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt=""></p>
+<h1 id="实现CNN的步骤"><a href="#实现CNN的步骤" class="headerlink" title="实现CNN的步骤"></a>实现CNN的步骤</h1><p>input——&gt;convolution——&gt;max pooling——&gt;…——&gt;flatten（压平）——&gt;fully connected network——&gt;output</p>
+<h2 id="卷积层（减少训练参数）"><a href="#卷积层（减少训练参数）" class="headerlink" title="卷积层（减少训练参数）"></a>卷积层（减少训练参数）</h2><p><img src="https://img-blog.csdnimg.cn/81dc5d9f161c47b4b7054b5964eda897.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="CNN流程图"></p>
+<ul>
+<li><p>对应Property1：每一个Filter（待训练的参数，即卷积核）代表一个<strong>局部特征探测器</strong>（他是一个可以特点图形的表示器），假设现在两个特征探测器（<em>Filter1</em> 和 <em>Filter2</em>）</p>
+<ul>
+<li><p>卷积核1的结果 值最大的那个点所在的图片部分，就是我们要找的内容<br><img src="https://img-blog.csdnimg.cn/afe8e2823a47491bba71d054aa0ade85.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</li>
+<li><p>卷积核2的结果。与卷积核1的结构共同组成了 feature map<img src="https://img-blog.csdnimg.cn/c3841af956b24b6d8721af30d207cb4c.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>对应Property2：用 <em>Filter1</em> 就能探测出在不同位置的同一个flatten，而不需要用不同的Filter</li>
+</ul>
+<p>如果图片是彩色的，也就是说它是三通道的，还没卷积之前，可以说有3个通道（RGB），意味着每一个像素由3个数值表示。如下图所示：<br>卷积核是立方体3×3×3，图片为9×9×3。图片中同样选择卷积核大小，与卷积核累和，但要注意我们并不是把RGB三层，分开算，应该算合为一体的。<img src="https://img-blog.csdnimg.cn/991470ca8069474fabd2088db993f9eb.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="RGB卷积"></p>
+<h3 id="与全连接方式的对比"><a href="#与全连接方式的对比" class="headerlink" title="与全连接方式的对比"></a>与全连接方式的对比</h3><p>全连接层，图像处理的神经网络图如下所示，每个输入与各神经元都有链接（有固定的权值）<img src="https://img-blog.csdnimg.cn/b34b02cb98274e53a6600a5c685d3674.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="全连接层"><br>下面是CNN神经网络图，其主要的目的是减少参数（减少权值数量）。并且可以存在一定的共享权值，下面颜色相同的权值边值应该相同，这样调参可以更快。</p>
+<p><img src="https://img-blog.csdnimg.cn/250d06b21d4546dea59a0a6502d3a3c0.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="CNN"></p>
+<h2 id="池化层（Maxpooling）"><a href="#池化层（Maxpooling）" class="headerlink" title="池化层（Maxpooling）"></a>池化层（Maxpooling）</h2><p>目的是减少每一个特征的维度，也就是减少后面flatten的输入特征数量。Maxpooling这边我们取每个框内的最大点。<img src="https://img-blog.csdnimg.cn/f52e46c700fe492ab79a470370e223ff.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="Maxpooling的规程"><br>在整理一下，变成一个新的feature map</p>
+<p>合计上两步得到：<br><img src="https://img-blog.csdnimg.cn/8065213d0fff4e30b41d596b0cde4d65.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>做一次卷积+池化后，把原来的 <em>6 × 6</em> 图像变成了 <em>2 × 2</em> 图像，<em>2 × 2</em>图像的深度（每个像素点用多少个值表示）<strong>取决于有多少个过滤器，如果有 <em>50</em> 个过滤器，<em>2 × 2</em> 图像就有 <em>50</em> 维</strong>，上图是只用两个过滤器，那就是 <em>2</em> 维。<br>所以上图右边，就是一个新的比较小的图像，每个过滤器代表了一个channel(通道)。</p>
+<h2 id="重复上两步操作"><a href="#重复上两步操作" class="headerlink" title="重复上两步操作"></a>重复上两步操作</h2><p>可多次重复上述两个步骤，将输出的结果变得最小化。</p>
+<blockquote>
+<p><strong>Q: 假设我们第一次卷积的时候，我们有25个卷积核，那输出的结果 feature map中应该有25个矩阵。那请问，第二次卷积的时候，输出的feature map 应该是 25×25=625 个矩阵么？</strong><br>答：不对，做完第一次卷积得到25个矩阵，做完第二次后还是25个矩阵。例如输入是三个通道 <em>(RGB)</em> 的 <em>6 × 6</em> 矩阵数据（即一个立方体，6 × 6  × 3），有两个过滤器（也是立方体，三个通道，<em>3 × 3 × 3</em>），则输出为<em>4  × 4 × 2</em>。（<em>4 = 6-2 ； 2</em>是过滤器个数  <strong>过滤器决定通道数</strong>）<img src="https://img-blog.csdnimg.cn/a4aeaa3dd23d4ff48bce2e89c97553c3.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</blockquote>
+<p><img src="https://img-blog.csdnimg.cn/e634fad522fe498a9b5cb04557fe7a05.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt=""></p>
+<h2 id="Flatten（压平）"><a href="#Flatten（压平）" class="headerlink" title="Flatten（压平）"></a>Flatten（压平）</h2><p><img src="https://img-blog.csdnimg.cn/699741afda84434985ef450ad1cffeea.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="Flatten"><br>flatten(压平)的意思是，把特征图拉直，然后丢到一个全连接神经网络里。</p>
+<h1 id="CNN-in-Keras"><a href="#CNN-in-Keras" class="headerlink" title="CNN in Keras"></a>CNN in Keras</h1><ul>
+<li>卷积前，一个pixel用多少个数值表示，取决于通道数</li>
+<li>卷积后，一个pixel用多少个数值表示，取决于Filter个数，而通道数决定Filter的高</li>
+<li>上一个卷积层有多少个Filter，下一层卷积input就有多少个通道<br><img src="https://img-blog.csdnimg.cn/75db9d57e892418d9c68b6d52c714c4b.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/686fdcfd5a734bfa998f6d84def07fea.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model = Sequential()</span><br><span class="line">model.add(Conv2D(<span class="number">25</span>,<span class="number">3</span>,<span class="number">3</span>),input_shape=(<span class="number">1</span>,<span class="number">28</span>,<span class="number">28</span>))</span><br><span class="line">model.add(MaxPooling2D((<span class="number">2</span>,<span class="number">2</span>)))</span><br><span class="line">model.add(Conv2D(<span class="number">50</span>,<span class="number">3</span>,<span class="number">3</span>))</span><br><span class="line">model.add(MaxPooling2D((<span class="number">2</span>,<span class="number">2</span>)))</span><br><span class="line">model.add(Dense(output_dim=<span class="number">100</span>))</span><br><span class="line">model.add(Activation(<span class="string">&#x27;relu&#x27;</span>))</span><br><span class="line">model.add(Dense(output_dim=<span class="number">10</span>))</span><br><span class="line">model.add(Activation(<span class="string">&#x27;softmax&#x27;</span>))</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>Q：为什么上图第二次 每个卷积核的 参数是 225？</strong><br>答：因为是 3×3×25  那为什么是25而不是50呢？</p>
+</blockquote>
+<h1 id="CNN在学什么？"><a href="#CNN在学什么？" class="headerlink" title="CNN在学什么？"></a>CNN在学什么？</h1><h2 id="CNN卷积和池化部分在做什么？"><a href="#CNN卷积和池化部分在做什么？" class="headerlink" title="CNN卷积和池化部分在做什么？"></a>CNN卷积和池化部分在做什么？</h2><p><img src="https://img-blog.csdnimg.cn/919125d4f1964cb9b520a639ed94e2e6.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<ul>
+<li>分析第一个层的卷积核是比较容易的，里面每个卷积核就是一个3 <em> 3 的矩阵，对应3 </em> 3 范围内的9个像素点，<strong>只要看到矩阵的值，就知道在检测什么</strong>（有明显的特征）。</li>
+<li>第二层的卷积核没法知道在做什么，虽然也是 <em>3 × 3</em> 的矩阵，总共 50 个。<strong>但是这些卷积核的输入不是像素点，而是在上一层做完卷积和池化后的输出</strong>。就算知道第二层卷积核的矩阵值，也不知道在检测什么。<strong>另外第二层卷积核考虑的不是原图 <em>3 × 3</em> 的像素点，而是比原图 <em>3 × 3</em> 像素点更大的范围，因为在第一层的池化后，压缩了原图 <em>3 × 3</em> 的区域，第二层卷积核是在压缩后的图像里再选取 <em>3 × 3</em>  像素点，相当于扩大了原图检测的范围。</strong></li>
+</ul>
+<blockquote>
+<font color="red">Q：那怎么分析第二层卷积核在做什么？</font>
+
+<p>第二层的50个卷积核，每个卷积核的输出是一个 <em>11 × 11</em> 的矩阵。把第k个卷积核输出拿出来如上图左下，矩阵元素表示为  $a_{ij}^{k}$  (第k个卷积核，第i个行，第j个列)。接下来 定义一个“<em>Degree of the activation of the k-th  filter</em>”（第k个卷积核的激活程度），值代表第k个卷积核的被激活程度（<strong>input和第k个卷积核侦测的东西有多匹配</strong>）。</p>
+<p>第k个卷积核被激活程度表示为：$a^{k}=\sum<em>{i=1}^{11}\sum</em>{j=1}^{11}a_{ij}^{k}$ ，<em>11 × 11</em> 矩阵所有元素值之和。</p>
+<p><strong>Q：找一张图像，可以让第k个卷积核被激活程度最大，如果做到这件事情？</strong><br><strong>称 <em>input</em> 的图像为 <em>x</em>，目标是找一个让 $a^{k}$ 最大的 <em>x</em>，如何找到这个 <em>x</em>？</strong></p>
+<p><font color="red">使用梯度上升</font>，因为我们的目标是最大化 $a^{k}$  。现在是把 <em>x</em> 当做我们要找的参数，对 <em>x</em> 用梯度上升。原来CNN的 <em>input</em> 是固定的，<em>model</em> 的参数使用梯度下降求解。现在反过来，<em>model</em> 的参数是固定的，使用个梯度上升更新 <em>x</em>，让被激活程度最大。</p>
+</blockquote>
+<p><img src="https://img-blog.csdnimg.cn/b5522ea6a04d49bfa39a3f94db140610.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述">上图左下，是随便取12个卷积核后对 <em>x</em> 做梯度上升后的结果，每个卷积核都找到一张图像，这张图像让这个卷积核的被激活程度最高。如果有50个卷积核，理论上可以找50张图像。</p>
+<blockquote>
+<p><strong>Q：这12张图像有一个共同的特征：是某种纹路在图上不断反复。为什么会这样？</strong><br>看第三张图像，都是小小的斜条纹，这意味着第三个卷积核是在检测是否有斜的条纹。因为卷积核考虑的范围是很小的，所以原图像上任何地方出现一个小小的斜纹的话，这个卷积核（过滤器）就会被激活，输出值就会很大。如果原图像所有范围都是这种小小的条纹，那这个卷积核的被激活程度就最大。</p>
+</blockquote>
+<p>你会发现每个过滤器都是在检测某一种图案（某一种线条），例如上图左下第3个过滤器是检测斜条纹，第4个是检测短、直的线条，第6个是检测斜成一定程度的线条等等。</p>
+<font color="red">每个卷积核（过滤器）都在检测不同角度的线条。</font>
+
+<h2 id="全连接的隐藏层都在干什么？"><a href="#全连接的隐藏层都在干什么？" class="headerlink" title="全连接的隐藏层都在干什么？"></a>全连接的隐藏层都在干什么？</h2><p><img src="https://img-blog.csdnimg.cn/cc01d0cb741b4bab93047f401e34b40f.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>做完卷积和池化后，会做flatten(压平)，把压平后的结果丢到神经网络里去。</p>
+<blockquote>
+<p><strong>Q：在这个神经网络的隐藏层里，每个神经元都在干什么？</strong><br>答：如法炮制之前的做法，定义第 <em>j</em> 个神经元的输出是 $a<em>{j}$ ，然后找一张图像 <em>x</em>，使 $a</em>{j}$ 最大。<br>找到的图像如上图左下所示，9张图像，是对应神经元的输出最大。你会发现跟刚才卷积核（过滤器）观察的图案很<strong>不一样</strong>，<font color="red"><strong>卷积核观察的是类似纹路的东西，因为卷积核只考虑了原图像的一部分区域</strong></font>。<br><strong>输出通过压平后，现在每个神经元是去看整张图像</strong>，能使神经元激活程度最高的图像不再是纹路这种小图案，而是一个完整的图形，虽然看起来完全不像是数字，但神经元被激活后也的确在侦测一个完整的数字。</p>
+</blockquote>
+<h2 id="考虑最后的输出？"><a href="#考虑最后的输出？" class="headerlink" title="考虑最后的输出？"></a>考虑最后的输出？</h2><p><img src="https://img-blog.csdnimg.cn/c02bf451565e4f01bacf11dc6922219c.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>如果最后的输出是10维的，每一维对应一个数字。把某一维拿出来，找一张图像使那个维度的输出最大。例如现在要找一张图像，使输出层上对应数字1的神经元的输出最大，理论上这张图像看起来就是数字1<br>但是实际的图像如上图左边所示，每张图像分别代表0,1,2,3,4,5,6,7,8</p>
+<blockquote>
+<p><strong>Q：那为什么是这种是乱七八糟的雪花状呢，而不是我们能看清的数字呢？</strong><br>答：因为神经网络的视角，他就是和人不一样的。他就认为这些雪花图像是不一样的，对于0-8数字。与我们人的思维不同。<br><img src="https://img-blog.csdnimg.cn/f84a6c6c9e4c468a805407e8bfee004c.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><strong>Q：能不能让这些图像看起来更像数字？</strong><br>我们知道，一张图像是不是一个数字，有一些基本的假设。比如上图左边，人类看起来显示不是数字。那么我们对x做一些<strong>正则项约束</strong>，告诉机器，虽然有些 <em>x</em>（图像） 可以让  <em>y</em>  很大，但是这些 <em>x</em> 的确不是数字。<br><strong>Q：那加些什么约束呢？</strong><br>比如最简单的想法，图像上的白点是有墨水（笔画）的地方，对一个数字来说，有白点的部分是有限的，数字的笔画只占图的一小部分，所以我们要对 <em>x</em> 做一些限制。<br>假设 $x<em>{ij}$ 是图像像素点的值，每张图像有 <em>28 × 28</em> 个像素点。<strong>把所有像素点的值取绝对值并求和（相当于L1正则）</strong>，我们希望找一个 <em>x</em> ，让 $y</em>{i}$ 越大的同时，也让像素点绝对值之和越小。那我们找出来的图像大部分的地方就不是白色的。<br>最后得到的结果如上图右边所示，和左边的图看起来，已经可以隐约看出来是个数字了。</p>
+</blockquote>
+<h1 id="CNN的应用"><a href="#CNN的应用" class="headerlink" title="CNN的应用"></a>CNN的应用</h1><h2 id="Deep-Dream"><a href="#Deep-Dream" class="headerlink" title="Deep Dream"></a>Deep Dream</h2><p>你给机器一张图像，<strong>机器会在这张图像里面，加上它学习到的东西</strong>。<br><img src="https://img-blog.csdnimg.cn/b3c9858f5d9849d8995dd1183150f92e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>比如把上图丢到CNN里面去，然后把某个卷积核或者某个全连接隐藏层拿出来（一个向量），假设是 $\begin{bmatrix}<br>3.9\<br>-1.5\<br>2.3\<br>:\<br>\end{bmatrix}$</p>
+<p>然后把3.9、2.3调大（本来是正的值调大），-1.5调小（负的值调小），正的更正，负的更负。找一个图像使卷积核或者隐藏层（拿出来的）的输出是调整后的向量。<strong>这么做的意思是让CNN夸大化它看到的东西。</strong><br><img src="https://img-blog.csdnimg.cn/0884c7de1c4e44b2ae5e302590b5ee18.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>找到的图像会变成上图所示，出现很多奇怪的东西。右边看起来是一头熊，原来是一颗石头。对机器来说，本来就觉得石头像一头熊，强化它的认知后，就学习出来更像一头熊的图案。这个就是Deep Dream。</p>
+<h2 id="Deep-Style"><a href="#Deep-Style" class="headerlink" title="Deep Style"></a>Deep Style</h2><p><em>input</em> 一张图像，然后让机器去修改这张图像，让它有另一张图的风格，比如让上图看起来是呐喊。<br><img src="https://img-blog.csdnimg.cn/153f1e11b39943d8b64e7f352c289410.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<blockquote>
+<p><img src="https://img-blog.csdnimg.cn/952a46ca31584df885c1722e5f79912d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><strong>Q：卷积核和过滤器的区别</strong></p>
+<ul>
+<li><p>卷积核就是由<strong>长和宽</strong>来指定的，是一个<strong>二维</strong>的概念。</p>
+<ul>
+<li>过滤器是是由<strong>长、宽和深度</strong>指定的，是一个<strong>三维</strong>的概念。</li>
+<li>过滤器可以看做是卷积核的集合。</li>
+<li>过滤器比卷积核高一个维度——深度。</li>
+</ul>
+<p>——————————————————————————————————</p>
+</li>
+</ul>
+<p><strong>Q：怎么做到图像风格转变呢？</strong><br><strong>把原来的图像丢给CNN，得到CNN过滤器的输出，代表一张图像里有什么样的内容</strong>。 然后把呐喊这张图也丢到CNN里，也得到过滤器的输出，但这时候考虑的不是过滤器输出的绝对值，而是考虑<strong>过滤器和过滤器输出之间的关系</strong>，<strong>这个关系代表了一张图像的风格</strong>。接下来用同一个CNN找一张图像，这张图像的内容像原图像的内容（过滤器的输出类似），同时这张图像的风格像呐喊的风格（过滤器输出之间的关系类似）。<br><strong>找一张图片同时<font color="red">最大化</font>内容和风格（使用<font color="red">梯度上升更新参数</font>），得到的结果就像两张图片结合一样。</strong></p>
+</blockquote>
+<h2 id="CNN应用在围棋上"><a href="#CNN应用在围棋上" class="headerlink" title="CNN应用在围棋上"></a>CNN应用在围棋上</h2><p><img src="https://img-blog.csdnimg.cn/d2233ab8dcdf4ca8ad1e4dc4ebf550b6.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>要让机器下围棋，不一定要用CNN，一般的神经网络也可以做这件事情。只要学习一个网络，也就是找一个函数，输入是棋盘，输出是棋盘上的位置，根据棋盘的盘势，判断下一步落子的位置。<br>输入是<em>19 ×19</em> 向量，向量每一维是棋盘上的一个位置（是黑子则值为1，是白子则值为-1，反之则为0），丢到一个全连接的神经网络，输出也是<em>19 ×19</em> 的向量（每一维对应棋盘一个位置），那这样机器就可以学会下围棋了。</p>
+<h3 id="为什么CNN可以用在下围棋上？"><a href="#为什么CNN可以用在下围棋上？" class="headerlink" title="为什么CNN可以用在下围棋上？"></a>为什么CNN可以用在下围棋上？</h3><p>但实际采用CNN会得到更好的效果！为什么呢？<br>之前举的例子都是把CNN用在图像上面，<em>input</em> 是一个矩阵。用到下棋上，只要把 <em>19 ×19</em>  的向量表示为 <em>19 ×19</em>  的矩阵。对CNN来说，<strong>就是把棋盘和棋子当成一个图像，然后输出下一步落子的位置</strong>。</p>
+<blockquote>
+<p><img src="https://img-blog.csdnimg.cn/604669df79b5475aa23db1f14d14b3e5.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>收集很多棋谱，告诉CNN，看到落子在5之五，输出天元的位置为1，其他位置为0<br>看到5之五和天元都有棋子，输出就是5之五的位置为1，其他位置为0<br>这个是监督的部分，AlphaGo还有强化学习的部分</p>
+</blockquote>
+<h2 id="总结一下什么时候用CNN-为什么围棋适用？"><a href="#总结一下什么时候用CNN-为什么围棋适用？" class="headerlink" title="总结一下什么时候用CNN?为什么围棋适用？"></a>总结一下什么时候用CNN?为什么围棋适用？</h2><p><strong>图像要有该有的特性，开头讲过的根据<font color="red">三个特性</font>设计出了CNN的网络结构，在处理图像的时候特别有效。</strong></p>
+<blockquote>
+<p><strong>Q：为什么围棋很适用CNN？</strong><img src="https://img-blog.csdnimg.cn/36ddc9027bbe4537b72ff41a6553c1dd.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>答：因为围棋有一些特性和图像处理是很相似的。</p>
+<p><font color="red">围棋是有图像的第一个和第二个特性</font></p>
+<ul>
+<li><p><strong>在一张图像上面，有一些图案是比整张图像小的，比如鸟嘴。在围棋也有同样的现象</strong>，比如看到一些棋子摆放的图案，就要做一些相应的事情（比如上图黑子叫吃的时候，白子要落在下方保证不被吃）。不需要看整个棋盘，只需要看一个小小的范围，就可以侦测白子是不是属于被叫吃的状态。<br>AlphaGo里第一层的过滤器就是用的 5 × 5 过滤器，显然设计这个过滤器的人觉得围棋上最基本的图案在 5 × 5 范围内就可以被侦测出来。</p>
+</li>
+<li><p>图<strong>像还有个特性是相同的图案会出现在不同的区域，在围棋上也有同样的特征。</strong>例如叫吃的图案，可以出现在棋盘左上角，也可以出现在棋盘右下角，图案代表了同样的意义（叫吃），所以可以用同一个检测器来处理这些在不同位置的图案。</p>
+</li>
+</ul>
+<p>Q：困惑的是图像的第三个特性，对原图像做子采样不会影响人看到的这张图像的样子，基于第三个特性有了池化层，但Alpha<br>并没有采用池化层（就是做子采样）？<br><strong>因为不能做子采样。比如丢弃棋盘的奇数行和偶数列，想想也应该是不可以的。</strong></p>
+<p>也许AlphaGo里的CNN架构有特殊的地方。AlphaGo论文附录里描述了它的网络结构，input是一个<em>19 ×19 ×48</em> 的图像，<em>19<br>×19</em> 是棋盘可以理解，<strong>但48是怎么来的？</strong><br>对AlphaGo来说，把每一个位置都用48个值来描述（卷积后有48个通道）。本来我们只要描述一个位置是不是白子、黑子就可以了，而AlphaGo加上了领域知识（看这个位置是不是出于叫吃的状态等等）。</p>
+<p>AlphaGo有做zero padding(零填充)，在原来<em>19 ×19</em> 的图像外围补上 <em>0</em> 值变成 <em>23 × 23</em> 的图像，第一层用的是 <em>5 × 5</em> 过滤器，总共 <em>k</em> 个过滤器（paper里用的是192个过滤器），步长<em>stride=1</em>，有用到 <em>ReLu</em> 作为激活函数，有2到12层的过滤器层，最后变成 <em>21 × 21</em> 的图像，接下来再使用 <em>3 × 3</em> 的过滤器，步长 <em>stride=1</em>。最后发现AlphaGo没有使用池化，针对围棋特性设计CNN结构的时候，是不需要池化这个结构的。</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>机器学习基础-李宏毅</category>
+      </categories>
+      <tags>
+        <tag>深度学习</tag>
+        <tag>李宏毅</tag>
+        <tag>CNN</tag>
+        <tag>卷积核</tag>
+        <tag>过滤器</tag>
+        <tag>Maxpooling</tag>
       </tags>
   </entry>
   <entry>
