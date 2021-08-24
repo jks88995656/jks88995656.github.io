@@ -1,0 +1,237 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Keras 构建 线性模型和非线性模型 | 一只柴犬</title><meta name="keywords" content="python,Tensorflow,Keras,线性模型,非线性模型"><meta name="author" content="凯凯超人"><meta name="copyright" content="凯凯超人"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="@TOC 预测线性模型使用的数据 是我们随机生成的、首先导入我们需要的包（直接把Sequential 和 Dense 直接导入 这样之后方便） 12345678910import kerasimport numpy as npimport matplotlibimport matplotlib.pyplot as plt# matplotlib.use(&amp;#x27;TkAgg&amp;#x27;)# pr">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Keras 构建 线性模型和非线性模型">
+<meta property="og:url" content="http://example.com/2021/08/24/Keras%20%E6%9E%84%E5%BB%BA%20%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%9D%9E%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/index.html">
+<meta property="og:site_name" content="一只柴犬">
+<meta property="og:description" content="@TOC 预测线性模型使用的数据 是我们随机生成的、首先导入我们需要的包（直接把Sequential 和 Dense 直接导入 这样之后方便） 12345678910import kerasimport numpy as npimport matplotlibimport matplotlib.pyplot as plt# matplotlib.use(&amp;#x27;TkAgg&amp;#x27;)# pr">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/12.jpg">
+<meta property="article:published_time" content="2021-08-24T09:22:01.000Z">
+<meta property="article:modified_time" content="2021-08-24T09:28:44.809Z">
+<meta property="article:author" content="凯凯超人">
+<meta property="article:tag" content="python">
+<meta property="article:tag" content="Tensorflow">
+<meta property="article:tag" content="Keras">
+<meta property="article:tag" content="线性模型">
+<meta property="article:tag" content="非线性模型">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/12.jpg"><link rel="shortcut icon" href="/img/favicon2.png"><link rel="canonical" href="http://example.com/2021/08/24/Keras%20%E6%9E%84%E5%BB%BA%20%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%9D%9E%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Keras 构建 线性模型和非线性模型',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-08-24 17:28:44'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/mycss.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/StaticFile_HEXO@latest/butterfly/css/pool.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/StaticFile_HEXO@latest/butterfly/css/iconfont.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/css/flink.min.css"><meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="一只柴犬" type="application/atom+xml">
+</head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/admin.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">28</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 清单</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/%E9%9F%B3%E4%B9%90"><i class="fa-fw /music/"></i><span> 0</span></a></li><li><a class="site-page child" href="/%E7%94%B5%E5%BD%B1"><i class="fa-fw /movies/"></i><span> 1</span></a></li><li><a class="site-page child" href="/%E7%85%A7%E7%89%87"><i class="fa-fw /Gallery/"></i><span> 2</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/12.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">一只柴犬</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 清单</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/%E9%9F%B3%E4%B9%90"><i class="fa-fw /music/"></i><span> 0</span></a></li><li><a class="site-page child" href="/%E7%94%B5%E5%BD%B1"><i class="fa-fw /movies/"></i><span> 1</span></a></li><li><a class="site-page child" href="/%E7%85%A7%E7%89%87"><i class="fa-fw /Gallery/"></i><span> 2</span></a></li></ul></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Keras 构建 线性模型和非线性模型</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-08-24T09:22:01.000Z" title="发表于 2021-08-24 17:22:01">2021-08-24</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-08-24T09:28:44.809Z" title="更新于 2021-08-24 17:28:44">2021-08-24</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/python%E6%A1%86%E6%9E%B6/">python框架</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Keras 构建 线性模型和非线性模型"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>@<a href="Keras 构建 线性模型和非线性模型">TOC</a></p>
+<h1 id="预测线性模型"><a href="#预测线性模型" class="headerlink" title="预测线性模型"></a>预测线性模型</h1><p>使用的数据 是我们随机生成的<br>、<br>首先导入我们需要的包（直接把Sequential 和 Dense 直接导入 这样之后方便）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> keras</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="comment"># matplotlib.use(&#x27;TkAgg&#x27;)</span></span><br><span class="line"><span class="comment"># print(matplotlib.get_backend())</span></span><br><span class="line"><span class="comment"># Sequential按顺序构成的模型</span></span><br><span class="line"><span class="keyword">from</span> keras.models <span class="keyword">import</span> Sequential</span><br><span class="line"><span class="comment"># Dense全连接层</span></span><br><span class="line"><span class="keyword">from</span> keras.layers <span class="keyword">import</span> Dense</span><br></pre></td></tr></table></figure>
+<p>先准备我们需要的数据。随机生成100个随机值x，并随机产生100个噪声值。我们按 $y=0.1x+0.2$ 的公式，得到对应的y标签值。 </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用numpy 生成100个 随机点</span></span><br><span class="line">x_data = np.random.rand(<span class="number">100</span>)</span><br><span class="line"><span class="comment"># 测试集，但其实都是随机的 用x_data 也可以</span></span><br><span class="line">x_pre = np.random.rand(<span class="number">100</span>)</span><br><span class="line"><span class="comment"># 噪声 使得每个点不是 均匀在一条直线上</span></span><br><span class="line">noise = np.random.normal(<span class="number">0</span>,<span class="number">0.01</span>,x_data.shape)</span><br><span class="line">y_data = x_data * <span class="number">0.1</span> + <span class="number">0.2</span> + noise</span><br></pre></td></tr></table></figure>
+<p>可以将 100个点的分布图画出。 注意图的显示可能有问题，自行解决一下哦。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">plt.scatter(x_data,y_data)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>Q：为什么我们要引入 噪声呢？<br>答：引入噪声可以让我们的数据更加的离散分布 在 我们设计的线性模型上。 使得假设的数据更加的合理。 如下图所示 。 <font color="orange">橙色</font>的是我们设定的线性模型，<font color="blue">蓝色</font>的是 加入噪声以后的数据分布<br><img src="https://img-blog.csdnimg.cn/92fd1e153f2845aba178b80a7845b8cb.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</blockquote>
+<p>使用 keras 中的 Sequential （顺序构成的模型） 构建模型</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 构建一个顺序模型</span></span><br><span class="line">model = Sequential()</span><br><span class="line"><span class="comment"># 在模型中添加一个全连接层</span></span><br><span class="line"><span class="comment"># units 输出的维度</span></span><br><span class="line"><span class="comment"># input_dim 输入的维度</span></span><br><span class="line">model.add(Dense(units=<span class="number">1</span>,input_dim=<span class="number">1</span>))</span><br><span class="line"><span class="comment"># sgd 随机梯度下降法</span></span><br><span class="line"><span class="comment"># mse Mean Squared Error 均方误差</span></span><br><span class="line">model.<span class="built_in">compile</span>(optimizer=<span class="string">&#x27;sgd&#x27;</span>,loss=<span class="string">&#x27;mse&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<p>之后我们就按照批次训练。 共训练3001个批次。有两种写法。<br>方法一：<br>用一个循环体，循环3001次； 每500次 打印一次 损失值。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 训练3001个批次</span></span><br><span class="line"><span class="keyword">for</span> step <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">3001</span>):</span><br><span class="line">    <span class="comment">#每次训练一个批次</span></span><br><span class="line">    cost = model.train_on_batch(x_data,y_data)</span><br><span class="line">    <span class="comment"># 每500个 batch 打印一次 cost值</span></span><br><span class="line">    <span class="keyword">if</span> step % <span class="number">500</span> == <span class="number">0</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;cost:&quot;</span>,cost)</span><br></pre></td></tr></table></figure><br>方法二： 直接使用 model.fit () 函数</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">model.fit(x_data,y_data,epochs=<span class="number">3001</span>)</span><br></pre></td></tr></table></figure>
+<p> 可以查看 参数值 W （权重）和 b（偏置值）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">W,b = model.layers[<span class="number">0</span>].get_weights()</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;W：&#x27;</span>,W,<span class="string">&#x27;b:&#x27;</span>,b)</span><br></pre></td></tr></table></figure>
+<p>预测 测试集的 结果 使用 model.predict () 函数</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 测试集 输入网络中，得到预测值 y_pred</span></span><br><span class="line">y_pred = model.predict(x_pre)</span><br></pre></td></tr></table></figure>
+<p>可以再 把预测的 图打出来</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">plt.scatter(x_pre,y_pred)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p>我们的训练 使用方法二 <strong>结果如图所示：</strong><br><img src="https://img-blog.csdnimg.cn/45c3db30524a45a48e919881f6c36710.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="预测非线性模型"><a href="#预测非线性模型" class="headerlink" title="预测非线性模型"></a>预测非线性模型</h1><p>使用的数据 也是我们随机生成的</p>
+<p>首先导入我们需要的包（直接把Sequential 和 Dense 直接导入 这样之后方便） 注意SGD 需要 tensorflow.keras.optimizers 导入</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line">matplotlib.use(<span class="string">&#x27;TkAgg&#x27;</span>)</span><br><span class="line"><span class="comment"># Sequential按顺序构成的模型</span></span><br><span class="line"><span class="keyword">from</span> keras.models <span class="keyword">import</span> Sequential</span><br><span class="line"><span class="comment"># Dense全连接层</span></span><br><span class="line"><span class="keyword">from</span> keras.layers <span class="keyword">import</span> Dense,Activation</span><br><span class="line"><span class="keyword">from</span> tensorflow.keras.optimizers <span class="keyword">import</span> SGD</span><br></pre></td></tr></table></figure>
+<p>先准备我们需要的数据。用等差数列生成200个值x，并随机产生200个噪声值。我们按 $y=x^{2}$ 的公式，得到对应的y标签值。 </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用numpy 生成 200 个随机点</span></span><br><span class="line">x_data = np.linspace(-<span class="number">0.5</span>,<span class="number">0.5</span>,<span class="number">200</span>)</span><br><span class="line"><span class="comment"># 测试集</span></span><br><span class="line">x_pre = np.linspace(-<span class="number">0.5</span>,<span class="number">0.5</span>,<span class="number">200</span>)</span><br><span class="line">noise = np.random.normal(<span class="number">0</span>,<span class="number">0.02</span>,x_data.shape)</span><br><span class="line">y_data = np.square(x_data) + noise</span><br></pre></td></tr></table></figure>
+<p>可以将 200个点的分布图画出。 注意图的显示可能有问题，自行解决一下哦。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">plt.scatter(x_data,y_data)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure></p>
+<p>使用 keras 中的 Sequential （顺序构成的模型） 构建模型。 <font color="red">与线性模型的区别在，我们需要 增加激活函数，并且增加一个 中间层（含有10个神经元）。</font>  <font color="blue">并且增加一点 sgd 的学习率，不然学习度太慢，需要的训练次数就会非常大。</font></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 构建一个顺序模型</span></span><br><span class="line">model = Sequential()</span><br><span class="line"><span class="comment"># 在模型中添加一个全连接层</span></span><br><span class="line"><span class="comment"># units 输出的维度  维度就是神经元个数</span></span><br><span class="line"><span class="comment"># input_dim 输入的维度</span></span><br><span class="line"><span class="comment"># 需要的神经模型为 1-10-1</span></span><br><span class="line">model.add(Dense(units=<span class="number">10</span>,input_dim=<span class="number">1</span>,activation=<span class="string">&#x27;tanh&#x27;</span>))</span><br><span class="line">model.add(Dense(units=<span class="number">1</span>,input_dim=<span class="number">10</span>,activation=<span class="string">&#x27;tanh&#x27;</span>))</span><br><span class="line"><span class="comment"># sgd 随机梯度下降法</span></span><br><span class="line"><span class="comment"># mse Mean Squared Error 均方误差</span></span><br><span class="line"><span class="comment"># sgd 的学习率太小 训练次数可能非常多</span></span><br><span class="line"><span class="comment"># 需要修改一下 sgd的学习率</span></span><br><span class="line">sgd = SGD(lr=<span class="number">0.3</span>)</span><br><span class="line">model.<span class="built_in">compile</span>(optimizer= sgd,loss=<span class="string">&#x27;mse&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<p>之后我们就按照批次训练。 共训练3001个批次。有两种写法。<br>方法一：<br>用一个循环体，循环3001次； 每500次 打印一次 损失值。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 训练3001个批次</span></span><br><span class="line"><span class="keyword">for</span> step <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">3001</span>):</span><br><span class="line">    <span class="comment">#每次训练一个批次</span></span><br><span class="line">    cost = model.train_on_batch(x_data,y_data)</span><br><span class="line">    <span class="comment"># 每500个 batch 打印一次 cost值</span></span><br><span class="line">    <span class="keyword">if</span> step % <span class="number">500</span> == <span class="number">0</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;cost:&quot;</span>,cost)</span><br></pre></td></tr></table></figure><br>方法二： 直接使用 model.fit () 函数</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">model.fit(x_data,y_data,epochs=<span class="number">3001</span>)</span><br></pre></td></tr></table></figure>
+<p> 可以查看 参数值 W （权重）和 b（偏置值）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">W,b = model.layers[<span class="number">0</span>].get_weights()</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;W：&#x27;</span>,W,<span class="string">&#x27;b:&#x27;</span>,b)</span><br></pre></td></tr></table></figure>
+<p>预测 测试集的 结果 使用 model.predict () 函数</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 测试集 输入网络中，得到预测值 y_pred</span></span><br><span class="line">y_pred = model.predict(x_pre)</span><br></pre></td></tr></table></figure>
+<p>可以再 把预测的 图打出来</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">plt.scatter(x_pre,y_pred)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p>我们的训练 使用方法二 <strong>结果如图所示：</strong><br><img src="https://img-blog.csdnimg.cn/79b89f1dec6e4327a2679c2c9882d6c7.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">凯凯超人</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2021/08/24/Keras%20%E6%9E%84%E5%BB%BA%20%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%9D%9E%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/">http://example.com/2021/08/24/Keras%20%E6%9E%84%E5%BB%BA%20%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%9D%9E%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">一只柴犬</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/python/">python</a><a class="post-meta__tags" href="/tags/Tensorflow/">Tensorflow</a><a class="post-meta__tags" href="/tags/Keras/">Keras</a><a class="post-meta__tags" href="/tags/%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/">线性模型</a><a class="post-meta__tags" href="/tags/%E9%9D%9E%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/">非线性模型</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/12.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2021/08/24/%E5%90%84%E7%B1%BB%20%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%20%E8%AF%A6%E8%A7%A3%E4%B8%8E%E9%80%89%E6%8B%A9/"><img class="next-cover" src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/14.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">各类 激活函数 详解与选择</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2021/08/22/Tensorflow 代码学习/" title="Tensorflow 代码学习"><img class="cover" src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/11.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-08-22</div><div class="title">Tensorflow 代码学习</div></div></a></div><div><a href="/2021/08/21/Numpy、Pandas、Matplotlib 常用代码/" title="Numpy、Pandas、Matplotlib  常用代码"><img class="cover" src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/6.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-08-21</div><div class="title">Numpy、Pandas、Matplotlib  常用代码</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/admin.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">凯凯超人</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">28</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">3</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/xxxxx" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:xxxxxx@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://gitee.com/×××" target="_blank" title="Gitee"><i class="iconfont gitee"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%A2%84%E6%B5%8B%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.</span> <span class="toc-text">预测线性模型</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%A2%84%E6%B5%8B%E9%9D%9E%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B"><span class="toc-number">2.</span> <span class="toc-text">预测非线性模型</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/08/24/Keras%20%E6%9E%84%E5%BB%BA%20%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%9D%9E%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/" title="Keras 构建 线性模型和非线性模型"><img src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/12.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Keras 构建 线性模型和非线性模型"/></a><div class="content"><a class="title" href="/2021/08/24/Keras%20%E6%9E%84%E5%BB%BA%20%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%9D%9E%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/" title="Keras 构建 线性模型和非线性模型">Keras 构建 线性模型和非线性模型</a><time datetime="2021-08-24T09:22:01.000Z" title="发表于 2021-08-24 17:22:01">2021-08-24</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/08/24/%E5%90%84%E7%B1%BB%20%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%20%E8%AF%A6%E8%A7%A3%E4%B8%8E%E9%80%89%E6%8B%A9/" title="各类 激活函数 详解与选择"><img src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/14.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="各类 激活函数 详解与选择"/></a><div class="content"><a class="title" href="/2021/08/24/%E5%90%84%E7%B1%BB%20%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%20%E8%AF%A6%E8%A7%A3%E4%B8%8E%E9%80%89%E6%8B%A9/" title="各类 激活函数 详解与选择">各类 激活函数 详解与选择</a><time datetime="2021-08-24T09:22:01.000Z" title="发表于 2021-08-24 17:22:01">2021-08-24</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/08/23/%E5%90%84%E7%B1%BB%20%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%20%E8%AF%A6%E8%A7%A3%E4%B8%8E%E9%80%89%E6%8B%A9/" title="各类 损失函数 详解与选择"><img src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/13.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="各类 损失函数 详解与选择"/></a><div class="content"><a class="title" href="/2021/08/23/%E5%90%84%E7%B1%BB%20%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%20%E8%AF%A6%E8%A7%A3%E4%B8%8E%E9%80%89%E6%8B%A9/" title="各类 损失函数 详解与选择">各类 损失函数 详解与选择</a><time datetime="2021-08-23T09:22:01.000Z" title="发表于 2021-08-23 17:22:01">2021-08-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/08/22/Tensorflow%20%E4%BB%A3%E7%A0%81%E5%AD%A6%E4%B9%A0/" title="Tensorflow 代码学习"><img src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/11.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Tensorflow 代码学习"/></a><div class="content"><a class="title" href="/2021/08/22/Tensorflow%20%E4%BB%A3%E7%A0%81%E5%AD%A6%E4%B9%A0/" title="Tensorflow 代码学习">Tensorflow 代码学习</a><time datetime="2021-08-22T06:05:01.000Z" title="发表于 2021-08-22 14:05:01">2021-08-22</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/08/21/Numpy%E3%80%81Pandas%E3%80%81Matplotlib%20%E5%B8%B8%E7%94%A8%E4%BB%A3%E7%A0%81/" title="Numpy、Pandas、Matplotlib  常用代码"><img src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/6.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Numpy、Pandas、Matplotlib  常用代码"/></a><div class="content"><a class="title" href="/2021/08/21/Numpy%E3%80%81Pandas%E3%80%81Matplotlib%20%E5%B8%B8%E7%94%A8%E4%BB%A3%E7%A0%81/" title="Numpy、Pandas、Matplotlib  常用代码">Numpy、Pandas、Matplotlib  常用代码</a><time datetime="2021-08-21T02:18:01.000Z" title="发表于 2021-08-21 10:18:01">2021-08-21</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 凯凯超人</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.2
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        insertScript: [200, () => {
+          document.querySelectorAll('mjx-container:not\([display]\)').forEach(node => {
+            const target = node.parentNode
+            if (target.nodeName.toLowerCase() === 'li') {
+              target.parentNode.classList.add('has-jax')
+            } else {
+              target.classList.add('has-jax')
+            }
+          });
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/StaticFile_HEXO@latest/butterfly/js/pool.min.js"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/js/mouse_snow.min.js"><script src="https://cdn.jsdelivr.net/gh/sviptzk/StaticFile_HEXO@latest/butterfly/js/pool.min.js"></script><script src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/js/mouse_snow.min.js"></script><script src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/js/hideMobileSidebar.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
