@@ -96,27 +96,6 @@
       </tags>
   </entry>
   <entry>
-    <title>为什么要Deep？深而不是宽</title>
-    <url>/2021/08/10/%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81Deep%EF%BC%9F%E6%B7%B1%E8%80%8C%E4%B8%8D%E6%98%AF%E5%AE%BD/</url>
-    <content><![CDATA[<p>@<a href="为什么要Deep？深而不是宽">TOC</a></p>
-<blockquote>
-<p><strong>Q：为什么要用要用深度？而不是广度？</strong><br>答：1.因为深度可以用少量的数据，就完成对数据的分类。<br>2.深度，每个层次都是基于上个层次得到的（其实就是学习的过程），我们可以将神经元的数量减少。如果层次很少的话，会导致神经元可能非常多。可以类比逻辑电路。<img src="https://img-blog.csdnimg.cn/3889abe5617e426d91f92e842ba3af83.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"></p>
-<h1 id="模组化"><a href="#模组化" class="headerlink" title="模组化"></a>模组化</h1><p>在比较浅层网络与深层网络时，要让“矮胖”的网络和“高瘦”的网络的参数数目相等，这样比较才公平。<br><strong>但即便是在深层网络参数较少的情况下，深层网络也会比浅层网络表现好。</strong><br>这是因为<font color="red"> 深层”其实相当于“模组化”</font>，第一个隐层是最基本的分类器，第二个隐层是用第一个隐层建造的分类器，以此类推。</p>
-<p><strong>举个栗子，为什么说深度好！</strong><br>左边第一幅图可以看到，我们需要分四个类，包括长发女，长发男，短发女，短发男。一共四类，其中长发男的数据样本很少，那区分这个类的能力就非常的弱。<br>这个时候，我们就可以先分为两个神经元，一个区分男女，一个区分长发短发，这样中间加一层，可以使得数据样本少的类 鉴定的效果更好。<br><img src="https://img-blog.csdnimg.cn/dc3ef77e42724c1ebbcb6d0d29067206.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><strong>对于分类一个图像来说，深度使得模块化。</strong><img src="https://img-blog.csdnimg.cn/81cf2b79b06440e789ad2a03937c7e2e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"></p>
-</blockquote>
-<h1 id="类比逻辑电路"><a href="#类比逻辑电路" class="headerlink" title="类比逻辑电路"></a>类比逻辑电路</h1><p><img src="https://img-blog.csdnimg.cn/8635e890e73f4834900ea683446b9f0a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"><br>浅层网络确实可以表示任意函数，但是使用深层结构更有效率。<br><strong>好比逻辑门电路，用两层逻辑门就可以实现任何布尔函数，但是用多层结构更简单、需要的逻辑门更少。</strong><br><img src="https://img-blog.csdnimg.cn/3889abe5617e426d91f92e842ba3af83.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"></p>
-<p>神经网络也是如此，单隐层网络可以表示任何连续函数，但是多层结构表示起来更简单、需要的神经元更少，<strong>所以比较不容易overfitting，或只需较少的data。</strong>而且，深层结构可以比较有效率地使用data。</p>
-<h1 id="类比图形"><a href="#类比图形" class="headerlink" title="类比图形"></a>类比图形</h1><p><img src="https://img-blog.csdnimg.cn/e4e96dfdc69b4c47b96640efa2f70be8.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"><br>1层hidden layer与3层hidden layer（相同数目的参数），3层的效果更好。<br>但理论上，3层可达到的效果，1层也能达到：要在1层learn的时候，target从真实label改为3层的output，这样1层的结果会接近3层的结果。</p>
-]]></content>
-      <categories>
-        <category>机器学习基础-李宏毅</category>
-      </categories>
-      <tags>
-        <tag>深度学习</tag>
-        <tag>李宏毅</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Tensorflow 代码学习</title>
     <url>/2021/08/22/Tensorflow%20%E4%BB%A3%E7%A0%81%E5%AD%A6%E4%B9%A0/</url>
     <content><![CDATA[<p>@<a href="Tensorflow 代码学习">TOC</a></p>
@@ -162,6 +141,27 @@
         <tag>python</tag>
         <tag>Tensorflow</tag>
         <tag>Keras</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>为什么要Deep？深而不是宽</title>
+    <url>/2021/08/10/%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81Deep%EF%BC%9F%E6%B7%B1%E8%80%8C%E4%B8%8D%E6%98%AF%E5%AE%BD/</url>
+    <content><![CDATA[<p>@<a href="为什么要Deep？深而不是宽">TOC</a></p>
+<blockquote>
+<p><strong>Q：为什么要用要用深度？而不是广度？</strong><br>答：1.因为深度可以用少量的数据，就完成对数据的分类。<br>2.深度，每个层次都是基于上个层次得到的（其实就是学习的过程），我们可以将神经元的数量减少。如果层次很少的话，会导致神经元可能非常多。可以类比逻辑电路。<img src="https://img-blog.csdnimg.cn/3889abe5617e426d91f92e842ba3af83.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"></p>
+<h1 id="模组化"><a href="#模组化" class="headerlink" title="模组化"></a>模组化</h1><p>在比较浅层网络与深层网络时，要让“矮胖”的网络和“高瘦”的网络的参数数目相等，这样比较才公平。<br><strong>但即便是在深层网络参数较少的情况下，深层网络也会比浅层网络表现好。</strong><br>这是因为<font color="red"> 深层”其实相当于“模组化”</font>，第一个隐层是最基本的分类器，第二个隐层是用第一个隐层建造的分类器，以此类推。</p>
+<p><strong>举个栗子，为什么说深度好！</strong><br>左边第一幅图可以看到，我们需要分四个类，包括长发女，长发男，短发女，短发男。一共四类，其中长发男的数据样本很少，那区分这个类的能力就非常的弱。<br>这个时候，我们就可以先分为两个神经元，一个区分男女，一个区分长发短发，这样中间加一层，可以使得数据样本少的类 鉴定的效果更好。<br><img src="https://img-blog.csdnimg.cn/dc3ef77e42724c1ebbcb6d0d29067206.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><strong>对于分类一个图像来说，深度使得模块化。</strong><img src="https://img-blog.csdnimg.cn/81cf2b79b06440e789ad2a03937c7e2e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"></p>
+</blockquote>
+<h1 id="类比逻辑电路"><a href="#类比逻辑电路" class="headerlink" title="类比逻辑电路"></a>类比逻辑电路</h1><p><img src="https://img-blog.csdnimg.cn/8635e890e73f4834900ea683446b9f0a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"><br>浅层网络确实可以表示任意函数，但是使用深层结构更有效率。<br><strong>好比逻辑门电路，用两层逻辑门就可以实现任何布尔函数，但是用多层结构更简单、需要的逻辑门更少。</strong><br><img src="https://img-blog.csdnimg.cn/3889abe5617e426d91f92e842ba3af83.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"></p>
+<p>神经网络也是如此，单隐层网络可以表示任何连续函数，但是多层结构表示起来更简单、需要的神经元更少，<strong>所以比较不容易overfitting，或只需较少的data。</strong>而且，深层结构可以比较有效率地使用data。</p>
+<h1 id="类比图形"><a href="#类比图形" class="headerlink" title="类比图形"></a>类比图形</h1><p><img src="https://img-blog.csdnimg.cn/e4e96dfdc69b4c47b96640efa2f70be8.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"><br>1层hidden layer与3层hidden layer（相同数目的参数），3层的效果更好。<br>但理论上，3层可达到的效果，1层也能达到：要在1层learn的时候，target从真实label改为3层的output，这样1层的结果会接近3层的结果。</p>
+]]></content>
+      <categories>
+        <category>机器学习基础-李宏毅</category>
+      </categories>
+      <tags>
+        <tag>深度学习</tag>
+        <tag>李宏毅</tag>
       </tags>
   </entry>
   <entry>
@@ -214,10 +214,11 @@
       </tags>
   </entry>
   <entry>
-    <title>各类 激活函数 详解与选择</title>
-    <url>/2021/08/24/%E5%90%84%E7%B1%BB%20%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%20%E8%AF%A6%E8%A7%A3%E4%B8%8E%E9%80%89%E6%8B%A9/</url>
-    <content><![CDATA[<p>@<a href="各类 激活函数 详解与选择">TOC</a></p>
-<h1 id="Relu"><a href="#Relu" class="headerlink" title="Relu"></a>Relu</h1><h1 id="tanh"><a href="#tanh" class="headerlink" title="tanh"></a>tanh</h1><h1 id="sigmiod"><a href="#sigmiod" class="headerlink" title="sigmiod"></a>sigmiod</h1><h1 id="softmax"><a href="#softmax" class="headerlink" title="softmax"></a>softmax</h1>]]></content>
+    <title>各类 损失函数 详解与选择</title>
+    <url>/2021/08/23/%E5%90%84%E7%B1%BB%20%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%20%E8%AF%A6%E8%A7%A3%E4%B8%8E%E9%80%89%E6%8B%A9/</url>
+    <content><![CDATA[<p>@<a href="各类 损失函数 详解与选择">TOC</a></p>
+<h1 id="mean-squared-error-均方误差"><a href="#mean-squared-error-均方误差" class="headerlink" title="mean_squared_error 均方误差"></a>mean_squared_error 均方误差</h1><p><img src="https://img-blog.csdnimg.cn/a55e390e62dd4e0b8bd1c9ff5cfb7826.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+]]></content>
       <categories>
         <category>损失函数与激活函数</category>
       </categories>
@@ -226,11 +227,10 @@
       </tags>
   </entry>
   <entry>
-    <title>各类 损失函数 详解与选择</title>
-    <url>/2021/08/23/%E5%90%84%E7%B1%BB%20%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%20%E8%AF%A6%E8%A7%A3%E4%B8%8E%E9%80%89%E6%8B%A9/</url>
-    <content><![CDATA[<p>@<a href="各类 损失函数 详解与选择">TOC</a></p>
-<h1 id="mean-squared-error-均方误差"><a href="#mean-squared-error-均方误差" class="headerlink" title="mean_squared_error 均方误差"></a>mean_squared_error 均方误差</h1><p><img src="https://img-blog.csdnimg.cn/a55e390e62dd4e0b8bd1c9ff5cfb7826.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-]]></content>
+    <title>各类 激活函数 详解与选择</title>
+    <url>/2021/08/24/%E5%90%84%E7%B1%BB%20%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%20%E8%AF%A6%E8%A7%A3%E4%B8%8E%E9%80%89%E6%8B%A9/</url>
+    <content><![CDATA[<p>@<a href="各类 激活函数 详解与选择">TOC</a></p>
+<h1 id="Relu"><a href="#Relu" class="headerlink" title="Relu"></a>Relu</h1><h1 id="tanh"><a href="#tanh" class="headerlink" title="tanh"></a>tanh</h1><h1 id="sigmiod"><a href="#sigmiod" class="headerlink" title="sigmiod"></a>sigmiod</h1><h1 id="softmax"><a href="#softmax" class="headerlink" title="softmax"></a>softmax</h1>]]></content>
       <categories>
         <category>损失函数与激活函数</category>
       </categories>
