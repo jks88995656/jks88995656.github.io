@@ -1,6 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Keras  MNIST（数字识别）数据集分类（普通全神经网络）</title>
+    <url>/2021/08/30/Keras%20%20MNIST%EF%BC%88%E6%95%B0%E5%AD%97%E8%AF%86%E5%88%AB%EF%BC%89%E6%95%B0%E6%8D%AE%E9%9B%86%E5%88%86%E7%B1%BB%EF%BC%88%E6%99%AE%E9%80%9A%E5%85%A8%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%EF%BC%89/</url>
+    <content><![CDATA[<p>@<a href="Keras  MNIST（数字识别）数据集分类">TOC</a></p>
+<h1 id="导入需要的包"><a href="#导入需要的包" class="headerlink" title="导入需要的包"></a>导入需要的包</h1><p>首先导入我们需要的包（直接把Sequential 和 Dense 直接导入 这样之后方便）</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> keras.datasets <span class="keyword">import</span> mnist</span><br><span class="line"><span class="keyword">from</span> keras.utils <span class="keyword">import</span> np_utils</span><br><span class="line"><span class="keyword">from</span> keras.models <span class="keyword">import</span>  Sequential</span><br><span class="line"><span class="keyword">from</span> keras.layers <span class="keyword">import</span> Dense</span><br><span class="line"><span class="keyword">from</span> tensorflow.keras.optimizers <span class="keyword">import</span> SGD</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> matplotlib</span><br><span class="line">matplotlib.use(<span class="string">&#x27;TkAgg&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(matplotlib.get_backend())</span><br></pre></td></tr></table></figure>
+<h1 id="载入MNIST-数据"><a href="#载入MNIST-数据" class="headerlink" title="载入MNIST 数据"></a>载入MNIST 数据</h1><p>该数据集一共有训练集 6w 张，测试集 1w 张<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">(train_images,train_labels),(test_images,test_labels)= mnist.load_data()</span><br></pre></td></tr></table></figure></p>
+<p>可以查看一下图像和标签  是什么</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 数字5</span></span><br><span class="line"><span class="built_in">print</span>(train_images[<span class="number">0</span>])</span><br><span class="line"><span class="comment"># 标签5</span></span><br><span class="line"><span class="built_in">print</span>(train_labels[<span class="number">0</span>])</span><br><span class="line"><span class="comment"># 数字7</span></span><br><span class="line"><span class="built_in">print</span>(test_images[<span class="number">0</span>])</span><br><span class="line"><span class="comment"># 标签7</span></span><br><span class="line"><span class="built_in">print</span>(test_labels[<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
+<p>可以 打印 一下图片 看看是什么样子<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">plt.imshow(train_images[<span class="number">0</span>])</span><br><span class="line">plt.show()</span><br><span class="line">plt.imshow(test_images[<span class="number">0</span>])</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure><br><img src="https://img-blog.csdnimg.cn/a745fc12bef94f93b93f80b2e89bb0d0.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_13,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="图片数据处理"><a href="#图片数据处理" class="headerlink" title="图片数据处理"></a>图片数据处理</h1><h2 id="查看图片原有-shape"><a href="#查看图片原有-shape" class="headerlink" title="查看图片原有 shape"></a>查看图片原有 shape</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># train_images (60000, 28, 28)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;train_images&#x27;</span>, train_images.shape)</span><br><span class="line"><span class="comment"># train_labels (60000,)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;train_labels&#x27;</span>, train_labels.shape)</span><br></pre></td></tr></table></figure>
+<h2 id="图片数据处理：将图片压平"><a href="#图片数据处理：将图片压平" class="headerlink" title="图片数据处理：将图片压平"></a>图片数据处理：将图片压平</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 数据处理</span></span><br><span class="line"><span class="comment"># 将 (60000, 28, 28) -&gt; (60000, 784)  压平图片</span></span><br><span class="line">train_images_scale = train_images.reshape(train_images.shape[<span class="number">0</span>], train_images.shape[<span class="number">1</span>] * train_images.shape[<span class="number">2</span>])/<span class="number">255.0</span></span><br><span class="line">test_images_scale = test_images.reshape(test_images.shape[<span class="number">0</span>], test_images.shape[<span class="number">1</span>] * test_images.shape[<span class="number">2</span>])/<span class="number">255.0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># train_images变换后 (60000, 784)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;train_images变换后&#x27;</span>, train_images_scale.shape)</span><br><span class="line"><span class="comment"># test_images变换后 (10000, 784)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;test_images变换后&#x27;</span>, test_images_scale.shape)</span><br></pre></td></tr></table></figure>
+<h2 id="标签数据处理：转换成-one-hot-格式"><a href="#标签数据处理：转换成-one-hot-格式" class="headerlink" title="标签数据处理：转换成 one hot 格式"></a>标签数据处理：转换成 one hot 格式</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 换 one hot 格式  共十个分类</span></span><br><span class="line"><span class="comment"># np_utils.to_categorical用于将标签转化为形如(nb_samples, nb_classes)的二值序列。</span></span><br><span class="line">train_labels_hot = np_utils.to_categorical(train_labels,num_classes=<span class="number">10</span>)</span><br><span class="line">test_labels_hot = np_utils.to_categorical(test_labels,num_classes=<span class="number">10</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># train_labels (60000, 10)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;train_labels&#x27;</span>,train_labels_hot.shape)</span><br><span class="line"><span class="comment"># test_labels (10000, 10)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;test_labels&#x27;</span>,test_labels_hot.shape)</span><br></pre></td></tr></table></figure>
+<h1 id="构建模型"><a href="#构建模型" class="headerlink" title="构建模型"></a>构建模型</h1><p>只有输入和输出层， 输入压平图像 维度为784   输出为 10分类<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model = Sequential()</span><br><span class="line"><span class="comment"># 输入压平图像 维度为784   输出为 10分类</span></span><br><span class="line">model.add(Dense(units=<span class="number">10</span>,input_dim=<span class="number">784</span>,bias_initializer=<span class="string">&quot;one&quot;</span>,activation=<span class="string">&quot;softmax&quot;</span>))</span><br></pre></td></tr></table></figure><br>优化器使用加速学习率的 sgd ， 损失函数 选择 交叉熵</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 重新定义 sgd 优化器  加速一下学习率</span></span><br><span class="line">sgd = SGD(learning_rate=<span class="number">0.2</span>)</span><br><span class="line"><span class="comment"># 优化器使用加速学习率的 sgd ， 损失函数 选择 交叉熵</span></span><br><span class="line">model.<span class="built_in">compile</span>(optimizer= sgd,loss=<span class="string">&#x27;categorical_crossentropy&#x27;</span>,metrics=<span class="string">&quot;accuracy&quot;</span>)</span><br></pre></td></tr></table></figure>
+<h1 id="训练模型"><a href="#训练模型" class="headerlink" title="训练模型"></a>训练模型</h1><p> 一共 60000张训练图片 按批次训练 一批次32张   一共6w/32 = 1875 个批次<br>训练完一轮6w张，表示一个epoch<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 一共 60000张训练图片 按批次训练 一批次32张   一共6w/32 = 1875 个批次</span></span><br><span class="line"><span class="comment"># 训练完一轮6w张，表示一个epoch</span></span><br><span class="line">model.fit(train_images_scale,train_labels_hot,batch_size=<span class="number">32</span>,epochs=<span class="number">10</span>)</span><br></pre></td></tr></table></figure><br><img src="https://img-blog.csdnimg.cn/576f033299d04330a371c33eb6a2abac.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="训练过程"></p>
+<h1 id="评估模型"><a href="#评估模型" class="headerlink" title="评估模型"></a>评估模型</h1><p>就是在 测试集上的表现<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">loss,accuracy = model.evaluate(test_images_scale,test_labels_hot)</span><br></pre></td></tr></table></figure><br><img src="https://img-blog.csdnimg.cn/eb52f38d3e944137a3ade6e5b9d1e1a9.png#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="预测数据"><a href="#预测数据" class="headerlink" title="预测数据"></a>预测数据</h1><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 看下输入的形状</span></span><br><span class="line"><span class="built_in">print</span>(test_images_scale[<span class="number">0</span>].reshape(-<span class="number">1</span>,<span class="number">784</span>).shape)</span><br><span class="line"><span class="comment"># 模型预测  输出每个分类的 概率</span></span><br><span class="line"><span class="built_in">print</span>(model.predict((test_images_scale[<span class="number">0</span>].reshape(-<span class="number">1</span>,<span class="number">784</span>))))</span><br><span class="line"><span class="comment"># 选取最大的那个 就是预测的标签</span></span><br><span class="line"><span class="built_in">print</span>(np.argmax(model.predict((test_images_scale[<span class="number">0</span>].reshape(-<span class="number">1</span>,<span class="number">784</span>)))))</span><br><span class="line"><span class="comment"># 实际该图片的 标签</span></span><br><span class="line"><span class="built_in">print</span>(test_labels[<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
+<p>输入的图像 变换后形状<br><img src="https://img-blog.csdnimg.cn/4302df2ba0e44c04897aaf00f6955dad.png#pic_center" alt="在这里插入图片描述"><br>模型预测 数据 输出的概率分类结果<br><img src="https://img-blog.csdnimg.cn/3ffa135e578d486c8404588781678e0c.png#pic_center" alt="在这里插入图片描述"><br>选出其中最大的 以及 实际图片标签 均为 数字7<br><img src="https://img-blog.csdnimg.cn/5a585701d439431aa1853283c8592b46.png#pic_center" alt="在这里插入图片描述"></p>
+]]></content>
+      <categories>
+        <category>python框架</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+        <tag>Tensorflow</tag>
+        <tag>Keras</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Keras 构建 线性模型和非线性模型</title>
     <url>/2021/08/24/Keras%20%E6%9E%84%E5%BB%BA%20%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B%E5%92%8C%E9%9D%9E%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B/</url>
     <content><![CDATA[<p>@<a href="Keras 构建 线性模型和非线性模型">TOC</a></p>
@@ -144,6 +173,45 @@
       </tags>
   </entry>
   <entry>
+    <title>keras 包方法集合</title>
+    <url>/2021/08/29/keras%20%E5%8C%85%E6%96%B9%E6%B3%95%E9%9B%86%E5%90%88/</url>
+    <content><![CDATA[<p>@<a href="keras 包方法集合">TOC</a></p>
+<h1 id="keras-util-库-np-utils"><a href="#keras-util-库-np-utils" class="headerlink" title="keras.util 库  np_utils"></a>keras.util 库  np_utils</h1><h2 id="np-utils-to-categorical"><a href="#np-utils-to-categorical" class="headerlink" title="np_utils.to_categorical"></a>np_utils.to_categorical</h2><p>np_utils.to_categorical用于将标签转化为形如(nb_samples, nb_classes)的二值序列。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">train_labels_hot = np_utils.to_categorical(train_labels,num_classes=<span class="number">10</span>)</span><br></pre></td></tr></table></figure>
+<p>如将 $[1,2,3,……4]$ 转化成：<br><img src="https://img-blog.csdnimg.cn/379535ca64bc4e5987673ecd12af0c75.png#pic_center" alt="在这里插入图片描述"><br>这样的形态。</p>
+]]></content>
+      <categories>
+        <category>python框架</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+        <tag>Numpy</tag>
+        <tag>Pandas</tag>
+        <tag>Matplotlib</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>为什么要Deep？深而不是宽</title>
+    <url>/2021/08/10/%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81Deep%EF%BC%9F%E6%B7%B1%E8%80%8C%E4%B8%8D%E6%98%AF%E5%AE%BD/</url>
+    <content><![CDATA[<p>@<a href="为什么要Deep？深而不是宽">TOC</a></p>
+<blockquote>
+<p><strong>Q：为什么要用要用深度？而不是广度？</strong><br>答：1.因为深度可以用少量的数据，就完成对数据的分类。<br>2.深度，每个层次都是基于上个层次得到的（其实就是学习的过程），我们可以将神经元的数量减少。如果层次很少的话，会导致神经元可能非常多。可以类比逻辑电路。<img src="https://img-blog.csdnimg.cn/3889abe5617e426d91f92e842ba3af83.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"></p>
+<h1 id="模组化"><a href="#模组化" class="headerlink" title="模组化"></a>模组化</h1><p>在比较浅层网络与深层网络时，要让“矮胖”的网络和“高瘦”的网络的参数数目相等，这样比较才公平。<br><strong>但即便是在深层网络参数较少的情况下，深层网络也会比浅层网络表现好。</strong><br>这是因为<font color="red"> 深层”其实相当于“模组化”</font>，第一个隐层是最基本的分类器，第二个隐层是用第一个隐层建造的分类器，以此类推。</p>
+<p><strong>举个栗子，为什么说深度好！</strong><br>左边第一幅图可以看到，我们需要分四个类，包括长发女，长发男，短发女，短发男。一共四类，其中长发男的数据样本很少，那区分这个类的能力就非常的弱。<br>这个时候，我们就可以先分为两个神经元，一个区分男女，一个区分长发短发，这样中间加一层，可以使得数据样本少的类 鉴定的效果更好。<br><img src="https://img-blog.csdnimg.cn/dc3ef77e42724c1ebbcb6d0d29067206.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><strong>对于分类一个图像来说，深度使得模块化。</strong><img src="https://img-blog.csdnimg.cn/81cf2b79b06440e789ad2a03937c7e2e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"></p>
+</blockquote>
+<h1 id="类比逻辑电路"><a href="#类比逻辑电路" class="headerlink" title="类比逻辑电路"></a>类比逻辑电路</h1><p><img src="https://img-blog.csdnimg.cn/8635e890e73f4834900ea683446b9f0a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"><br>浅层网络确实可以表示任意函数，但是使用深层结构更有效率。<br><strong>好比逻辑门电路，用两层逻辑门就可以实现任何布尔函数，但是用多层结构更简单、需要的逻辑门更少。</strong><br><img src="https://img-blog.csdnimg.cn/3889abe5617e426d91f92e842ba3af83.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"></p>
+<p>神经网络也是如此，单隐层网络可以表示任何连续函数，但是多层结构表示起来更简单、需要的神经元更少，<strong>所以比较不容易overfitting，或只需较少的data。</strong>而且，深层结构可以比较有效率地使用data。</p>
+<h1 id="类比图形"><a href="#类比图形" class="headerlink" title="类比图形"></a>类比图形</h1><p><img src="https://img-blog.csdnimg.cn/e4e96dfdc69b4c47b96640efa2f70be8.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"><br>1层hidden layer与3层hidden layer（相同数目的参数），3层的效果更好。<br>但理论上，3层可达到的效果，1层也能达到：要在1层learn的时候，target从真实label改为3层的output，这样1层的结果会接近3层的结果。</p>
+]]></content>
+      <categories>
+        <category>机器学习基础-李宏毅</category>
+      </categories>
+      <tags>
+        <tag>深度学习</tag>
+        <tag>李宏毅</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>分类问题 Classification 案例一：神奇宝贝是水系还是普通系？</title>
     <url>/2021/08/04/%E5%88%86%E7%B1%BB%E9%97%AE%E9%A2%98%20Classification%20%E6%A1%88%E4%BE%8B%E4%B8%80%EF%BC%9A%E7%A5%9E%E5%A5%87%E5%AE%9D%E8%B4%9D%E6%98%AF%E6%B0%B4%E7%B3%BB%E8%BF%98%E6%98%AF%E6%99%AE%E9%80%9A%E7%B3%BB%EF%BC%9F/</url>
     <content><![CDATA[<p>@<a href="分类问题 Classification">TOC</a></p>
@@ -187,30 +255,21 @@
         <category>机器学习基础-李宏毅</category>
       </categories>
       <tags>
-        <tag>机器学习</tag>
         <tag>李宏毅</tag>
+        <tag>机器学习</tag>
         <tag>分类问题</tag>
       </tags>
   </entry>
   <entry>
-    <title>为什么要Deep？深而不是宽</title>
-    <url>/2021/08/10/%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81Deep%EF%BC%9F%E6%B7%B1%E8%80%8C%E4%B8%8D%E6%98%AF%E5%AE%BD/</url>
-    <content><![CDATA[<p>@<a href="为什么要Deep？深而不是宽">TOC</a></p>
-<blockquote>
-<p><strong>Q：为什么要用要用深度？而不是广度？</strong><br>答：1.因为深度可以用少量的数据，就完成对数据的分类。<br>2.深度，每个层次都是基于上个层次得到的（其实就是学习的过程），我们可以将神经元的数量减少。如果层次很少的话，会导致神经元可能非常多。可以类比逻辑电路。<img src="https://img-blog.csdnimg.cn/3889abe5617e426d91f92e842ba3af83.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"></p>
-<h1 id="模组化"><a href="#模组化" class="headerlink" title="模组化"></a>模组化</h1><p>在比较浅层网络与深层网络时，要让“矮胖”的网络和“高瘦”的网络的参数数目相等，这样比较才公平。<br><strong>但即便是在深层网络参数较少的情况下，深层网络也会比浅层网络表现好。</strong><br>这是因为<font color="red"> 深层”其实相当于“模组化”</font>，第一个隐层是最基本的分类器，第二个隐层是用第一个隐层建造的分类器，以此类推。</p>
-<p><strong>举个栗子，为什么说深度好！</strong><br>左边第一幅图可以看到，我们需要分四个类，包括长发女，长发男，短发女，短发男。一共四类，其中长发男的数据样本很少，那区分这个类的能力就非常的弱。<br>这个时候，我们就可以先分为两个神经元，一个区分男女，一个区分长发短发，这样中间加一层，可以使得数据样本少的类 鉴定的效果更好。<br><img src="https://img-blog.csdnimg.cn/dc3ef77e42724c1ebbcb6d0d29067206.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><strong>对于分类一个图像来说，深度使得模块化。</strong><img src="https://img-blog.csdnimg.cn/81cf2b79b06440e789ad2a03937c7e2e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"></p>
-</blockquote>
-<h1 id="类比逻辑电路"><a href="#类比逻辑电路" class="headerlink" title="类比逻辑电路"></a>类比逻辑电路</h1><p><img src="https://img-blog.csdnimg.cn/8635e890e73f4834900ea683446b9f0a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"><br>浅层网络确实可以表示任意函数，但是使用深层结构更有效率。<br><strong>好比逻辑门电路，用两层逻辑门就可以实现任何布尔函数，但是用多层结构更简单、需要的逻辑门更少。</strong><br><img src="https://img-blog.csdnimg.cn/3889abe5617e426d91f92e842ba3af83.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"></p>
-<p>神经网络也是如此，单隐层网络可以表示任何连续函数，但是多层结构表示起来更简单、需要的神经元更少，<strong>所以比较不容易overfitting，或只需较少的data。</strong>而且，深层结构可以比较有效率地使用data。</p>
-<h1 id="类比图形"><a href="#类比图形" class="headerlink" title="类比图形"></a>类比图形</h1><p><img src="https://img-blog.csdnimg.cn/e4e96dfdc69b4c47b96640efa2f70be8.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"><br>1层hidden layer与3层hidden layer（相同数目的参数），3层的效果更好。<br>但理论上，3层可达到的效果，1层也能达到：要在1层learn的时候，target从真实label改为3层的output，这样1层的结果会接近3层的结果。</p>
-]]></content>
+    <title>各类 优化器(调参工具) 详解与选择</title>
+    <url>/2021/08/28/%E5%90%84%E7%B1%BB%20%E4%BC%98%E5%8C%96%E5%99%A8(%E8%B0%83%E5%8F%82%E5%B7%A5%E5%85%B7)%20%E8%AF%A6%E8%A7%A3%E4%B8%8E%E9%80%89%E6%8B%A9/</url>
+    <content><![CDATA[<p>@<a href="各类 优化器 详解与选择">TOC</a></p>
+<h1 id="sgd"><a href="#sgd" class="headerlink" title="sgd"></a>sgd</h1><h1 id="adam"><a href="#adam" class="headerlink" title="adam"></a>adam</h1>]]></content>
       <categories>
-        <category>机器学习基础-李宏毅</category>
+        <category>优化器</category>
       </categories>
       <tags>
-        <tag>李宏毅</tag>
-        <tag>深度学习</tag>
+        <tag>优化器</tag>
       </tags>
   </entry>
   <entry>
@@ -283,8 +342,8 @@
         <category>机器学习基础-李宏毅</category>
       </categories>
       <tags>
-        <tag>机器学习</tag>
         <tag>李宏毅</tag>
+        <tag>机器学习</tag>
       </tags>
   </entry>
   <entry>
@@ -335,8 +394,94 @@
         <category>机器学习基础-李宏毅</category>
       </categories>
       <tags>
-        <tag>机器学习</tag>
         <tag>李宏毅</tag>
+        <tag>机器学习</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>线性回归Regression 案例一：宝可梦进化CP值</title>
+    <url>/2021/07/31/%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92Regression%20%E6%A1%88%E4%BE%8B%E4%B8%80%EF%BC%9A%E5%AE%9D%E5%8F%AF%E6%A2%A6%E8%BF%9B%E5%8C%96CP%E5%80%BC/</url>
+    <content><![CDATA[<p>@<a href="线性回归Regression 案例一：宝可梦进化CP值">TOC</a></p>
+<blockquote>
+<p>本栗子：预测Pokemon精灵攻击力。<br>输入：进化前的CP值、物种（Bulbasaur）、血量（HP）、重量（Weight）、高度（Height）<br>输出：进化后的CP值</p>
+</blockquote>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/d53b2b95d30c7af9574c7a0bbaba2c82.png#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="实现回归的步骤（机器学习的步骤）"><a href="#实现回归的步骤（机器学习的步骤）" class="headerlink" title="实现回归的步骤（机器学习的步骤）"></a>实现回归的步骤（机器学习的步骤）</h1><h2 id="Step1-确定一个model-线性模型"><a href="#Step1-确定一个model-线性模型" class="headerlink" title="Step1 确定一个model - 线性模型"></a>Step1 确定一个model - 线性模型</h2><blockquote>
+<p>输入的特征包括：进化前的CP值（<em>Xcp</em>）、物种（Bulbasaur）（<em>Xs</em>）、血量（HP）（<em>Xhp</em>）、重量（Weight）（<em>Xw</em>）、高度（Height）（<em>Xh</em>）</p>
+</blockquote>
+<p>先从简单的<strong>单个特征</strong> 进化前的CP值（<em>Xcp</em>）开始（<strong>后面改进再考虑多个特征</strong>）。<br><img src="https://img-blog.csdnimg.cn/img_convert/5b4df493600379c7aa0372e103eb7d79.png#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="Step2-goodness-of-function（函数优化）——损失函数"><a href="#Step2-goodness-of-function（函数优化）——损失函数" class="headerlink" title="Step2 goodness of function（函数优化）——损失函数"></a>Step2 goodness of function（函数优化）——损失函数</h2><ol>
+<li>确定model后（案例为线性模型），开始训练数据（使用的为训练样本集）<img src="https://img-blog.csdnimg.cn/img_convert/ebd00bf7bee79841d6c35eac2865fd61.png#pic_center" alt="在这里插入图片描述"></li>
+<li>训练10个训练样本后得到10个的预测进化CP值（<em>y</em>）如下图所示。左侧为训练样本本身真实的进化CP值，右侧为横轴为进化前CP值（<em>Xcp</em>）<img src="https://img-blog.csdnimg.cn/img_convert/fbba4351217b730cd11ca92a7427cd51.png#pic_center" alt="在这里插入图片描述"></li>
+<li><strong>确定损失函数</strong>。损失函数用于评价一个模型的好坏。损失函数的值越小，那么模型越好。<strong>对于本案例，损失函数采用最简单的距离表示</strong>。即求<strong>实际进化后的CP值与模型预测的CP值差</strong>，来判定模型的好坏。<img src="https://img-blog.csdnimg.cn/img_convert/3abae7108681dbad20cc15a952d20bba.png#pic_center" alt="在这里插入图片描述"><ol>
+<li>List item</li>
+</ol>
+</li>
+</ol>
+<h2 id="Step3-best-function（找出最好的一个函数-即调参）——使用梯度下降法"><a href="#Step3-best-function（找出最好的一个函数-即调参）——使用梯度下降法" class="headerlink" title="Step3 best function（找出最好的一个函数 即调参）——使用梯度下降法"></a>Step3 best function（找出最好的一个函数 即调参）——使用梯度下降法</h2><ol>
+<li>案例采用<strong>梯度下降法</strong>来帮助选择 <em>w</em> 和 <em>b</em> 两个参数取何值时损失函数最小，也就意味着构建的模型越准确。 <img src="https://img-blog.csdnimg.cn/img_convert/7d75962cbe0b2dc3c54f370383912138.png#pic_center" alt="在这里插入图片描述"><blockquote>
+<p>什么是梯度下降法？梯度指的是？<br>………………………………………………………………………………………………………<br>梯度？<br>在<strong>单变量的函数</strong>中，梯度其实就是对应点<strong>函数的微分</strong>，代表着这个函数在<strong>某个给定点的切线的斜率</strong><br>在<strong>多变量函数</strong>中，梯度是一个<strong>向量</strong>，向量有方向，梯度的方向就指出了函数在给定点的上升最快的方向  <strong>即例如二维就是 偏导 i + 偏导 j</strong><br>………………………………………………………………………………………………………<br>梯度下降法(SGD  Stochastic gradient descent）？答： “下山最快路径”的一种算法<br>我们是尝试使用偏导来衡量函数随自变量的值变化关系，选择变化更为平缓的那一处  对应的 <em>w</em> 和 <em>b</em> 作为调整后的参数</p>
+</blockquote>
+</li>
+</ol>
+<h3 id="一维视角：只考虑一个参数-w"><a href="#一维视角：只考虑一个参数-w" class="headerlink" title="一维视角：只考虑一个参数 w"></a>一维视角：只考虑一个参数 <em>w</em></h3><p><img src="https://img-blog.csdnimg.cn/3c72961665a942ac87f066a129a30183.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<blockquote>
+<p>如上图  learning rate（学习率）：移动的步长 一般用η来表示<br>………………………………………………………………………………………………………<br>如何寻找一个最合适的 <em>w</em> ？<br>步骤1：随机在横轴上选取一个 <em>w0</em> 。<br>步骤2：计算微分，也就是当前的斜率，根据斜率来判定移动的方向。微分大于0应向右移动（增加 <em>w</em> ）；微分小于0向左移动（减少 <em>w</em> ）<br>步骤3：根据学习率，按步骤2得到的方向移动<br>重复步骤2和步骤3，直到找到<strong>最低点</strong>。横轴即对于的最佳 <em>w</em>  参数<br>………………………………………………………………………………………………………<br>如下图，是经过迭代多次后找到的最佳点（得是全局最优解） 。注：大部分损失函数都为正<br><img src="https://img-blog.csdnimg.cn/588186b690dd43c38a10a80600802ab0.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="二维视角：考虑两个参数-w-和-b"><a href="#二维视角：考虑两个参数-w-和-b" class="headerlink" title="二维视角：考虑两个参数 w 和 b"></a>二维视角：考虑两个参数 <em>w</em> 和 <em>b</em></h3><p><img src="https://img-blog.csdnimg.cn/55f2f295750242bfa35f9ac576602194.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>如何寻找一个最合适的 <em>w</em> ？<br>步骤1：随机在横轴上选取一个 <em>w0</em> ，<em>b0</em> 。<br>步骤2：计算各偏导，也就是当前偏导的斜率，根据斜率来判定移动的方向。微分大于0应向右移动（增加 <em>w</em> 或 <em>b</em>）；微分小于0向左移动（减少 <em>w</em> 或 <em>b</em>）<img src="https://img-blog.csdnimg.cn/6a082b40869947c2a0723b298cd36027.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>步骤3：根据学习率，按步骤2得到的方向移动<br>重复步骤2和步骤3，直到找到<strong>最低点</strong>。横轴即对于的最佳 <em>w</em> 和 <em>b</em>  参数</p>
+</blockquote>
+<p>二维情况：梯度下降法的效果<br>颜色约深的区域代表的损失函数越小？ <strong>为什么呢？</strong><br><img src="https://img-blog.csdnimg.cn/299d0d615f6640a6ae092e51579d09ea.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="梯度算法的优缺点"><a href="#梯度算法的优缺点" class="headerlink" title="梯度算法的优缺点"></a>梯度算法的优缺点</h3><blockquote>
+<p>总结一下梯度下降法：<br>　　　我们要解决使<strong>损失函数<em>L(w,b)</em></strong> 最小时参数的最佳值，梯度下降法是每次update参数值，直到损失函数最小时找到对应最佳的参数<em>w，b</em></p>
+</blockquote>
+<p><strong>缺点1</strong>：求解的未必是全局最优解，有可能是局部最优解。</p>
+<blockquote>
+<p><strong>用下山的例子讲</strong>：<br>　　　比如我们在一座大山上的某处位置，由于我们不知道怎么下山，于是决定走一步算一步，也就是在<strong>每走到一个位置的时候</strong>，<strong>求解当前位置的梯度</strong>，沿着<strong>梯度的负方向</strong>，也就是<strong>当前最陡峭的位置向下走一步</strong>，然后继续求解当前位置梯度，向这一步所在位置沿着最陡峭最易下山的位置走一步。这样一步步的走下去，一直走到觉得我们已经到了山脚。当然这样走下去，<strong>有可能我们不能走到山脚，而是到了某一个局部的山峰低处。</strong><br>………………………………………………………………………………………………………<br>　　　从上面的解释可以看出，<strong>梯度下降不一定能够找到全局的最优解，有可能是一个局部最优解</strong>。当然，如果损失函数是<strong>凸函数</strong>，梯度下降法得到的解就<strong>一定是</strong>全局最优解。</p>
+</blockquote>
+<p><strong>优点1</strong>：无论随机从哪个点出发，得到的最佳参数一定是同一组</p>
+<blockquote>
+<p><strong>用下山的例子讲</strong>：<br>　　　因为山只有一处是最低点，在确保能找到全局最优解的情况下，无论人从山上哪一点出发，一定能找到这特定一处的最低洼处。</p>
+</blockquote>
+<h2 id="Step4-回归结果分析"><a href="#Step4-回归结果分析" class="headerlink" title="Step4 回归结果分析"></a>Step4 回归结果分析</h2><blockquote>
+<p>经过上述三个步骤后，得到了<strong>训练后</strong>的“最佳参数<em>w</em>，<em>b</em>”，那么现在这个模型在<strong>测试集</strong>上是什么表现呢？<br>得到的结果是：<br><strong>测试集的误差比在训练集上得到的损失值大</strong> 这个事非常正常。因为你训练集里面可能有些数据是不典型的，同样测试集中很多也包含了训练集中没有的因素。所以一个函数模型在实际应用中，效果基本上时打折扣的。<strong>一般会采用两种方式来加强这个函数模型</strong>：<br>　　　select another model（选择另一个模型）即增加维度，增加高此项多项式<br>　　　consider the hidden factors（考虑其他隐藏因素）</p>
+</blockquote>
+<h3 id="优化模型方法一：增加高次项（一般用于拟合度不够的情况）"><a href="#优化模型方法一：增加高次项（一般用于拟合度不够的情况）" class="headerlink" title="优化模型方法一：增加高次项（一般用于拟合度不够的情况）"></a>优化模型方法一：增加高次项（一般用于拟合度不够的情况）</h3><p><strong>回到Step1</strong></p>
+<ol>
+<li>尝试二次项、三次项、四次项、五次项…… 右上图为训练集损失，下图是测试集的损失。第五次<strong>过拟合</strong>导致了，测试集损失度很高。<img src="https://img-blog.csdnimg.cn/c707638cef5c4d698813e6acfe4ec172.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/ce26490bbfc64ea6967cd7b8e1e8184d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/166aef516df14c339c45fee48a78e16a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/87e7491ce6a1464dad4c023dc9004274.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+<li><strong>选择合适的模型</strong>，即我到底要加到几次项呢？</li>
+</ol>
+<blockquote>
+<p>越复杂的模型所包含的函数也就越多，那么它包含理想模型的可能性也就越大，但是如果过分地去拟合理想模型，就会出现<strong>过拟合</strong>的情况。<br><img src="https://img-blog.csdnimg.cn/6a394ba6b4a648a994472d8969668601.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</blockquote>
+<ol>
+<li>横向比较各个多项次，训练集和测试集的失误。理论上，失误会随着高次项而变小，如果变大，则表示模型<strong>过拟合</strong>了。<img src="https://img-blog.csdnimg.cn/979417ba98f6475d941753e0cb71b91c.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>所以，如上图所示，在为3次的时候，训练集和测试集的误差差值最小。并且4次开始，以及存在过拟合现象了。因此本案例可选择3次项线性模型。</li>
+</ol>
+<h3 id="优化模型方法二：考虑其他隐藏因素"><a href="#优化模型方法二：考虑其他隐藏因素" class="headerlink" title="优化模型方法二：考虑其他隐藏因素"></a>优化模型方法二：考虑其他隐藏因素</h3><p><strong>回到Step1</strong></p>
+<blockquote>
+<p>输入的特征包括：进化前的CP值（<em>Xcp</em>）、物种（Bulbasaur）（<em>Xs</em>）、血量（HP）（<em>Xhp</em>）、重量（Weight）（<em>Xw</em>）、高度（Height）（<em>Xh</em>）<br>除了之前考虑的进化前的CP值（<em>Xcp</em>），其他均为隐藏因素<br>………………………………………………………………………………<br><strong>这里另外考虑的是神奇宝贝的种类</strong>？因为，有时候一个模型恰恰只能符合一种神奇宝贝，也就是<strong>不同神奇宝贝应该有不同的预测模型</strong>。<img src="https://img-blog.csdnimg.cn/72a4aadb2ba24aefb4584a8a8ca2801e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</blockquote>
+<ol>
+<li>不同的神奇宝贝有不同的预测模型<img src="https://img-blog.csdnimg.cn/46fe5297bddb46a4bd511a7cea422e3a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+<li>拟合这个模型的曲线，可以看出不同神奇宝贝拟合成了不同的类线性直线<img src="https://img-blog.csdnimg.cn/7a55f95269d642038715e355437600f2.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+<li>如果还考虑了其他隐藏元素。如图是横轴是对应的隐藏元素，纵轴是对应进化后的CP值。<img src="https://img-blog.csdnimg.cn/591a6aa5537443428687ba15886ab11d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+<li>如果都采用最高二次项，考虑所有其他的隐藏因素。该案例的数学模型就变成 如图所示的式子。<img src="https://img-blog.csdnimg.cn/0a80407d715e4dcc978bd86dee3451a3.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><blockquote>
+<p> 考虑更多的因素反而出现了过拟合的问题，<strong>说明有些因素跟本次实验的CP值预测没有关系</strong>！<br>………………………………………………………………………………<br><strong>过拟合这么讨厌，到底如何减少过拟合问题呢？往下看！</strong></p>
+</blockquote>
+</li>
+</ol>
+<h3 id="优化模型：防止过拟合（为损失函数加一个正则项）"><a href="#优化模型：防止过拟合（为损失函数加一个正则项）" class="headerlink" title="优化模型：防止过拟合（为损失函数加一个正则项）"></a>优化模型：防止过拟合（为损失函数加一个正则项）</h3><h4 id="正则项是什么"><a href="#正则项是什么" class="headerlink" title="正则项是什么?"></a>正则项是什么?</h4><blockquote>
+<p><strong>方法：正则化</strong>?<br>比如先考虑一个参数w，正则化就是在损失函数上加上一个与w（斜率）相关的值（正则项），那么要是loss function越小的话，w也会越小，w越小就使function更加平滑（function没那么大跳跃）<img src="https://img-blog.csdnimg.cn/7a87a38ed54c438c8af37860e982f775.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h4 id="正则化的缺点"><a href="#正则化的缺点" class="headerlink" title="正则化的缺点"></a>正则化的缺点</h4><p>正则化虽然能够减少过拟合的现象，但是因为加在损失函数后面的值是平白无故加上去的，所以正则化过度的话会导致<strong>bias偏差增大</strong>   ？？？？<img src="https://img-blog.csdnimg.cn/f4c9ea7efb144c8a89b7fee964b75fa8.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>1）实现参数的稀疏有什么好处吗？<br>一个好处是可以简化模型，避免过拟合。<strong>因为一个模型中真正重要的参数可能并不多，如果考虑所有的参数起作用，那么可以对训练数据可以预测的很好，但是对测试数据表现性能极差</strong>。另一个好处是参数变少可以使整个模型获得更好的可解释性。<br>2）参数值越小代表模型越简单吗？<br>是的。为什么参数越小，说明模型越简单呢，这是因为越复杂的模型，<strong>越是会尝试对所有的样本进行拟合，甚至包括一些异常样本点</strong>，这就容易造成在<strong>较小的区间里预测值产生较大的波动</strong>，这种较大的波动也反映了在这个区间里的<strong>导数很大</strong>，而<strong>只有较大的参数值才能产生较大的导数。因此复杂的模型，其参数值会比较大。</strong></p>
+</blockquote>
+<p><img src="https://img-blog.csdnimg.cn/9dcfac9366564857a226de8d73bf512e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+]]></content>
+      <categories>
+        <category>机器学习基础-李宏毅</category>
+      </categories>
+      <tags>
+        <tag>李宏毅</tag>
+        <tag>机器学习</tag>
+        <tag>线性回归</tag>
       </tags>
   </entry>
   <entry>
@@ -431,8 +576,8 @@
         <category>机器学习基础-李宏毅</category>
       </categories>
       <tags>
-        <tag>李宏毅</tag>
         <tag>深度学习</tag>
+        <tag>李宏毅</tag>
         <tag>反向传播</tag>
       </tags>
   </entry>
@@ -529,96 +674,10 @@
         <category>机器学习基础-李宏毅</category>
       </categories>
       <tags>
-        <tag>机器学习</tag>
         <tag>李宏毅</tag>
+        <tag>机器学习</tag>
         <tag>分类问题</tag>
         <tag>逻辑回归</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>线性回归Regression 案例一：宝可梦进化CP值</title>
-    <url>/2021/07/31/%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92Regression%20%E6%A1%88%E4%BE%8B%E4%B8%80%EF%BC%9A%E5%AE%9D%E5%8F%AF%E6%A2%A6%E8%BF%9B%E5%8C%96CP%E5%80%BC/</url>
-    <content><![CDATA[<p>@<a href="线性回归Regression 案例一：宝可梦进化CP值">TOC</a></p>
-<blockquote>
-<p>本栗子：预测Pokemon精灵攻击力。<br>输入：进化前的CP值、物种（Bulbasaur）、血量（HP）、重量（Weight）、高度（Height）<br>输出：进化后的CP值</p>
-</blockquote>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/d53b2b95d30c7af9574c7a0bbaba2c82.png#pic_center" alt="在这里插入图片描述"></p>
-<h1 id="实现回归的步骤（机器学习的步骤）"><a href="#实现回归的步骤（机器学习的步骤）" class="headerlink" title="实现回归的步骤（机器学习的步骤）"></a>实现回归的步骤（机器学习的步骤）</h1><h2 id="Step1-确定一个model-线性模型"><a href="#Step1-确定一个model-线性模型" class="headerlink" title="Step1 确定一个model - 线性模型"></a>Step1 确定一个model - 线性模型</h2><blockquote>
-<p>输入的特征包括：进化前的CP值（<em>Xcp</em>）、物种（Bulbasaur）（<em>Xs</em>）、血量（HP）（<em>Xhp</em>）、重量（Weight）（<em>Xw</em>）、高度（Height）（<em>Xh</em>）</p>
-</blockquote>
-<p>先从简单的<strong>单个特征</strong> 进化前的CP值（<em>Xcp</em>）开始（<strong>后面改进再考虑多个特征</strong>）。<br><img src="https://img-blog.csdnimg.cn/img_convert/5b4df493600379c7aa0372e103eb7d79.png#pic_center" alt="在这里插入图片描述"></p>
-<h2 id="Step2-goodness-of-function（函数优化）——损失函数"><a href="#Step2-goodness-of-function（函数优化）——损失函数" class="headerlink" title="Step2 goodness of function（函数优化）——损失函数"></a>Step2 goodness of function（函数优化）——损失函数</h2><ol>
-<li>确定model后（案例为线性模型），开始训练数据（使用的为训练样本集）<img src="https://img-blog.csdnimg.cn/img_convert/ebd00bf7bee79841d6c35eac2865fd61.png#pic_center" alt="在这里插入图片描述"></li>
-<li>训练10个训练样本后得到10个的预测进化CP值（<em>y</em>）如下图所示。左侧为训练样本本身真实的进化CP值，右侧为横轴为进化前CP值（<em>Xcp</em>）<img src="https://img-blog.csdnimg.cn/img_convert/fbba4351217b730cd11ca92a7427cd51.png#pic_center" alt="在这里插入图片描述"></li>
-<li><strong>确定损失函数</strong>。损失函数用于评价一个模型的好坏。损失函数的值越小，那么模型越好。<strong>对于本案例，损失函数采用最简单的距离表示</strong>。即求<strong>实际进化后的CP值与模型预测的CP值差</strong>，来判定模型的好坏。<img src="https://img-blog.csdnimg.cn/img_convert/3abae7108681dbad20cc15a952d20bba.png#pic_center" alt="在这里插入图片描述"><ol>
-<li>List item</li>
-</ol>
-</li>
-</ol>
-<h2 id="Step3-best-function（找出最好的一个函数-即调参）——使用梯度下降法"><a href="#Step3-best-function（找出最好的一个函数-即调参）——使用梯度下降法" class="headerlink" title="Step3 best function（找出最好的一个函数 即调参）——使用梯度下降法"></a>Step3 best function（找出最好的一个函数 即调参）——使用梯度下降法</h2><ol>
-<li>案例采用<strong>梯度下降法</strong>来帮助选择 <em>w</em> 和 <em>b</em> 两个参数取何值时损失函数最小，也就意味着构建的模型越准确。 <img src="https://img-blog.csdnimg.cn/img_convert/7d75962cbe0b2dc3c54f370383912138.png#pic_center" alt="在这里插入图片描述"><blockquote>
-<p>什么是梯度下降法？梯度指的是？<br>………………………………………………………………………………………………………<br>梯度？<br>在<strong>单变量的函数</strong>中，梯度其实就是对应点<strong>函数的微分</strong>，代表着这个函数在<strong>某个给定点的切线的斜率</strong><br>在<strong>多变量函数</strong>中，梯度是一个<strong>向量</strong>，向量有方向，梯度的方向就指出了函数在给定点的上升最快的方向  <strong>即例如二维就是 偏导 i + 偏导 j</strong><br>………………………………………………………………………………………………………<br>梯度下降法(SGD  Stochastic gradient descent）？答： “下山最快路径”的一种算法<br>我们是尝试使用偏导来衡量函数随自变量的值变化关系，选择变化更为平缓的那一处  对应的 <em>w</em> 和 <em>b</em> 作为调整后的参数</p>
-</blockquote>
-</li>
-</ol>
-<h3 id="一维视角：只考虑一个参数-w"><a href="#一维视角：只考虑一个参数-w" class="headerlink" title="一维视角：只考虑一个参数 w"></a>一维视角：只考虑一个参数 <em>w</em></h3><p><img src="https://img-blog.csdnimg.cn/3c72961665a942ac87f066a129a30183.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<blockquote>
-<p>如上图  learning rate（学习率）：移动的步长 一般用η来表示<br>………………………………………………………………………………………………………<br>如何寻找一个最合适的 <em>w</em> ？<br>步骤1：随机在横轴上选取一个 <em>w0</em> 。<br>步骤2：计算微分，也就是当前的斜率，根据斜率来判定移动的方向。微分大于0应向右移动（增加 <em>w</em> ）；微分小于0向左移动（减少 <em>w</em> ）<br>步骤3：根据学习率，按步骤2得到的方向移动<br>重复步骤2和步骤3，直到找到<strong>最低点</strong>。横轴即对于的最佳 <em>w</em>  参数<br>………………………………………………………………………………………………………<br>如下图，是经过迭代多次后找到的最佳点（得是全局最优解） 。注：大部分损失函数都为正<br><img src="https://img-blog.csdnimg.cn/588186b690dd43c38a10a80600802ab0.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="二维视角：考虑两个参数-w-和-b"><a href="#二维视角：考虑两个参数-w-和-b" class="headerlink" title="二维视角：考虑两个参数 w 和 b"></a>二维视角：考虑两个参数 <em>w</em> 和 <em>b</em></h3><p><img src="https://img-blog.csdnimg.cn/55f2f295750242bfa35f9ac576602194.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>如何寻找一个最合适的 <em>w</em> ？<br>步骤1：随机在横轴上选取一个 <em>w0</em> ，<em>b0</em> 。<br>步骤2：计算各偏导，也就是当前偏导的斜率，根据斜率来判定移动的方向。微分大于0应向右移动（增加 <em>w</em> 或 <em>b</em>）；微分小于0向左移动（减少 <em>w</em> 或 <em>b</em>）<img src="https://img-blog.csdnimg.cn/6a082b40869947c2a0723b298cd36027.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>步骤3：根据学习率，按步骤2得到的方向移动<br>重复步骤2和步骤3，直到找到<strong>最低点</strong>。横轴即对于的最佳 <em>w</em> 和 <em>b</em>  参数</p>
-</blockquote>
-<p>二维情况：梯度下降法的效果<br>颜色约深的区域代表的损失函数越小？ <strong>为什么呢？</strong><br><img src="https://img-blog.csdnimg.cn/299d0d615f6640a6ae092e51579d09ea.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="梯度算法的优缺点"><a href="#梯度算法的优缺点" class="headerlink" title="梯度算法的优缺点"></a>梯度算法的优缺点</h3><blockquote>
-<p>总结一下梯度下降法：<br>　　　我们要解决使<strong>损失函数<em>L(w,b)</em></strong> 最小时参数的最佳值，梯度下降法是每次update参数值，直到损失函数最小时找到对应最佳的参数<em>w，b</em></p>
-</blockquote>
-<p><strong>缺点1</strong>：求解的未必是全局最优解，有可能是局部最优解。</p>
-<blockquote>
-<p><strong>用下山的例子讲</strong>：<br>　　　比如我们在一座大山上的某处位置，由于我们不知道怎么下山，于是决定走一步算一步，也就是在<strong>每走到一个位置的时候</strong>，<strong>求解当前位置的梯度</strong>，沿着<strong>梯度的负方向</strong>，也就是<strong>当前最陡峭的位置向下走一步</strong>，然后继续求解当前位置梯度，向这一步所在位置沿着最陡峭最易下山的位置走一步。这样一步步的走下去，一直走到觉得我们已经到了山脚。当然这样走下去，<strong>有可能我们不能走到山脚，而是到了某一个局部的山峰低处。</strong><br>………………………………………………………………………………………………………<br>　　　从上面的解释可以看出，<strong>梯度下降不一定能够找到全局的最优解，有可能是一个局部最优解</strong>。当然，如果损失函数是<strong>凸函数</strong>，梯度下降法得到的解就<strong>一定是</strong>全局最优解。</p>
-</blockquote>
-<p><strong>优点1</strong>：无论随机从哪个点出发，得到的最佳参数一定是同一组</p>
-<blockquote>
-<p><strong>用下山的例子讲</strong>：<br>　　　因为山只有一处是最低点，在确保能找到全局最优解的情况下，无论人从山上哪一点出发，一定能找到这特定一处的最低洼处。</p>
-</blockquote>
-<h2 id="Step4-回归结果分析"><a href="#Step4-回归结果分析" class="headerlink" title="Step4 回归结果分析"></a>Step4 回归结果分析</h2><blockquote>
-<p>经过上述三个步骤后，得到了<strong>训练后</strong>的“最佳参数<em>w</em>，<em>b</em>”，那么现在这个模型在<strong>测试集</strong>上是什么表现呢？<br>得到的结果是：<br><strong>测试集的误差比在训练集上得到的损失值大</strong> 这个事非常正常。因为你训练集里面可能有些数据是不典型的，同样测试集中很多也包含了训练集中没有的因素。所以一个函数模型在实际应用中，效果基本上时打折扣的。<strong>一般会采用两种方式来加强这个函数模型</strong>：<br>　　　select another model（选择另一个模型）即增加维度，增加高此项多项式<br>　　　consider the hidden factors（考虑其他隐藏因素）</p>
-</blockquote>
-<h3 id="优化模型方法一：增加高次项（一般用于拟合度不够的情况）"><a href="#优化模型方法一：增加高次项（一般用于拟合度不够的情况）" class="headerlink" title="优化模型方法一：增加高次项（一般用于拟合度不够的情况）"></a>优化模型方法一：增加高次项（一般用于拟合度不够的情况）</h3><p><strong>回到Step1</strong></p>
-<ol>
-<li>尝试二次项、三次项、四次项、五次项…… 右上图为训练集损失，下图是测试集的损失。第五次<strong>过拟合</strong>导致了，测试集损失度很高。<img src="https://img-blog.csdnimg.cn/c707638cef5c4d698813e6acfe4ec172.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/ce26490bbfc64ea6967cd7b8e1e8184d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/166aef516df14c339c45fee48a78e16a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/87e7491ce6a1464dad4c023dc9004274.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
-<li><strong>选择合适的模型</strong>，即我到底要加到几次项呢？</li>
-</ol>
-<blockquote>
-<p>越复杂的模型所包含的函数也就越多，那么它包含理想模型的可能性也就越大，但是如果过分地去拟合理想模型，就会出现<strong>过拟合</strong>的情况。<br><img src="https://img-blog.csdnimg.cn/6a394ba6b4a648a994472d8969668601.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-</blockquote>
-<ol>
-<li>横向比较各个多项次，训练集和测试集的失误。理论上，失误会随着高次项而变小，如果变大，则表示模型<strong>过拟合</strong>了。<img src="https://img-blog.csdnimg.cn/979417ba98f6475d941753e0cb71b91c.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>所以，如上图所示，在为3次的时候，训练集和测试集的误差差值最小。并且4次开始，以及存在过拟合现象了。因此本案例可选择3次项线性模型。</li>
-</ol>
-<h3 id="优化模型方法二：考虑其他隐藏因素"><a href="#优化模型方法二：考虑其他隐藏因素" class="headerlink" title="优化模型方法二：考虑其他隐藏因素"></a>优化模型方法二：考虑其他隐藏因素</h3><p><strong>回到Step1</strong></p>
-<blockquote>
-<p>输入的特征包括：进化前的CP值（<em>Xcp</em>）、物种（Bulbasaur）（<em>Xs</em>）、血量（HP）（<em>Xhp</em>）、重量（Weight）（<em>Xw</em>）、高度（Height）（<em>Xh</em>）<br>除了之前考虑的进化前的CP值（<em>Xcp</em>），其他均为隐藏因素<br>………………………………………………………………………………<br><strong>这里另外考虑的是神奇宝贝的种类</strong>？因为，有时候一个模型恰恰只能符合一种神奇宝贝，也就是<strong>不同神奇宝贝应该有不同的预测模型</strong>。<img src="https://img-blog.csdnimg.cn/72a4aadb2ba24aefb4584a8a8ca2801e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-</blockquote>
-<ol>
-<li>不同的神奇宝贝有不同的预测模型<img src="https://img-blog.csdnimg.cn/46fe5297bddb46a4bd511a7cea422e3a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
-<li>拟合这个模型的曲线，可以看出不同神奇宝贝拟合成了不同的类线性直线<img src="https://img-blog.csdnimg.cn/7a55f95269d642038715e355437600f2.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
-<li>如果还考虑了其他隐藏元素。如图是横轴是对应的隐藏元素，纵轴是对应进化后的CP值。<img src="https://img-blog.csdnimg.cn/591a6aa5537443428687ba15886ab11d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
-<li>如果都采用最高二次项，考虑所有其他的隐藏因素。该案例的数学模型就变成 如图所示的式子。<img src="https://img-blog.csdnimg.cn/0a80407d715e4dcc978bd86dee3451a3.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><blockquote>
-<p> 考虑更多的因素反而出现了过拟合的问题，<strong>说明有些因素跟本次实验的CP值预测没有关系</strong>！<br>………………………………………………………………………………<br><strong>过拟合这么讨厌，到底如何减少过拟合问题呢？往下看！</strong></p>
-</blockquote>
-</li>
-</ol>
-<h3 id="优化模型：防止过拟合（为损失函数加一个正则项）"><a href="#优化模型：防止过拟合（为损失函数加一个正则项）" class="headerlink" title="优化模型：防止过拟合（为损失函数加一个正则项）"></a>优化模型：防止过拟合（为损失函数加一个正则项）</h3><h4 id="正则项是什么"><a href="#正则项是什么" class="headerlink" title="正则项是什么?"></a>正则项是什么?</h4><blockquote>
-<p><strong>方法：正则化</strong>?<br>比如先考虑一个参数w，正则化就是在损失函数上加上一个与w（斜率）相关的值（正则项），那么要是loss function越小的话，w也会越小，w越小就使function更加平滑（function没那么大跳跃）<img src="https://img-blog.csdnimg.cn/7a87a38ed54c438c8af37860e982f775.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h4 id="正则化的缺点"><a href="#正则化的缺点" class="headerlink" title="正则化的缺点"></a>正则化的缺点</h4><p>正则化虽然能够减少过拟合的现象，但是因为加在损失函数后面的值是平白无故加上去的，所以正则化过度的话会导致<strong>bias偏差增大</strong>   ？？？？<img src="https://img-blog.csdnimg.cn/f4c9ea7efb144c8a89b7fee964b75fa8.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>1）实现参数的稀疏有什么好处吗？<br>一个好处是可以简化模型，避免过拟合。<strong>因为一个模型中真正重要的参数可能并不多，如果考虑所有的参数起作用，那么可以对训练数据可以预测的很好，但是对测试数据表现性能极差</strong>。另一个好处是参数变少可以使整个模型获得更好的可解释性。<br>2）参数值越小代表模型越简单吗？<br>是的。为什么参数越小，说明模型越简单呢，这是因为越复杂的模型，<strong>越是会尝试对所有的样本进行拟合，甚至包括一些异常样本点</strong>，这就容易造成在<strong>较小的区间里预测值产生较大的波动</strong>，这种较大的波动也反映了在这个区间里的<strong>导数很大</strong>，而<strong>只有较大的参数值才能产生较大的导数。因此复杂的模型，其参数值会比较大。</strong></p>
-</blockquote>
-<p><img src="https://img-blog.csdnimg.cn/9dcfac9366564857a226de8d73bf512e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-]]></content>
-      <categories>
-        <category>机器学习基础-李宏毅</category>
-      </categories>
-      <tags>
-        <tag>机器学习</tag>
-        <tag>李宏毅</tag>
-        <tag>线性回归</tag>
       </tags>
   </entry>
   <entry>
@@ -763,8 +822,8 @@
         <category>机器学习基础-李宏毅</category>
       </categories>
       <tags>
-        <tag>李宏毅</tag>
         <tag>深度学习</tag>
+        <tag>李宏毅</tag>
         <tag>半监督学习</tag>
       </tags>
   </entry>
@@ -888,8 +947,8 @@
         <category>机器学习基础-李宏毅</category>
       </categories>
       <tags>
-        <tag>李宏毅</tag>
         <tag>深度学习</tag>
+        <tag>李宏毅</tag>
         <tag>CNN</tag>
         <tag>卷积核</tag>
         <tag>过滤器</tag>
@@ -1090,8 +1149,8 @@ PCA后选择4个主成分，每个主成分是一个6维向量（因为原来每
         <category>机器学习基础-李宏毅</category>
       </categories>
       <tags>
-        <tag>李宏毅</tag>
         <tag>深度学习</tag>
+        <tag>李宏毅</tag>
         <tag>无监督学习</tag>
         <tag>聚类</tag>
         <tag>降维</tag>
@@ -1227,8 +1286,8 @@ L2 learn的结果：参数值平均来讲比较小。
         <category>机器学习基础-李宏毅</category>
       </categories>
       <tags>
-        <tag>李宏毅</tag>
         <tag>深度学习</tag>
+        <tag>李宏毅</tag>
         <tag>模型优化</tag>
       </tags>
   </entry>
