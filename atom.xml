@@ -50,7 +50,7 @@
     <link href="http://example.com/2021/08/29/keras%20%E5%8C%85%E6%96%B9%E6%B3%95%E9%9B%86%E5%90%88/"/>
     <id>http://example.com/2021/08/29/keras%20%E5%8C%85%E6%96%B9%E6%B3%95%E9%9B%86%E5%90%88/</id>
     <published>2021-08-29T02:18:01.000Z</published>
-    <updated>2021-08-30T02:45:09.137Z</updated>
+    <updated>2021-08-30T02:55:17.890Z</updated>
     
     <content type="html"><![CDATA[<p>@<a href="keras 包方法集合">TOC</a></p><h1 id="keras-util-库-np-utils"><a href="#keras-util-库-np-utils" class="headerlink" title="keras.util 库  np_utils"></a>keras.util 库  np_utils</h1><h2 id="np-utils-to-categorical"><a href="#np-utils-to-categorical" class="headerlink" title="np_utils.to_categorical"></a>np_utils.to_categorical</h2><p>np_utils.to_categorical用于将标签转化为形如(nb_samples, nb_classes)的二值序列。</p><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">train_labels_hot = np_utils.to_categorical(train_labels,num_classes=<span class="number">10</span>)</span><br></pre></td></tr></table></figure><p>如将 $[1,2,3,……4]$ 转化成：<br><img src="https://img-blog.csdnimg.cn/379535ca64bc4e5987673ecd12af0c75.png#pic_center" alt="在这里插入图片描述"><br>这样的形态。</p>]]></content>
     
@@ -68,11 +68,7 @@
     
     <category term="python" scheme="http://example.com/tags/python/"/>
     
-    <category term="Numpy" scheme="http://example.com/tags/Numpy/"/>
-    
-    <category term="Pandas" scheme="http://example.com/tags/Pandas/"/>
-    
-    <category term="Matplotlib" scheme="http://example.com/tags/Matplotlib/"/>
+    <category term="Keras" scheme="http://example.com/tags/Keras/"/>
     
   </entry>
   
