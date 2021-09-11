@@ -1,0 +1,344 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>神经网络与深度学习 邱锡鹏 学习笔记（机器学习） | 一只柴犬</title><meta name="keywords" content="深度学习,机器学习,邱锡鹏,神经网络"><meta name="author" content="凯凯超人"><meta name="copyright" content="凯凯超人"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="@TOC 机器学习机器学习看作一个从有限、高维、有噪声的数据上得到更一般性规律的泛化问题． 机器学习的三个基本要素  模型 学习准则 优化算法  模型我们不知道 输入和输出是如何对应联系的，也就是数学函数究竟是什么。 我们假设一个可能的函数集合 $ℱ$ ，称为 假设空间 。 我们根据 观测 各函数在测试集 $𝒟$ 的表现，从中选择更理想的假设模型。常用的假设空间分为 线性和非线性 两种 学习准则">
+<meta property="og:type" content="article">
+<meta property="og:title" content="神经网络与深度学习 邱锡鹏 学习笔记（机器学习）">
+<meta property="og:url" content="http://example.com/2021/09/11/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%20%E9%82%B1%E9%94%A1%E9%B9%8F%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%EF%BC%89/index.html">
+<meta property="og:site_name" content="一只柴犬">
+<meta property="og:description" content="@TOC 机器学习机器学习看作一个从有限、高维、有噪声的数据上得到更一般性规律的泛化问题． 机器学习的三个基本要素  模型 学习准则 优化算法  模型我们不知道 输入和输出是如何对应联系的，也就是数学函数究竟是什么。 我们假设一个可能的函数集合 $ℱ$ ，称为 假设空间 。 我们根据 观测 各函数在测试集 $𝒟$ 的表现，从中选择更理想的假设模型。常用的假设空间分为 线性和非线性 两种 学习准则">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/04d5fbd531af9230e3cb8c723ab59f9a.jpeg">
+<meta property="article:published_time" content="2021-09-11T07:46:01.000Z">
+<meta property="article:modified_time" content="2021-09-11T07:46:43.906Z">
+<meta property="article:author" content="凯凯超人">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="机器学习">
+<meta property="article:tag" content="邱锡鹏">
+<meta property="article:tag" content="神经网络">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/04d5fbd531af9230e3cb8c723ab59f9a.jpeg"><link rel="shortcut icon" href="/img/favicon2.png"><link rel="canonical" href="http://example.com/2021/09/11/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%20%E9%82%B1%E9%94%A1%E9%B9%8F%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%EF%BC%89/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '神经网络与深度学习 邱锡鹏 学习笔记（机器学习）',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-09-11 15:46:43'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/mycss.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/StaticFile_HEXO@latest/butterfly/css/pool.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/StaticFile_HEXO@latest/butterfly/css/iconfont.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/css/flink.min.css"><meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="一只柴犬" type="application/atom+xml">
+</head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/admin.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">25</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">34</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 清单</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/%E9%9F%B3%E4%B9%90"><i class="fa-fw /music/"></i><span> 0</span></a></li><li><a class="site-page child" href="/%E7%94%B5%E5%BD%B1"><i class="fa-fw /movies/"></i><span> 1</span></a></li><li><a class="site-page child" href="/%E7%85%A7%E7%89%87"><i class="fa-fw /Gallery/"></i><span> 2</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/04d5fbd531af9230e3cb8c723ab59f9a.jpeg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">一只柴犬</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 清单</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/%E9%9F%B3%E4%B9%90"><i class="fa-fw /music/"></i><span> 0</span></a></li><li><a class="site-page child" href="/%E7%94%B5%E5%BD%B1"><i class="fa-fw /movies/"></i><span> 1</span></a></li><li><a class="site-page child" href="/%E7%85%A7%E7%89%87"><i class="fa-fw /Gallery/"></i><span> 2</span></a></li></ul></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">神经网络与深度学习 邱锡鹏 学习笔记（机器学习）</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-09-11T07:46:01.000Z" title="发表于 2021-09-11 15:46:01">2021-09-11</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-09-11T07:46:43.906Z" title="更新于 2021-09-11 15:46:43">2021-09-11</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80-%E9%82%B1%E9%94%A1%E9%B9%8F/">深度学习基础-邱锡鹏</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="神经网络与深度学习 邱锡鹏 学习笔记（机器学习）"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>@<a href="神经网络与深度学习 邱锡鹏 学习笔记（机器学习）">TOC</a></p>
+<h1 id="机器学习"><a href="#机器学习" class="headerlink" title="机器学习"></a>机器学习</h1><p>机器学习看作一个从有限、高维、有噪声的数据上得到更一般性规律的泛化问题．<br><img src="https://img-blog.csdnimg.cn/b5f2ae1f8a044527984d6b7a4e1d2190.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="机器学习过程"></p>
+<h2 id="机器学习的三个基本要素"><a href="#机器学习的三个基本要素" class="headerlink" title="机器学习的三个基本要素"></a>机器学习的三个基本要素</h2><p><img src="https://img-blog.csdnimg.cn/0e48590c034949c6917b8eeeb555ad30.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_19,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="机器学习三要素"></p>
+<ul>
+<li>模型</li>
+<li>学习准则</li>
+<li>优化算法</li>
+</ul>
+<h2 id="模型"><a href="#模型" class="headerlink" title="模型"></a>模型</h2><p>我们不知道 输入和输出是如何对应联系的，也就是数学函数究竟是什么。 我们假设一个可能的函数集合 $ℱ$ ，称为 假设空间 。 我们根据 观测 各函数在测试集 $𝒟$ 的表现，从中选择更理想的假设模型。<br>常用的假设空间分为 <strong>线性和非线性</strong> 两种</p>
+<h2 id="学习准则"><a href="#学习准则" class="headerlink" title="学习准则"></a>学习准则</h2><p>令训练集 是由 $𝑁$ 个独立同分布的样本组成，即每个样本 (𝒙, 𝑦) ∈ 𝒳 × 𝒴 是从 𝒳  和 𝒴  的联合空间中按照某个未知分布 $𝑝_{r}(𝒙, 𝑦)$ 独立地随机产生的 。</p>
+<p>学习准则包括：</p>
+<ul>
+<li>经验风险最小化</li>
+<li>结构风险最小化</li>
+<li>最大似然估计</li>
+<li>最大后验估计</li>
+</ul>
+<h3 id="损失函数"><a href="#损失函数" class="headerlink" title="损失函数"></a>损失函数</h3><p>用来量化模型预测和真实标签之间的差异</p>
+<h4 id="0-1损失函数"><a href="#0-1损失函数" class="headerlink" title="0-1损失函数"></a>0-1损失函数</h4><h4 id="平方损失函数"><a href="#平方损失函数" class="headerlink" title="平方损失函数"></a>平方损失函数</h4><p>经常用在预测标签 $𝑦$ 为实数值的任务中</p>
+<pre><code>                $$L(y,f(x;θ)) = \frac&#123;1&#125;&#123;2&#125;(y-f(x;θ))$$
+</code></pre><font color="red">**平方损失函数一般不适用于分类问题** </font>
+#### 交叉熵损失函数
+一般用于分类问题
+$$L(y,f(x;θ)) =-\sum_{c=1}^{C}y_{c}\log f_{c}(x;θ)$$
+
+例如，对于一个三分类的问题，一个样本的标签向量为 $𝒚 = [0, 0, 1]^{T}$，模型预测的标签分布为 $f(x;θ) = [0.3, 0.3, 0.4]^{T}$。
+则它们的交叉熵为 
+ $−(0 × log(0.3) + 0 ×log(0.3) + 1 × log(0.4)) = − log(0.4)$
+
+### 过拟合和欠拟合
+
+> **过拟合：**
+> 模型在训练集上错误率 很低，但是在未知数据上错误率很高，这就是所谓的过拟合。
+> 过拟合的 3种 方法： 参数在过拟合之前就停止更新；正则化Regularization；
+dropout
+
+
+> **欠拟合：**
+> 模型不能很好地拟合训练数据，在训练集上的错误率比较高．欠拟合一般是由于模型能力不足造成的。
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/0bb493818f134cfe924b74c3f5e9a772.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center)
+
+### 优化算法
+#### 参数与超参数
+
+ - 参数：模型 𝑓(𝒙; 𝜃)中的 𝜃 称为模型的参数，可以通过优化算法进行学习
+ - 超参数：用来定义模型结构或优化策略的。 <font color="blue">常见的超参数有：聚类算法中的类别个数、梯度下降法中的步长、正则化项的系数、神经网络的层数、支持向量机中的核函数等 </font>
+
+
+<p>参数的优化一般都是由优化器优化，而超参数优化是机器学习的 一个经验性很强的技术 ，通常是按照人的经验设定，或者通过搜索的方法对一组超参数组合进行不断试错调整。</p>
+<h4 id="批量梯度下降法"><a href="#批量梯度下降法" class="headerlink" title="批量梯度下降法"></a>批量梯度下降法</h4><p>缺点在于 局部最优问题<br>用下面的迭代公式来计算计算训练集 𝒟 上风险函数的最小值：<br><img src="https://img-blog.csdnimg.cn/4703fad601d345569a9950cc173f436d.png#pic_center" alt="批量梯度下降法"><br>𝛼 一般称为学习率（Learning Rate）．</p>
+<blockquote>
+<p>批量梯度下降法在  每次迭代时<strong>需要计算每个样本（也就是所有样本）</strong>上损失函数的梯度并求和。当训练集中的样本数量 𝑁 很大时，空间复杂度比较高，每次迭代的计算开销也很大．</p>
+</blockquote>
+<h4 id="随机梯度下降法"><a href="#随机梯度下降法" class="headerlink" title="随机梯度下降法"></a>随机梯度下降法</h4><p>缺点在于 局部最优问题，但相比于批量，更容易脱离局部最优</p>
+<blockquote>
+<p>为了减少每次迭代的计算复杂度，我们也可以在每次迭代时<strong>只采集一个样本</strong>，计算这个样本损失函数的梯度并更新参数，即随机梯度下降法。当经过足够次数的迭代时，随机梯度下降 也可以收敛到局部最优解。<br><img src="https://img-blog.csdnimg.cn/4770f90631bb4ef3aa53847f7242a206.png#pic_center" alt="随机梯度下降法"></p>
+<h4 id="小批量梯度下降法"><a href="#小批量梯度下降法" class="headerlink" title="小批量梯度下降法"></a>小批量梯度下降法</h4><p><font color="red">现在 大规模的机器学习 常用这个。</font><br><strong>利用了计算机的并行计算能力</strong><br>每次迭代时，我们随机选取一小部分训练样本来计算梯度并更新参数，这样既可以兼顾随机梯度下降法的优点，也可以提高训练效率。<br><img src="https://img-blog.csdnimg.cn/36fa218d071f4a399d141fa6641232ae.png#pic_center" alt="小批量梯度下降法"></p>
+<h1 id="机器学习的简单示例——线性回归"><a href="#机器学习的简单示例——线性回归" class="headerlink" title="机器学习的简单示例——线性回归"></a>机器学习的简单示例——线性回归</h1><p>自变量数量 为1时称为 <strong>简单回归</strong>， 自变量数量大于1时称为 <strong>多元回归</strong>．</p>
+<script type="math/tex; mode=display">𝑓(𝒙; 𝒘) = 𝒘^{T}𝒙</script></blockquote>
+<h2 id="不明白-先跳过"><a href="#不明白-先跳过" class="headerlink" title="不明白 先跳过"></a>不明白 先跳过</h2><h1 id="偏差-方差分解"><a href="#偏差-方差分解" class="headerlink" title="偏差- 方差分解"></a>偏差- 方差分解</h1><p>其用在，对如何对模型的拟合能力和复杂度之间取得一个良好的平衡，偏差与方差起这很好的分析和指导作用。</p>
+<p>对于单个样本 𝒙，不同训练集 𝒟 得到模型 $𝑓_{D}(𝒙)$ 和最优模型 $𝑓^{*}(𝒙)$ 的期望  差距为：<br><img src="https://img-blog.csdnimg.cn/0568101873af46f9ac794e591d7cfb19.png#pic_center" alt="在这里插入图片描述"></p>
+<ul>
+<li>偏差：指一个模型在 <font color="red">不同训练集</font> 上的<strong>平均性能和最优模型的差异</strong>，可以用来衡量一个模型的<strong>拟合能力</strong></li>
+<li>方差：一个模型在不同训练集上的差异 ，可以用来衡量一个模型是否容易过拟合 ．</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/99942f3b15814cacbb5dcfb5a53cb056.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_9,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="机器学习模型的四种偏差和方差组合情况"><br>每个图的中心点为<br>最优模型 $𝑓^{*}(𝒙)$，黑点为不同训练集𝐷 上得到的模型 $𝑓_{D}(𝒙)$</p>
+<ul>
+<li>高偏差<strong>低方差</strong>的情况，表示模型的泛化能力很好，但<strong>拟合能力不足</strong></li>
+<li>低偏差<strong>高方差</strong>的情况，表示模型的<strong>拟合能力很好</strong>，但泛化能力比较差．当训练数据比较少时会导致过拟合</li>
+</ul>
+<p>总结的来看：<br>模型在<strong>训练集</strong>上的错误率比较高时，说明模型的<strong>拟合能力不够</strong>，<strong>偏差比较高</strong>。这种情况可以通过</p>
+<ul>
+<li>增加数据特征</li>
+<li>提高模型复杂度</li>
+<li>减小正则化系数</li>
+</ul>
+<p>模型在训练集上的错误率比较低，但验证集上的错误率比较高时，说明模型过拟合，方差比较高．这种情况可以通过</p>
+<ul>
+<li>降低模型复杂度</li>
+<li>加大正则化系数</li>
+<li>引入先验</li>
+<li>此外，还有一种有效降低方差的方法为<strong>集成模型</strong>，即通过多个高方差模型的平均来降低方差．</li>
+</ul>
+<h1 id="学习算法分类"><a href="#学习算法分类" class="headerlink" title="学习算法分类"></a>学习算法分类</h1><p>按照训练样本提供的信息以及反馈方式的不同，将机器学习算法分为以下几类：</p>
+<h2 id="监督学习"><a href="#监督学习" class="headerlink" title="监督学习"></a>监督学习</h2><p>机器学习的特征 𝒙 和标签 𝑦 之间可以用 数学模型表示出来，并且训练集中每个样本都有标签。（数据集标签一般都需要由人工进行标注，成本很高）<br>根据标签的类型还可以分为：</p>
+<ul>
+<li>回归。 标签 𝑦 与 模型的输出 都是连续值</li>
+<li>分类。 标签 𝑦 是离散的类别（符号）。这种模型又叫做 分类器 。 分类问题可以分为 二分类 多分类。</li>
+<li>结构化学习。 特殊的分类问题。标签 𝒚 通常是结构化的对象，比如序列、树或图等。 由于结构化学习的输出空间比较大，因此我们一般定义一个联合特征空间，将 𝒙 ,  𝒚 映射为该空间中的联合特征向量 𝜙(𝒙, 𝒚)，预测模型可以写为 <img src="https://img-blog.csdnimg.cn/e6f1ad9f44424166b35a7bf4def1dbb4.png#pic_center" alt="在这里插入图片描述"><br>其中 Gen(𝒙) 表示输入 𝒙 的所有可能的输出目标集合．计算 arg max 的过程也称为<strong>解码</strong>（Decoding）过程，一般通过<strong>动态规划</strong>的方法来计算。</li>
+</ul>
+<h2 id="无监督学习"><a href="#无监督学习" class="headerlink" title="无监督学习"></a>无监督学习</h2><p> 是指从不包含目标标签的训练样本中自动学习到一些有价值的信息。典型的无监督学习问题有 </p>
+<ul>
+<li>聚类</li>
+<li>密度估计</li>
+<li>特征学习</li>
+<li>降维</li>
+</ul>
+<h2 id="强化学习"><a href="#强化学习" class="headerlink" title="强化学习"></a>强化学习</h2><p> 是一类通过交互来学习的机器学习算法．在强化学习中，智能体根据环境的状态做出一个动作，并得到即时或延时的奖励．智能体在和环境的交互中不断学习并调整策略，以取得最大化的期望总回报．</p>
+<h2 id="弱监督和半监督"><a href="#弱监督和半监督" class="headerlink" title="弱监督和半监督"></a>弱监督和半监督</h2><p>弱监督学习和半监督学习的方法，希望从大规模的无标注数据中充分挖掘有用的信息，降低对标注样本数量的要求。</p>
+<p>强化学习和监督学习的不同在于，强化学习不需要显式地以“输入/输出对”的方式给出训练样本，是一种在线的学习机制。</p>
+<h1 id="数据的特征表示"><a href="#数据的特征表示" class="headerlink" title="数据的特征表示"></a>数据的特征表示</h1><p><img src="https://img-blog.csdnimg.cn/deb2a7eee01647089fa86ebbd5f6acd8.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<p>需要将这些不同类型的数据转换为向量表示 。</p>
+<p>如何选取有效的特征，具体可分为两种：特征选择和特征抽取。 <strong>传统的是和预测模型的学习分离的。</strong></p>
+<h2 id="特征选择"><a href="#特征选择" class="headerlink" title="特征选择"></a>特征选择</h2><p>特征选择就是保留有用特征，移除冗余或无关的特征。<br>方法包括 子集搜索和 L1正则化 </p>
+<h3 id="子集搜索"><a href="#子集搜索" class="headerlink" title="子集搜索"></a>子集搜索</h3><ul>
+<li>过滤式方法：不依赖具体机器学习模型的特征选择方法。每次增加最有信息量的特征，或删除最没有信息量的特征。</li>
+<li>包裹式方法（Wrapper Method）是使用后续机器学习模型的准确率作为评价来选择一个特征子集的方法．每次增加对后续机器学习模型最有用的特征，或删除对后续机器学习任务最无用的特征。</li>
+</ul>
+<h3 id="L1正则化"><a href="#L1正则化" class="headerlink" title="L1正则化"></a>L1正则化</h3><p>由于 L1 正则化会导致稀疏特征，因此间接实现了特征选择．</p>
+<h2 id="特征抽取"><a href="#特征抽取" class="headerlink" title="特征抽取"></a>特征抽取</h2><p> 构造一个新的特征空间，并将原始特征投影在新的空间中得到新的表示。 其方法分为 <strong>有监督和无监督</strong>两类。</p>
+<ul>
+<li><strong>监督</strong>的特征学习的目标是抽取对一个特定的预测任务最有用的特征，比如线性判别分析。</li>
+<li><strong>无监督</strong>的特征学习和具体任务无关，其目标通常是减少冗余信息和噪声，比如<strong>主成分分析PCA</strong>和<strong>自编码器 AE</strong>。</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><img src="https://img-blog.csdnimg.cn/502589206ad64f6898d51126bd9233ba.png#pic_center" alt="传统的特征选择和特征抽取方法"><br>特征选择和特征抽取的优点是可以用较少的特征来表示原始特征中的大部分相关信息，去掉噪声信息，并进而提高计算效率和减小维度灾难。<br>对于很多没有正则化的模型，特征选择和特征抽取非常必要。 经过特征选择或特征抽取后，特征的数量一般会减少，因此特征选择和特征抽取。 也经常称为<strong>维数约减或降维</strong>。</p>
+<h1 id="模型的评价指标"><a href="#模型的评价指标" class="headerlink" title="模型的评价指标"></a>模型的评价指标</h1><ul>
+<li>准确率（Accuracy）</li>
+<li>错误率（Error Rate）： 1 - 准确率</li>
+<li>查准率（Precision）</li>
+<li>查全率（Recall）</li>
+<li>F值（F Measure）</li>
+</ul>
+<h2 id="如何理解-精确率、召回率和F值"><a href="#如何理解-精确率、召回率和F值" class="headerlink" title="如何理解 精确率、召回率和F值"></a>如何理解 精确率、召回率和F值</h2><p>模型在测试集上的结果可以分为以下四种情况：<br>比如我们现在 预测标签 C</p>
+<ul>
+<li>真正例（TP）：样本的预测与实际标签相同</li>
+<li>假负例（FN）：样本实际标签为C，模型预测错了</li>
+<li>假正例（FP）：样本实际标签不是C，但模型预测成C了</li>
+<li>真负例（TN）：样本实际为其他类，模型也预测为其他类</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/e157318baff446ce9215cf7854120df2.png#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="查准率"><a href="#查准率" class="headerlink" title="查准率"></a>查准率</h3><p>类别 𝑐 的查准率  是所有预测为 类别C 的样本中 预测正确  的比例<br>精确率 $P_{C}$ 的计算 公式为：</p>
+<script type="math/tex; mode=display">P_{C} = \frac{TP_{c}}{TP_{c}+FP_{c}}</script><h3 id="查全率"><a href="#查全率" class="headerlink" title="查全率"></a>查全率</h3><p>类别𝑐的查全率 是所有真实标签为 类别𝑐 的样本中预测正确的比例：</p>
+<script type="math/tex; mode=display">R_{C} = \frac{TP_{c}}{TP_{c}+FN_{c}}</script><h3 id="F值"><a href="#F值" class="headerlink" title="F值"></a>F值</h3><p>F值（F Measure）是一个综合指标，为精确率和召回率的调和平均：</p>
+<script type="math/tex; mode=display">F_{C} = \frac{(1+β^{2})×P_{C}×R_{C}}{β^{2}×P_{C}+R_{C}}</script><p>其中 𝛽 用于平衡精确率和召回率的重要性，一般取值为1．𝛽 = 1时的F值称为 <strong>F1 值</strong>，是精确率和召回率的调和平均．</p>
+<h2 id="宏平均和微平均"><a href="#宏平均和微平均" class="headerlink" title="宏平均和微平均"></a>宏平均和微平均</h2><p>为了计算分类算法在<strong>所有类别上的总体查准率、查全率和 F1值</strong>，经常使用两种平均方法，分别称为 宏平均 和 微平均</p>
+<ul>
+<li>宏平均是每一类的性能指标的算术平均值</li>
+<li>微平均是每一个样本的性能指标的算术平均值</li>
+</ul>
+<h1 id="理论和定理"><a href="#理论和定理" class="headerlink" title="理论和定理"></a>理论和定理</h1><h2 id="PAC学习理论："><a href="#PAC学习理论：" class="headerlink" title="PAC学习理论："></a>PAC学习理论：</h2><p>指该学习算法能够在多项式时间内从合理数量的训练数据中学习到一个近似正确的𝑓(𝒙)．</p>
+<h2 id="没有免费午餐定理"><a href="#没有免费午餐定理" class="headerlink" title="没有免费午餐定理"></a>没有免费午餐定理</h2><p>没有免费午餐定理   就是不存在一种机器学习算法适合于任何领域或任务。</p>
+<h2 id="奥卡姆剃刀原理"><a href="#奥卡姆剃刀原理" class="headerlink" title="奥卡姆剃刀原理"></a>奥卡姆剃刀原理</h2><p>简单的模型泛化能力更好．如果有两个性能相近的模型，我们应该选择<strong>更简单的模型</strong>。<br>因此，在机器学习的学习准则上，我们经常会引入参数正则化来限制模型能力，避免过拟合．</p>
+<h2 id="丑小鸭定理"><a href="#丑小鸭定理" class="headerlink" title="丑小鸭定理"></a>丑小鸭定理</h2><p>世界上不存在相似性的客观标准，一切相似性的标准都是主观的</p>
+<h2 id="归纳偏置"><a href="#归纳偏置" class="headerlink" title="归纳偏置"></a>归纳偏置</h2><p>预测模型前，先假设。<br>比如在最近邻分类器中，我们会假设在特征空间中，一个小的局部区域中的大部分样本同属一类。<br>在朴素贝叶斯分类器中，我们会假设每个特征的条件概率是互相独立的。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">凯凯超人</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2021/09/11/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%20%E9%82%B1%E9%94%A1%E9%B9%8F%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%EF%BC%89/">http://example.com/2021/09/11/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%20%E9%82%B1%E9%94%A1%E9%B9%8F%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%EF%BC%89/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">一只柴犬</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">深度学习</a><a class="post-meta__tags" href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a><a class="post-meta__tags" href="/tags/%E9%82%B1%E9%94%A1%E9%B9%8F/">邱锡鹏</a><a class="post-meta__tags" href="/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/">神经网络</a></div><div class="post_share"><div class="social-share" data-image="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/04d5fbd531af9230e3cb8c723ab59f9a.jpeg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2021/09/10/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E7%AC%AC%E4%B8%80%E7%AB%A0%EF%BC%89/"><img class="next-cover" src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/123345.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">神经网络与深度学习 学习笔记（第一章）</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2021/09/10/神经网络与深度学习 学习笔记（第一章）/" title="神经网络与深度学习 学习笔记（第一章）"><img class="cover" src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/123345.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-09-10</div><div class="title">神经网络与深度学习 学习笔记（第一章）</div></div></a></div><div><a href="/2021/08/10/为什么要Deep？深而不是宽/" title="为什么要Deep？深而不是宽"><img class="cover" src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/4.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-08-10</div><div class="title">为什么要Deep？深而不是宽</div></div></a></div><div><a href="/2021/08/07/深度学习 Deep Learning 基础/" title="深度学习 Deep Learning 基础"><img class="cover" src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/1.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-08-07</div><div class="title">深度学习 Deep Learning 基础</div></div></a></div><div><a href="/2021/08/17/半监督学习 Semi-Supervised/" title="半监督学习 Semi-Supervised"><img class="cover" src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/5.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-08-17</div><div class="title">半监督学习 Semi-Supervised</div></div></a></div><div><a href="/2021/08/12/卷积神经网络CNN（Convolutional Neural Network）/" title="卷积神经网络CNN（Convolutional Neural Network）"><img class="cover" src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/14.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-08-12</div><div class="title">卷积神经网络CNN（Convolutional Neural Network）</div></div></a></div><div><a href="/2021/08/19/无监督学习（Unsupervised Learning）之 聚类与降维/" title="无监督学习（Unsupervised Learning）之 聚类与降维"><img class="cover" src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/2.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-08-19</div><div class="title">无监督学习（Unsupervised Learning）之 聚类与降维</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/admin.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">凯凯超人</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">25</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">34</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/xxxxx" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:xxxxxx@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://gitee.com/×××" target="_blank" title="Gitee"><i class="iconfont gitee"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0"><span class="toc-number">1.</span> <span class="toc-text">机器学习</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%9A%84%E4%B8%89%E4%B8%AA%E5%9F%BA%E6%9C%AC%E8%A6%81%E7%B4%A0"><span class="toc-number">1.1.</span> <span class="toc-text">机器学习的三个基本要素</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.2.</span> <span class="toc-text">模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0%E5%87%86%E5%88%99"><span class="toc-number">1.3.</span> <span class="toc-text">学习准则</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0"><span class="toc-number">1.3.1.</span> <span class="toc-text">损失函数</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#0-1%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0"><span class="toc-number">1.3.1.1.</span> <span class="toc-text">0-1损失函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B9%B3%E6%96%B9%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0"><span class="toc-number">1.3.1.2.</span> <span class="toc-text">平方损失函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%89%B9%E9%87%8F%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95"><span class="toc-number">1.3.1.3.</span> <span class="toc-text">批量梯度下降法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%9A%8F%E6%9C%BA%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95"><span class="toc-number">1.3.1.4.</span> <span class="toc-text">随机梯度下降法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B0%8F%E6%89%B9%E9%87%8F%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95"><span class="toc-number">1.3.1.5.</span> <span class="toc-text">小批量梯度下降法</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%9A%84%E7%AE%80%E5%8D%95%E7%A4%BA%E4%BE%8B%E2%80%94%E2%80%94%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92"><span class="toc-number">2.</span> <span class="toc-text">机器学习的简单示例——线性回归</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8D%E6%98%8E%E7%99%BD-%E5%85%88%E8%B7%B3%E8%BF%87"><span class="toc-number">2.1.</span> <span class="toc-text">不明白 先跳过</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%81%8F%E5%B7%AE-%E6%96%B9%E5%B7%AE%E5%88%86%E8%A7%A3"><span class="toc-number">3.</span> <span class="toc-text">偏差- 方差分解</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0%E7%AE%97%E6%B3%95%E5%88%86%E7%B1%BB"><span class="toc-number">4.</span> <span class="toc-text">学习算法分类</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%91%E7%9D%A3%E5%AD%A6%E4%B9%A0"><span class="toc-number">4.1.</span> <span class="toc-text">监督学习</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%A0%E7%9B%91%E7%9D%A3%E5%AD%A6%E4%B9%A0"><span class="toc-number">4.2.</span> <span class="toc-text">无监督学习</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0"><span class="toc-number">4.3.</span> <span class="toc-text">强化学习</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%B1%E7%9B%91%E7%9D%A3%E5%92%8C%E5%8D%8A%E7%9B%91%E7%9D%A3"><span class="toc-number">4.4.</span> <span class="toc-text">弱监督和半监督</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%9A%84%E7%89%B9%E5%BE%81%E8%A1%A8%E7%A4%BA"><span class="toc-number">5.</span> <span class="toc-text">数据的特征表示</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%89%B9%E5%BE%81%E9%80%89%E6%8B%A9"><span class="toc-number">5.1.</span> <span class="toc-text">特征选择</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%90%E9%9B%86%E6%90%9C%E7%B4%A2"><span class="toc-number">5.1.1.</span> <span class="toc-text">子集搜索</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#L1%E6%AD%A3%E5%88%99%E5%8C%96"><span class="toc-number">5.1.2.</span> <span class="toc-text">L1正则化</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%89%B9%E5%BE%81%E6%8A%BD%E5%8F%96"><span class="toc-number">5.2.</span> <span class="toc-text">特征抽取</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">5.3.</span> <span class="toc-text">总结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A8%A1%E5%9E%8B%E7%9A%84%E8%AF%84%E4%BB%B7%E6%8C%87%E6%A0%87"><span class="toc-number">6.</span> <span class="toc-text">模型的评价指标</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3-%E7%B2%BE%E7%A1%AE%E7%8E%87%E3%80%81%E5%8F%AC%E5%9B%9E%E7%8E%87%E5%92%8CF%E5%80%BC"><span class="toc-number">6.1.</span> <span class="toc-text">如何理解 精确率、召回率和F值</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E5%87%86%E7%8E%87"><span class="toc-number">6.1.1.</span> <span class="toc-text">查准率</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E5%85%A8%E7%8E%87"><span class="toc-number">6.1.2.</span> <span class="toc-text">查全率</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#F%E5%80%BC"><span class="toc-number">6.1.3.</span> <span class="toc-text">F值</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%8F%E5%B9%B3%E5%9D%87%E5%92%8C%E5%BE%AE%E5%B9%B3%E5%9D%87"><span class="toc-number">6.2.</span> <span class="toc-text">宏平均和微平均</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%90%86%E8%AE%BA%E5%92%8C%E5%AE%9A%E7%90%86"><span class="toc-number">7.</span> <span class="toc-text">理论和定理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#PAC%E5%AD%A6%E4%B9%A0%E7%90%86%E8%AE%BA%EF%BC%9A"><span class="toc-number">7.1.</span> <span class="toc-text">PAC学习理论：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B2%A1%E6%9C%89%E5%85%8D%E8%B4%B9%E5%8D%88%E9%A4%90%E5%AE%9A%E7%90%86"><span class="toc-number">7.2.</span> <span class="toc-text">没有免费午餐定理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A5%A5%E5%8D%A1%E5%A7%86%E5%89%83%E5%88%80%E5%8E%9F%E7%90%86"><span class="toc-number">7.3.</span> <span class="toc-text">奥卡姆剃刀原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%91%E5%B0%8F%E9%B8%AD%E5%AE%9A%E7%90%86"><span class="toc-number">7.4.</span> <span class="toc-text">丑小鸭定理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BD%92%E7%BA%B3%E5%81%8F%E7%BD%AE"><span class="toc-number">7.5.</span> <span class="toc-text">归纳偏置</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/09/11/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%20%E9%82%B1%E9%94%A1%E9%B9%8F%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%EF%BC%89/" title="神经网络与深度学习 邱锡鹏 学习笔记（机器学习）"><img src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/04d5fbd531af9230e3cb8c723ab59f9a.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="神经网络与深度学习 邱锡鹏 学习笔记（机器学习）"/></a><div class="content"><a class="title" href="/2021/09/11/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%20%E9%82%B1%E9%94%A1%E9%B9%8F%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%EF%BC%89/" title="神经网络与深度学习 邱锡鹏 学习笔记（机器学习）">神经网络与深度学习 邱锡鹏 学习笔记（机器学习）</a><time datetime="2021-09-11T07:46:01.000Z" title="发表于 2021-09-11 15:46:01">2021-09-11</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/09/10/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E7%AC%AC%E4%B8%80%E7%AB%A0%EF%BC%89/" title="神经网络与深度学习 学习笔记（第一章）"><img src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/123345.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="神经网络与深度学习 学习笔记（第一章）"/></a><div class="content"><a class="title" href="/2021/09/10/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E7%AC%AC%E4%B8%80%E7%AB%A0%EF%BC%89/" title="神经网络与深度学习 学习笔记（第一章）">神经网络与深度学习 学习笔记（第一章）</a><time datetime="2021-09-10T08:42:01.000Z" title="发表于 2021-09-10 16:42:01">2021-09-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/09/08/Pytorch%20%E5%AE%9E%E7%8E%B0%20%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%E6%A8%A1%E5%9E%8B%20%E2%80%94%E2%80%94%20%E5%88%98%E4%BA%8C/" title="Pytorch 实现 线性回归模型 —— 刘二"><img src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/20150619152301_LvMzP.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Pytorch 实现 线性回归模型 —— 刘二"/></a><div class="content"><a class="title" href="/2021/09/08/Pytorch%20%E5%AE%9E%E7%8E%B0%20%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%E6%A8%A1%E5%9E%8B%20%E2%80%94%E2%80%94%20%E5%88%98%E4%BA%8C/" title="Pytorch 实现 线性回归模型 —— 刘二">Pytorch 实现 线性回归模型 —— 刘二</a><time datetime="2021-09-08T02:40:01.000Z" title="发表于 2021-09-08 10:40:01">2021-09-08</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/09/04/Keras%20%20RNN%20%E5%AE%9E%E7%8E%B0%20MNIST%20%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E8%AF%86%E5%88%AB/" title="Keras  RNN 实现 MNIST 手写数字识别"><img src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/beijing.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Keras  RNN 实现 MNIST 手写数字识别"/></a><div class="content"><a class="title" href="/2021/09/04/Keras%20%20RNN%20%E5%AE%9E%E7%8E%B0%20MNIST%20%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E8%AF%86%E5%88%AB/" title="Keras  RNN 实现 MNIST 手写数字识别">Keras  RNN 实现 MNIST 手写数字识别</a><time datetime="2021-09-04T02:40:01.000Z" title="发表于 2021-09-04 10:40:01">2021-09-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/09/03/Keras%20%20CNN%20%E5%AE%9E%E7%8E%B0%20MNIST%20%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E8%AF%86%E5%88%AB/" title="Keras  CNN 实现 MNIST 手写数字识别"><img src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/20150619151443_VJCik.thumb.1000_0%20(1).jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Keras  CNN 实现 MNIST 手写数字识别"/></a><div class="content"><a class="title" href="/2021/09/03/Keras%20%20CNN%20%E5%AE%9E%E7%8E%B0%20MNIST%20%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E8%AF%86%E5%88%AB/" title="Keras  CNN 实现 MNIST 手写数字识别">Keras  CNN 实现 MNIST 手写数字识别</a><time datetime="2021-09-03T02:40:01.000Z" title="发表于 2021-09-03 10:40:01">2021-09-03</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 凯凯超人</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.2
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        insertScript: [200, () => {
+          document.querySelectorAll('mjx-container:not\([display]\)').forEach(node => {
+            const target = node.parentNode
+            if (target.nodeName.toLowerCase() === 'li') {
+              target.parentNode.classList.add('has-jax')
+            } else {
+              target.classList.add('has-jax')
+            }
+          });
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/StaticFile_HEXO@latest/butterfly/js/pool.min.js"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/js/mouse_snow.min.js"><script src="https://cdn.jsdelivr.net/gh/sviptzk/StaticFile_HEXO@latest/butterfly/js/pool.min.js"></script><script src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/js/mouse_snow.min.js"></script><script src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/js/hideMobileSidebar.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
