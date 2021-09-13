@@ -64,6 +64,43 @@
       </tags>
   </entry>
   <entry>
+    <title>Keras  RNN 实现 MNIST 手写数字识别</title>
+    <url>/2021/09/04/Keras%20%20RNN%20%E5%AE%9E%E7%8E%B0%20MNIST%20%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E8%AF%86%E5%88%AB/</url>
+    <content><![CDATA[<p>@<a href="Keras  RNN 实现 MNIST 手写数字识别">TOC</a></p>
+<p>我们就以 MNIST数据集的手写识别 为例子</p>
+<h1 id="导入需要的包"><a href="#导入需要的包" class="headerlink" title="导入需要的包"></a>导入需要的包</h1><p>首先导入我们需要的包（直接把Sequential 和 Dense 直接导入 这样之后方便）</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> keras.datasets <span class="keyword">import</span> mnist</span><br><span class="line"><span class="keyword">from</span> keras.utils <span class="keyword">import</span> np_utils</span><br><span class="line"><span class="keyword">from</span> keras.models <span class="keyword">import</span>  Sequential</span><br><span class="line"><span class="keyword">from</span> keras.layers <span class="keyword">import</span> Dense</span><br><span class="line"><span class="keyword">from</span> keras.layers.recurrent <span class="keyword">import</span> SimpleRNN</span><br><span class="line"><span class="keyword">from</span> tensorflow.keras.optimizers <span class="keyword">import</span> Adam</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> matplotlib</span><br><span class="line">matplotlib.use(<span class="string">&#x27;TkAgg&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(matplotlib.get_backend())</span><br></pre></td></tr></table></figure>
+<h1 id="载入MNIST-数据"><a href="#载入MNIST-数据" class="headerlink" title="载入MNIST 数据"></a>载入MNIST 数据</h1><p>该数据集一共有训练集 6w 张，测试集 1w 张<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">(train_images,train_labels),(test_images,test_labels)= mnist.load_data()</span><br></pre></td></tr></table></figure></p>
+<p>可以查看一下图像和标签  是什么</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 数字5</span></span><br><span class="line"><span class="built_in">print</span>(train_images[<span class="number">0</span>])</span><br><span class="line"><span class="comment"># 标签5</span></span><br><span class="line"><span class="built_in">print</span>(train_labels[<span class="number">0</span>])</span><br><span class="line"><span class="comment"># 数字7</span></span><br><span class="line"><span class="built_in">print</span>(test_images[<span class="number">0</span>])</span><br><span class="line"><span class="comment"># 标签7</span></span><br><span class="line"><span class="built_in">print</span>(test_labels[<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
+<p>可以 打印 一下图片 看看是什么样子<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">plt.imshow(train_images[<span class="number">0</span>])</span><br><span class="line">plt.show()</span><br><span class="line">plt.imshow(test_images[<span class="number">0</span>])</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure><br><img src="https://img-blog.csdnimg.cn/a745fc12bef94f93b93f80b2e89bb0d0.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_13,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="图片数据处理"><a href="#图片数据处理" class="headerlink" title="图片数据处理"></a>图片数据处理</h1><h2 id="查看图片原有-shape"><a href="#查看图片原有-shape" class="headerlink" title="查看图片原有 shape"></a>查看图片原有 shape</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># train_images (60000, 28, 28)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;train_images&#x27;</span>, train_images.shape)</span><br><span class="line"><span class="comment"># train_labels (60000,)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;train_labels&#x27;</span>, train_labels.shape)</span><br></pre></td></tr></table></figure>
+<h2 id="图片数据处理：归一化"><a href="#图片数据处理：归一化" class="headerlink" title="图片数据处理：归一化"></a>图片数据处理：归一化</h2><p>除以255.0 是为了归一化，使得元素点 全部变为在 0-1 之间<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 数据处理</span></span><br><span class="line"><span class="comment">#  (60000, 28, 28) </span></span><br><span class="line">train_images_scale = train_images/<span class="number">255.0</span></span><br><span class="line">test_images_scale = test_images/<span class="number">255.0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># train_images变换后 (60000, 28, 28)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;train_images变换后&#x27;</span>, train_images_scale.shape)</span><br><span class="line"><span class="comment"># test_images变换后 (10000, 28, 28)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;test_images变换后&#x27;</span>, test_images_scale.shape)</span><br></pre></td></tr></table></figure></p>
+<h2 id="标签数据处理：转换成-one-hot-格式"><a href="#标签数据处理：转换成-one-hot-格式" class="headerlink" title="标签数据处理：转换成 one hot 格式"></a>标签数据处理：转换成 one hot 格式</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 换 one hot 格式  共十个分类</span></span><br><span class="line"><span class="comment"># np_utils.to_categorical用于将标签转化为形如(nb_samples, nb_classes)的二值序列。</span></span><br><span class="line">train_labels_hot = np_utils.to_categorical(train_labels,num_classes=<span class="number">10</span>)</span><br><span class="line">test_labels_hot = np_utils.to_categorical(test_labels,num_classes=<span class="number">10</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># train_labels (60000, 10)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;train_labels&#x27;</span>,train_labels_hot.shape)</span><br><span class="line"><span class="comment"># test_labels (10000, 10)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;test_labels&#x27;</span>,test_labels_hot.shape)</span><br></pre></td></tr></table></figure>
+<h1 id="构建模型"><a href="#构建模型" class="headerlink" title="构建模型"></a>构建模型</h1><p>先定义 RNN 所需的参数</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 定义rnn 的参数</span></span><br><span class="line"><span class="comment"># 数据长度 一行一共有28个元素</span></span><br><span class="line">input_size = <span class="number">28</span></span><br><span class="line"><span class="comment"># 序列长度 一共有28个序列 也就是28行</span></span><br><span class="line">time_steps = <span class="number">28</span></span><br><span class="line"><span class="comment"># 隐藏层cell个数</span></span><br><span class="line">cell_size = <span class="number">50</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>再定义 RNN 模型<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model = Sequential()</span><br><span class="line"></span><br><span class="line"><span class="comment">#循环神经网络</span></span><br><span class="line">model.add(SimpleRNN(</span><br><span class="line">    units=cell_size, <span class="comment">#输出</span></span><br><span class="line">    input_shape=(time_steps,input_size) <span class="comment">#输入</span></span><br><span class="line">))</span><br><span class="line"><span class="comment"># 输出层</span></span><br><span class="line">model.add(Dense(input_dim=cell_size,units=<span class="number">10</span>,activation=<span class="string">&quot;softmax&quot;</span>))</span><br></pre></td></tr></table></figure><br>优化器使用 Adam， 损失函数 选择 交叉熵   并编译</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 定义优化器  10的 -4次方</span></span><br><span class="line">adam = Adam(learning_rate=<span class="number">1e-4</span>)</span><br><span class="line"></span><br><span class="line">model.<span class="built_in">compile</span>(optimizer= adam,loss=<span class="string">&#x27;categorical_crossentropy&#x27;</span>,metrics=<span class="string">&quot;accuracy&quot;</span>)</span><br></pre></td></tr></table></figure>
+<h1 id="训练模型"><a href="#训练模型" class="headerlink" title="训练模型"></a>训练模型</h1><p> 一共 60000张训练图片 按批次训练 一批次64张   一共6w/64 个批次<br>训练完一轮6w张，表示一个epoch<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 一共 60000张训练图片 按批次训练 一批次64张   </span></span><br><span class="line"><span class="comment"># 训练完一轮6w张，表示一个epoch</span></span><br><span class="line">model.fit(train_images_scale,train_labels_hot,batch_size=<span class="number">64</span>,epochs=<span class="number">1</span>)</span><br></pre></td></tr></table></figure><br><img src="https://img-blog.csdnimg.cn/35cafae3dc0e431086f33cdf4a23dc52.png#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="评估模型"><a href="#评估模型" class="headerlink" title="评估模型"></a>评估模型</h1><p>就是在 测试集上的表现<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">loss,accuracy = model.evaluate(test_images_scale,test_labels_hot)</span><br></pre></td></tr></table></figure><br>也可以看一下 在训练集上的表现</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">loss,accuracy = model.evaluate(train_images_scale,train_labels_hot)</span><br></pre></td></tr></table></figure>
+<p>下面是 结果（上训练集 下测试集）<br><img src="https://img-blog.csdnimg.cn/d93ee2873e72460e96c0c4a9a663985b.png#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="预测数据"><a href="#预测数据" class="headerlink" title="预测数据"></a>预测数据</h1><font color="red">**有问题 输入的 数据维度不对 不知道错哪了？？？**</font>
+
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 看下输入的形状</span></span><br><span class="line"><span class="comment"># # 预测数据</span></span><br><span class="line"><span class="built_in">print</span>(test_images_scale[<span class="number">0</span>].shape)</span><br><span class="line"><span class="built_in">print</span>(model.predict((test_images_scale[<span class="number">0</span>]/<span class="number">255.0</span>)))</span><br><span class="line"><span class="built_in">print</span>(np.argmax(model.predict((test_images_scale[<span class="number">0</span>]/<span class="number">255.0</span>))))</span><br><span class="line"><span class="built_in">print</span>(test_labels[<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
+<p>输入的图像 变换后形状<br><img src="https://img-blog.csdnimg.cn/c6e4d5008f9c416ba48bea577a86c238.png#pic_center" alt="在这里插入图片描述"><br>模型预测 数据 输出的概率分类结果<br><img src="https://img-blog.csdnimg.cn/ba872c35347041b592db07d82b429d35.png#pic_center" alt="在这里插入图片描述"><br>选出其中最大的 以及 实际图片标签 均为 数字7<br><img src="https://img-blog.csdnimg.cn/5a585701d439431aa1853283c8592b46.png#pic_center" alt="在这里插入图片描述"></p>
+]]></content>
+      <categories>
+        <category>python框架</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+        <tag>Tensorflow</tag>
+        <tag>Keras</tag>
+        <tag>RNN</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Keras MNIST 过拟合问题解决：Dropout 与 正则化</title>
     <url>/2021/09/02/Keras%20MNIST%20%E8%BF%87%E6%8B%9F%E5%90%88%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3%EF%BC%9ADropout%20%E4%B8%8E%20%E6%AD%A3%E5%88%99%E5%8C%96/</url>
     <content><![CDATA[<p>@<a href="Keras MNIST 过拟合问题解决：Dropout 与 正则化">TOC</a></p>
@@ -104,43 +141,6 @@
         <tag>python</tag>
         <tag>Tensorflow</tag>
         <tag>Keras</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Keras  RNN 实现 MNIST 手写数字识别</title>
-    <url>/2021/09/04/Keras%20%20RNN%20%E5%AE%9E%E7%8E%B0%20MNIST%20%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E8%AF%86%E5%88%AB/</url>
-    <content><![CDATA[<p>@<a href="Keras  RNN 实现 MNIST 手写数字识别">TOC</a></p>
-<p>我们就以 MNIST数据集的手写识别 为例子</p>
-<h1 id="导入需要的包"><a href="#导入需要的包" class="headerlink" title="导入需要的包"></a>导入需要的包</h1><p>首先导入我们需要的包（直接把Sequential 和 Dense 直接导入 这样之后方便）</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> keras.datasets <span class="keyword">import</span> mnist</span><br><span class="line"><span class="keyword">from</span> keras.utils <span class="keyword">import</span> np_utils</span><br><span class="line"><span class="keyword">from</span> keras.models <span class="keyword">import</span>  Sequential</span><br><span class="line"><span class="keyword">from</span> keras.layers <span class="keyword">import</span> Dense</span><br><span class="line"><span class="keyword">from</span> keras.layers.recurrent <span class="keyword">import</span> SimpleRNN</span><br><span class="line"><span class="keyword">from</span> tensorflow.keras.optimizers <span class="keyword">import</span> Adam</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> matplotlib</span><br><span class="line">matplotlib.use(<span class="string">&#x27;TkAgg&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(matplotlib.get_backend())</span><br></pre></td></tr></table></figure>
-<h1 id="载入MNIST-数据"><a href="#载入MNIST-数据" class="headerlink" title="载入MNIST 数据"></a>载入MNIST 数据</h1><p>该数据集一共有训练集 6w 张，测试集 1w 张<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">(train_images,train_labels),(test_images,test_labels)= mnist.load_data()</span><br></pre></td></tr></table></figure></p>
-<p>可以查看一下图像和标签  是什么</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 数字5</span></span><br><span class="line"><span class="built_in">print</span>(train_images[<span class="number">0</span>])</span><br><span class="line"><span class="comment"># 标签5</span></span><br><span class="line"><span class="built_in">print</span>(train_labels[<span class="number">0</span>])</span><br><span class="line"><span class="comment"># 数字7</span></span><br><span class="line"><span class="built_in">print</span>(test_images[<span class="number">0</span>])</span><br><span class="line"><span class="comment"># 标签7</span></span><br><span class="line"><span class="built_in">print</span>(test_labels[<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
-<p>可以 打印 一下图片 看看是什么样子<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">plt.imshow(train_images[<span class="number">0</span>])</span><br><span class="line">plt.show()</span><br><span class="line">plt.imshow(test_images[<span class="number">0</span>])</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure><br><img src="https://img-blog.csdnimg.cn/a745fc12bef94f93b93f80b2e89bb0d0.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_13,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
-<h1 id="图片数据处理"><a href="#图片数据处理" class="headerlink" title="图片数据处理"></a>图片数据处理</h1><h2 id="查看图片原有-shape"><a href="#查看图片原有-shape" class="headerlink" title="查看图片原有 shape"></a>查看图片原有 shape</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># train_images (60000, 28, 28)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;train_images&#x27;</span>, train_images.shape)</span><br><span class="line"><span class="comment"># train_labels (60000,)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;train_labels&#x27;</span>, train_labels.shape)</span><br></pre></td></tr></table></figure>
-<h2 id="图片数据处理：归一化"><a href="#图片数据处理：归一化" class="headerlink" title="图片数据处理：归一化"></a>图片数据处理：归一化</h2><p>除以255.0 是为了归一化，使得元素点 全部变为在 0-1 之间<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 数据处理</span></span><br><span class="line"><span class="comment">#  (60000, 28, 28) </span></span><br><span class="line">train_images_scale = train_images/<span class="number">255.0</span></span><br><span class="line">test_images_scale = test_images/<span class="number">255.0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># train_images变换后 (60000, 28, 28)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;train_images变换后&#x27;</span>, train_images_scale.shape)</span><br><span class="line"><span class="comment"># test_images变换后 (10000, 28, 28)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;test_images变换后&#x27;</span>, test_images_scale.shape)</span><br></pre></td></tr></table></figure></p>
-<h2 id="标签数据处理：转换成-one-hot-格式"><a href="#标签数据处理：转换成-one-hot-格式" class="headerlink" title="标签数据处理：转换成 one hot 格式"></a>标签数据处理：转换成 one hot 格式</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 换 one hot 格式  共十个分类</span></span><br><span class="line"><span class="comment"># np_utils.to_categorical用于将标签转化为形如(nb_samples, nb_classes)的二值序列。</span></span><br><span class="line">train_labels_hot = np_utils.to_categorical(train_labels,num_classes=<span class="number">10</span>)</span><br><span class="line">test_labels_hot = np_utils.to_categorical(test_labels,num_classes=<span class="number">10</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># train_labels (60000, 10)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;train_labels&#x27;</span>,train_labels_hot.shape)</span><br><span class="line"><span class="comment"># test_labels (10000, 10)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;test_labels&#x27;</span>,test_labels_hot.shape)</span><br></pre></td></tr></table></figure>
-<h1 id="构建模型"><a href="#构建模型" class="headerlink" title="构建模型"></a>构建模型</h1><p>先定义 RNN 所需的参数</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 定义rnn 的参数</span></span><br><span class="line"><span class="comment"># 数据长度 一行一共有28个元素</span></span><br><span class="line">input_size = <span class="number">28</span></span><br><span class="line"><span class="comment"># 序列长度 一共有28个序列 也就是28行</span></span><br><span class="line">time_steps = <span class="number">28</span></span><br><span class="line"><span class="comment"># 隐藏层cell个数</span></span><br><span class="line">cell_size = <span class="number">50</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>再定义 RNN 模型<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model = Sequential()</span><br><span class="line"></span><br><span class="line"><span class="comment">#循环神经网络</span></span><br><span class="line">model.add(SimpleRNN(</span><br><span class="line">    units=cell_size, <span class="comment">#输出</span></span><br><span class="line">    input_shape=(time_steps,input_size) <span class="comment">#输入</span></span><br><span class="line">))</span><br><span class="line"><span class="comment"># 输出层</span></span><br><span class="line">model.add(Dense(input_dim=cell_size,units=<span class="number">10</span>,activation=<span class="string">&quot;softmax&quot;</span>))</span><br></pre></td></tr></table></figure><br>优化器使用 Adam， 损失函数 选择 交叉熵   并编译</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 定义优化器  10的 -4次方</span></span><br><span class="line">adam = Adam(learning_rate=<span class="number">1e-4</span>)</span><br><span class="line"></span><br><span class="line">model.<span class="built_in">compile</span>(optimizer= adam,loss=<span class="string">&#x27;categorical_crossentropy&#x27;</span>,metrics=<span class="string">&quot;accuracy&quot;</span>)</span><br></pre></td></tr></table></figure>
-<h1 id="训练模型"><a href="#训练模型" class="headerlink" title="训练模型"></a>训练模型</h1><p> 一共 60000张训练图片 按批次训练 一批次64张   一共6w/64 个批次<br>训练完一轮6w张，表示一个epoch<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 一共 60000张训练图片 按批次训练 一批次64张   </span></span><br><span class="line"><span class="comment"># 训练完一轮6w张，表示一个epoch</span></span><br><span class="line">model.fit(train_images_scale,train_labels_hot,batch_size=<span class="number">64</span>,epochs=<span class="number">1</span>)</span><br></pre></td></tr></table></figure><br><img src="https://img-blog.csdnimg.cn/35cafae3dc0e431086f33cdf4a23dc52.png#pic_center" alt="在这里插入图片描述"></p>
-<h1 id="评估模型"><a href="#评估模型" class="headerlink" title="评估模型"></a>评估模型</h1><p>就是在 测试集上的表现<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">loss,accuracy = model.evaluate(test_images_scale,test_labels_hot)</span><br></pre></td></tr></table></figure><br>也可以看一下 在训练集上的表现</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">loss,accuracy = model.evaluate(train_images_scale,train_labels_hot)</span><br></pre></td></tr></table></figure>
-<p>下面是 结果（上训练集 下测试集）<br><img src="https://img-blog.csdnimg.cn/d93ee2873e72460e96c0c4a9a663985b.png#pic_center" alt="在这里插入图片描述"></p>
-<h1 id="预测数据"><a href="#预测数据" class="headerlink" title="预测数据"></a>预测数据</h1><font color="red">**有问题 输入的 数据维度不对 不知道错哪了？？？**</font>
-
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 看下输入的形状</span></span><br><span class="line"><span class="comment"># # 预测数据</span></span><br><span class="line"><span class="built_in">print</span>(test_images_scale[<span class="number">0</span>].shape)</span><br><span class="line"><span class="built_in">print</span>(model.predict((test_images_scale[<span class="number">0</span>]/<span class="number">255.0</span>)))</span><br><span class="line"><span class="built_in">print</span>(np.argmax(model.predict((test_images_scale[<span class="number">0</span>]/<span class="number">255.0</span>))))</span><br><span class="line"><span class="built_in">print</span>(test_labels[<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
-<p>输入的图像 变换后形状<br><img src="https://img-blog.csdnimg.cn/c6e4d5008f9c416ba48bea577a86c238.png#pic_center" alt="在这里插入图片描述"><br>模型预测 数据 输出的概率分类结果<br><img src="https://img-blog.csdnimg.cn/ba872c35347041b592db07d82b429d35.png#pic_center" alt="在这里插入图片描述"><br>选出其中最大的 以及 实际图片标签 均为 数字7<br><img src="https://img-blog.csdnimg.cn/5a585701d439431aa1853283c8592b46.png#pic_center" alt="在这里插入图片描述"></p>
-]]></content>
-      <categories>
-        <category>python框架</category>
-      </categories>
-      <tags>
-        <tag>python</tag>
-        <tag>Tensorflow</tag>
-        <tag>Keras</tag>
-        <tag>RNN</tag>
       </tags>
   </entry>
   <entry>
@@ -236,6 +236,45 @@
         <tag>Numpy</tag>
         <tag>Pandas</tag>
         <tag>Matplotlib</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Pytorch 实现 多维特征的输入——糖尿病预测</title>
+    <url>/2021/09/13/Pytorch%20%E5%AE%9E%E7%8E%B0%20%E5%A4%9A%E7%BB%B4%E7%89%B9%E5%BE%81%E7%9A%84%E8%BE%93%E5%85%A5%E2%80%94%E2%80%94%E7%B3%96%E5%B0%BF%E7%97%85%E9%A2%84%E6%B5%8B/</url>
+    <content><![CDATA[<p>@<a href="Pytorch 实现 多维特征的输入——糖尿病预测">TOC</a></p>
+<p>整体的设计思路<br>大致的设计步骤 分为5步 如下所示：<br><img src="https://img-blog.csdnimg.cn/66ed2d3a9e914f229e8c67a8248b1dee.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_9,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="实现的步骤"><br>第五步：是进行 评估模型并预测</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br></pre></td></tr></table></figure>
+<h1 id="Step1：准备数据"><a href="#Step1：准备数据" class="headerlink" title="Step1：准备数据"></a>Step1：准备数据</h1><p>数据格式包含759个样本，其中有8个特征已经其是否会加剧糖尿病的预测标签（1或0）。<br><img src="https://img-blog.csdnimg.cn/7475f37ead424166967915beceedd5ec.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="数据维度预览"><br>我们将759个样本，分为758个训练样本以及1个测试样本。</p>
+<p>先读入本地 csv 文件内容</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 读取数据</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    numpy读取本地文件</span></span><br><span class="line"><span class="string">    delimiter 分割号</span></span><br><span class="line"><span class="string">    dtype 读取数据类型  一般机器学习类的都是float32 </span></span><br><span class="line"><span class="string">    因为显卡一般他内核里面是按32位工作的</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line">xy = np.loadtxt(<span class="string">&#x27;./dataset/diabetes.csv&#x27;</span>,delimiter=<span class="string">&quot;,&quot;</span>,dtype=np.float32)</span><br></pre></td></tr></table></figure>
+<p>可以查看一下 读入的数据维度情况</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># (759,9) 759行 9列</span></span><br><span class="line"><span class="built_in">print</span>(xy.shape)</span><br></pre></td></tr></table></figure>
+<p>其中758个样本作为测试集</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># numpy 转 张量  最后一组样本我们当测试样本吧  其余的当训练样本</span></span><br><span class="line">x_train = torch.from_numpy(xy[:-<span class="number">1</span>,:-<span class="number">1</span>])</span><br><span class="line"><span class="built_in">print</span>(x_train.shape)</span><br><span class="line">y_train = torch.from_numpy(xy[:-<span class="number">1</span>,[-<span class="number">1</span>]])</span><br></pre></td></tr></table></figure>
+<p>最后一个样本作为训练集，用于预测结果</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 当测试样本 的 一组数据</span></span><br><span class="line">x_test = torch.from_numpy(xy[-<span class="number">1</span>:,:-<span class="number">1</span>])</span><br><span class="line"><span class="built_in">print</span>(x_test.shape)</span><br><span class="line">y_test = torch.from_numpy(xy[-<span class="number">1</span>:,[-<span class="number">1</span>]])</span><br></pre></td></tr></table></figure>
+<h1 id="Step2：定义模型"><a href="#Step2：定义模型" class="headerlink" title="Step2：定义模型"></a>Step2：定义模型</h1><p>同样每一层都为 逻辑回归模型。但这边有8个特征，所以导入的应该是个矩阵。<br><img src="https://img-blog.csdnimg.cn/79a71c6a9f0245d9914e4fcef6607793.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="怎么构建线性模型"><br><img src="https://img-blog.csdnimg.cn/ad19f89d0a57481e8f2bdb1e37e8d7ee.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="数据维度的变换 输入n行8个特征得到n行1列的预测"></p>
+<h2 id="torch-nn-Linear-in-features-out-features-bias-True-方法"><a href="#torch-nn-Linear-in-features-out-features-bias-True-方法" class="headerlink" title="torch.nn.Linear(in_features,out_features,bias=True) 方法"></a>torch.nn.Linear(in_features,out_features,bias=True) 方法</h2><p><img src="https://img-blog.csdnimg.cn/0e75527101244e56a7687acb4eaa9315.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_16,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="torch.nn.Linear函数详解"><br>下面这个函数 使得8维度线性变换为6维度<br>注：1.整个模型都是以 列向量为操作单位的（这么做其实是为了利用计算机的并行计算能力加快训练速度），所以维度指的是有多少列，比如左下角这个维度就是8。<br>2.激活函数的引入，其实就是为了引入非线性的因素。这样就可以使得我们可以非线性的变换矩阵维度。<br><img src="https://img-blog.csdnimg.cn/1c73a9cbdba047818bda33c1c9ab517f.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="8D到6D的真正含义"><br>下面是我们 构建的整体的 线性网络模型<br><img src="https://img-blog.csdnimg.cn/06e1c8bb27054087bce6ccb4c0eee8c0.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="整体网络模型"></p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 第二部 定义模型</span></span><br><span class="line"><span class="comment"># 这个其实有点类似与 神经网络的结构了 每个线性层后面都加了一个sigmoid函数 做了次非线性变换</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FullLeanerModel</span>(<span class="params">torch.nn.Module</span>):</span></span><br><span class="line">    <span class="comment"># 定义多层线性模型的结构</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="built_in">super</span>(FullLeanerModel,self).__init__()</span><br><span class="line">        <span class="comment"># 第一个线性转换 将8维转换为6维</span></span><br><span class="line">        self.linear1 = torch.nn.Linear(<span class="number">8</span>,<span class="number">6</span>)</span><br><span class="line">        self.linear2 = torch.nn.Linear(<span class="number">6</span>,<span class="number">4</span>)</span><br><span class="line">        self.linear3 = torch.nn.Linear(<span class="number">4</span>,<span class="number">1</span>)</span><br><span class="line">        self.sigmoid = torch.nn.Sigmoid()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 前馈 运行输出结果</span></span><br><span class="line">    <span class="comment"># 会被自动调用 是方法的重写</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self,x</span>):</span></span><br><span class="line">        <span class="comment"># 用一个变量比较 简单</span></span><br><span class="line">        x = self.sigmoid(self.linear1(x))</span><br><span class="line">        x = self.sigmoid(self.linear2(x))</span><br><span class="line">        x = self.sigmoid(self.linear3(x))</span><br><span class="line">        <span class="keyword">return</span>  x</span><br></pre></td></tr></table></figure>
+<p>实例化这个模型</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 实例化模型</span></span><br><span class="line">FullLeanerModel = FullLeanerModel()</span><br></pre></td></tr></table></figure>
+<h1 id="Step3：定义损失函数和优化器"><a href="#Step3：定义损失函数和优化器" class="headerlink" title="Step3：定义损失函数和优化器"></a>Step3：定义损失函数和优化器</h1><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 第三步 定义 损失函数和优化器</span></span><br><span class="line">criterion = torch.nn.BCELoss(reduction=<span class="string">&#x27;mean&#x27;</span>)</span><br><span class="line">optimizer = torch.optim.SGD(FullLeanerModel.parameters(),lr=<span class="number">0.1</span>)</span><br></pre></td></tr></table></figure>
+<h1 id="Step4：训练模型"><a href="#Step4：训练模型" class="headerlink" title="Step4：训练模型"></a>Step4：训练模型</h1><p>训练模型100次</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 第四步 训练</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string"> 前两步 就是正向传播 forward</span></span><br><span class="line"><span class="string">    1. 预测 标签</span></span><br><span class="line"><span class="string">    2. 预测 与 实际 算出损失值</span></span><br><span class="line"><span class="string">    3. 反向传播 backward 优化参数</span></span><br><span class="line"><span class="string">    4. 更新参数</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">101</span>):</span><br><span class="line">    y_pred = FullLeanerModel(x_train)</span><br><span class="line">    loss = criterion(y_pred,y_train)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;迭代次数:&#x27;</span>,epoch,<span class="string">&quot;  损失值:&quot;</span>,loss.item())</span><br><span class="line"></span><br><span class="line">    optimizer.zero_grad() <span class="comment"># 梯度清零</span></span><br><span class="line">    loss.backward() <span class="comment"># 反向传播</span></span><br><span class="line">    optimizer.step()   <span class="comment">#更新参数</span></span><br></pre></td></tr></table></figure>
+<h1 id="评估模型并预测"><a href="#评估模型并预测" class="headerlink" title="评估模型并预测"></a>评估模型并预测</h1><h2 id="输出所有层次的-权重和偏置"><a href="#输出所有层次的-权重和偏置" class="headerlink" title="输出所有层次的 权重和偏置"></a>输出所有层次的 权重和偏置</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">    <span class="comment"># 输出各层  权重w 和 偏置b</span></span><br><span class="line"><span class="keyword">for</span> weight, bias <span class="keyword">in</span> FullLeanerModel.state_dict().items():  <span class="comment"># param is weight or bias(Tensor)</span></span><br><span class="line"><span class="built_in">print</span>( weight,bias)</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/5c3c93e1544a4005873d7fabd4f88e51.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="各层次的权重和偏置值"></p>
+<h2 id="预测"><a href="#预测" class="headerlink" title="预测"></a>预测</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 预测</span></span><br><span class="line">y_yuce = FullLeanerModel(x_test)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;测试样本的预测值为&quot;</span>,y_yuce.data,<span class="string">&quot;实际样本的标签值为&quot;</span>,y_test.data)</span><br></pre></td></tr></table></figure>
+<h1 id="完整代码"><a href="#完整代码" class="headerlink" title="完整代码"></a>完整代码</h1><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"><span class="comment"># 读取数据</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    numpy读取本地文件</span></span><br><span class="line"><span class="string">    delimiter 分割号</span></span><br><span class="line"><span class="string">    dtype 读取数据类型  一般机器学习类的都是float32 因为显卡一般他内核里面是按32位工作的</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line">xy = np.loadtxt(<span class="string">&#x27;./dataset/diabetes.csv&#x27;</span>,delimiter=<span class="string">&quot;,&quot;</span>,dtype=np.float32)</span><br><span class="line"><span class="comment"># (759,9) 759行 9列</span></span><br><span class="line"><span class="built_in">print</span>(xy.shape)</span><br><span class="line"><span class="comment"># numpy 转 张量  最后一组样本我们当测试样本吧  其余的当训练样本</span></span><br><span class="line">x_train = torch.from_numpy(xy[:-<span class="number">1</span>,:-<span class="number">1</span>])</span><br><span class="line"><span class="built_in">print</span>(x_train.shape)</span><br><span class="line">y_train = torch.from_numpy(xy[:-<span class="number">1</span>,[-<span class="number">1</span>]])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 当测试样本 的 一组数据</span></span><br><span class="line">x_test = torch.from_numpy(xy[-<span class="number">1</span>:,:-<span class="number">1</span>])</span><br><span class="line"><span class="built_in">print</span>(x_test.shape)</span><br><span class="line">y_test = torch.from_numpy(xy[-<span class="number">1</span>:,[-<span class="number">1</span>]])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 第二部 定义模型</span></span><br><span class="line"><span class="comment"># 这个其实有点类似与 神经网络的结构了 每个线性层后面都加了一个sigmoid函数 做了次非线性变换</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FullLeanerModel</span>(<span class="params">torch.nn.Module</span>):</span></span><br><span class="line">    <span class="comment"># 定义多层线性模型的结构</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="built_in">super</span>(FullLeanerModel,self).__init__()</span><br><span class="line">        <span class="comment"># 第一个线性转换 将8维转换为6维</span></span><br><span class="line">        self.linear1 = torch.nn.Linear(<span class="number">8</span>,<span class="number">6</span>)</span><br><span class="line">        self.linear2 = torch.nn.Linear(<span class="number">6</span>,<span class="number">4</span>)</span><br><span class="line">        self.linear3 = torch.nn.Linear(<span class="number">4</span>,<span class="number">1</span>)</span><br><span class="line">        self.sigmoid = torch.nn.Sigmoid()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 前馈 运行</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self,x</span>):</span></span><br><span class="line">        <span class="comment"># 用一个变量比较 简单</span></span><br><span class="line">        x = self.sigmoid(self.linear1(x))</span><br><span class="line">        x = self.sigmoid(self.linear2(x))</span><br><span class="line">        x = self.sigmoid(self.linear3(x))</span><br><span class="line">        <span class="keyword">return</span>  x</span><br><span class="line"></span><br><span class="line"><span class="comment"># 实例化模型</span></span><br><span class="line">FullLeanerModel = FullLeanerModel()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 第三步 定义 损失函数和优化器</span></span><br><span class="line">criterion = torch.nn.BCELoss(reduction=<span class="string">&#x27;mean&#x27;</span>)</span><br><span class="line">optimizer = torch.optim.SGD(FullLeanerModel.parameters(),lr=<span class="number">0.1</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 第四步 训练</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string"> 前两步 就是正向传播 forward</span></span><br><span class="line"><span class="string">    1. 预测 标签</span></span><br><span class="line"><span class="string">    2. 预测 与 实际 算出损失值</span></span><br><span class="line"><span class="string">    3. 反向传播 backward 优化参数</span></span><br><span class="line"><span class="string">    4. 更新参数</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">101</span>):</span><br><span class="line">    y_pred = FullLeanerModel(x_train)</span><br><span class="line">    loss = criterion(y_pred,y_train)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;迭代次数:&#x27;</span>,epoch,<span class="string">&quot;  损失值:&quot;</span>,loss.item())</span><br><span class="line">![在这里插入图片描述](https://img-blog.csdnimg.cn/f600a0b6fbe24b60b35a0f2bc26f9444.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16<span class="comment">#pic_center)</span></span><br><span class="line"></span><br><span class="line">    optimizer.zero_grad() <span class="comment"># 梯度清零</span></span><br><span class="line">    loss.backward() <span class="comment"># 反向传播</span></span><br><span class="line">    optimizer.step()   <span class="comment">#更新参数</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 第五步 评估模型</span></span><br><span class="line">    <span class="comment"># 输出各层  权重w 和 偏置b</span></span><br><span class="line"><span class="keyword">for</span> weight, bias <span class="keyword">in</span> FullLeanerModel.state_dict().items():  <span class="comment"># param is weight or bias(Tensor)</span></span><br><span class="line">    <span class="built_in">print</span>( weight,bias)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 预测</span></span><br><span class="line">y_yuce = FullLeanerModel(x_test)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;测试样本的预测值为&quot;</span>,y_yuce.data,<span class="string">&quot;实际样本的标签值为&quot;</span>,y_test.data)</span><br></pre></td></tr></table></figure>
+<h1 id="实验结果"><a href="#实验结果" class="headerlink" title="实验结果"></a>实验结果</h1><p><img src="https://img-blog.csdnimg.cn/d4fac45272664d249443217900408b79.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="实验结果"><br>可以看到 最后一个样本模型预测概率是 0.6529 。&gt;0.5 我们可以推测其标签就是1，而实际标签也是1，所以这个模型预测结果目前看是正确的。</p>
+]]></content>
+      <categories>
+        <category>Pytorch</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+        <tag>Pytorch</tag>
+        <tag>刘二</tag>
+        <tag>多维度特征</tag>
       </tags>
   </entry>
   <entry>
@@ -648,6 +687,67 @@
       </tags>
   </entry>
   <entry>
+    <title>神经网络与深度学习 学习笔记（第一章）</title>
+    <url>/2021/09/10/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E7%AC%AC%E4%B8%80%E7%AB%A0%EF%BC%89/</url>
+    <content><![CDATA[<p>@<a href="神经网络与深度学习 邱锡鹏 学习笔记（第一章）">TOC</a></p>
+<h1 id="机器学习"><a href="#机器学习" class="headerlink" title="机器学习"></a>机器学习</h1><h2 id="浅层学习"><a href="#浅层学习" class="headerlink" title="浅层学习"></a>浅层学习</h2><blockquote>
+<p>学习一个预测模型．一般需要首先将数据表示为一组特征（Feature），特征的表示形式可以是连续的数值、离散的符号或其他形式．然后将这些特征输入到预测模型，并输出预测结果．这类机器学习可以看作浅层学习（Shallow  Learning）</p>
+</blockquote>
+<h2 id="机器学习的步骤"><a href="#机器学习的步骤" class="headerlink" title="机器学习的步骤"></a>机器学习的步骤</h2><ol>
+<li>数据预处理：对数据的原始形式进行初步的数据清理（比如去掉一些有缺失特征的样本，或去掉一些冗余的数据特征等）和加工（对数值特征进行缩放和归一化等），并构建成可用于训练机器学习模型的数据集．</li>
+<li>特征提取：从数据的原始特征中提取一些对特定机器学习任务有用的高质量特征．比如在图像分类中提取边缘、尺度不变特征变换（Scale Invariant<br>Feature Transform，SIFT）特征，在文本分类中去除停用词等．</li>
+<li>特征转换：对特征进行进一步的加工，比如降维和升维． 很多特征转换方法也都是机器学习方法．降维包括特征抽取（Feature Extraction）和特征选择（FeatureSelection）两种途径．常用的特征转换方法有主成分分析（Principal Components Analysis，PCA）、 线性判别分析（Linear Discriminant Analysis，LDA）等．</li>
+<li>预测：机器学习的核心部分，学习一个函数并进行预测．</li>
+</ol>
+<p><img src="https://img-blog.csdnimg.cn/f3d73fb28f1342f48a6ca08638b8da68.png#pic_center" alt="传统机器学习的数据处理流程"><br>注：很多的机器学习问题变成了特征工程（Feature Engineering）问题．开发一个机器学习系统的主要工作量都消耗在了预处理、特征提取以及特征转换上。</p>
+<h1 id="表示学习"><a href="#表示学习" class="headerlink" title="表示学习"></a>表示学习</h1><p>在表示学习中，有两个核心问题：</p>
+<ul>
+<li>一是“什么是一个好的表示”；即表示 需要包含更高层的语义信息</li>
+<li>二是“如何学习到好的表示”．</li>
+</ul>
+<p>传统的特征学习一般是通过<font color="red">人为地设计一些准则</font>，然后根据这些准则来选取有效的特征。 所以 特征的学习是和最终预测模型的学习分开进行的，<font color="red">因此学习到的特征不一定可以提升最终模型的性能．</font></p>
+<h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>将输入信息转换为有效的特征。<br>如果有一种算法可以自动地学习出有效的特征，并提高最终机器学习模型的性能，那么这种学习就可以叫作表示学习（Representation Learning）．</p>
+<h2 id="语义鸿沟"><a href="#语义鸿沟" class="headerlink" title="语义鸿沟"></a>语义鸿沟</h2><p>语义鸿沟问题是指输入数据的底层特征和高层语义信息之间的不一致性和差异性。</p>
+<blockquote>
+<p>比如车，图片中每辆车的颜色和形状等属性都不尽相同，因此不同图片在像素级别上的表示（即底层特征）差异性也会非常大．但是我们理解这些图片是建立在比较抽象的高层语义概念上的</p>
+</blockquote>
+<h2 id="表示特征的方式"><a href="#表示特征的方式" class="headerlink" title="表示特征的方式"></a>表示特征的方式</h2><ol>
+<li>局部表示：例如，one-hot向量 表示颜色。 缺点在于多个颜色就多个列或者行 </li>
+<li>分布式表示：RGB 表示颜色</li>
+</ol>
+<p><img src="https://img-blog.csdnimg.cn/aa86242673364da09f8245d248914cbd.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="局部表示和分布式表示示例"></p>
+<h2 id="嵌入"><a href="#嵌入" class="headerlink" title="嵌入"></a>嵌入</h2><p>嵌入通常指将一个度量空间中的一些对象映射到另一个低维的度量空间中，并尽可能保持不同对象之间的拓扑关系．<font color="blue">比如自然语言中词的分布式表示，也经常叫作词嵌入 </font></p>
+<p><font color="red"><strong>例如：3维one-hot向量空间和一个2维嵌入空间的对比</strong></font><br><img src="https://img-blog.csdnimg.cn/007e99163fd044348e7061ebebc1af33.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_14,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="one-hot向量空间与嵌入空间"><br>在低维的嵌入空间中，每个样本都不在坐标轴上，样本之间可以计算相似度．</p>
+<h1 id="深度学习"><a href="#深度学习" class="headerlink" title="深度学习"></a>深度学习</h1><h2 id="什么是深度"><a href="#什么是深度" class="headerlink" title="什么是深度"></a>什么是深度</h2><p>“深度”是指原始数据进行非线性特征转换的次数</p>
+<h2 id="深度学习的优点"><a href="#深度学习的优点" class="headerlink" title="深度学习的优点"></a>深度学习的优点</h2><p>深度学习，其主要目的是从数据中<font color="red">自动学习到有效的特征表示 </font><br>其抽象在 数据通过多层的特征转换，学习到的表示可以代替人工设计的特征，从而避免“特征工程”<br><img src="https://img-blog.csdnimg.cn/f678fb27e01c4d989d099cfa06afe038.png#pic_center" alt="深度学习的数据处理流程"><br>其是 一种 <font color="red"><strong>端到端的学习方式</strong></font>   在学习过程中<strong>不进行分模块或分阶段训练</strong>，直接优化任务的总体目标．在端到端学习中，一般不需要明确地给出不同模块或阶段的功能，中间过程不需要人为干预</p>
+<h2 id="深度学习的关键问题"><a href="#深度学习的关键问题" class="headerlink" title="深度学习的关键问题"></a>深度学习的关键问题</h2><p>深度学习需要解决的关键问题是 <strong>贡献度分配问题</strong>，即一个系统中不同的 <strong>组件</strong> 或其 <strong>参数</strong> 对最终系统输出结果的贡献或影响 </p>
+<p>目前，深度学习采用的模型主要是神经网络模型，其主要原因是神经网络模型可以使用 <strong>误差反向传播算法</strong> ，从而可以比较好地解决贡献度分配问题</p>
+<h1 id="深度学习相关的学术会议"><a href="#深度学习相关的学术会议" class="headerlink" title="深度学习相关的学术会议"></a>深度学习相关的学术会议</h1><ul>
+<li>国际表示学习会议  ICLR ：主要聚焦于深度学习</li>
+<li>神经信息处理系统年会 NeurIPS ：交叉学科会议，但偏重于机器学习</li>
+<li>国际机器学习会议 ICML：机器学习顶级会议</li>
+<li>国际人工智能联合会议 IJCAI ：人工智能领域最顶尖的综合性会议</li>
+<li>美国人工智能协会年会  AAAI ：人工智能领域的顶级会议</li>
+</ul>
+<h2 id="计算机视觉领域"><a href="#计算机视觉领域" class="headerlink" title="计算机视觉领域"></a>计算机视觉领域</h2><ul>
+<li>计算机视觉与模式识别大会  CVPR</li>
+<li>国际计算机视觉会议  ICCV</li>
+</ul>
+<h2 id="自然语言处理领域"><a href="#自然语言处理领域" class="headerlink" title="自然语言处理领域"></a>自然语言处理领域</h2><ul>
+<li>计算语言学年会 ACL</li>
+<li>自然语言处理实证方法大会  EMNLP</li>
+</ul>
+]]></content>
+      <categories>
+        <category>深度学习基础-邱锡鹏</category>
+      </categories>
+      <tags>
+        <tag>深度学习</tag>
+        <tag>邱锡鹏</tag>
+        <tag>神经网络</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>神经网络与深度学习 邱锡鹏 学习笔记（机器学习）</title>
     <url>/2021/09/11/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%20%E9%82%B1%E9%94%A1%E9%B9%8F%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%EF%BC%89/</url>
     <content><![CDATA[<p>@<a href="神经网络与深度学习 邱锡鹏 学习笔记（机器学习）">TOC</a></p>
@@ -872,67 +972,6 @@
         <tag>机器学习</tag>
         <tag>李宏毅</tag>
         <tag>线性回归</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>神经网络与深度学习 学习笔记（第一章）</title>
-    <url>/2021/09/10/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E7%AC%AC%E4%B8%80%E7%AB%A0%EF%BC%89/</url>
-    <content><![CDATA[<p>@<a href="神经网络与深度学习 邱锡鹏 学习笔记（第一章）">TOC</a></p>
-<h1 id="机器学习"><a href="#机器学习" class="headerlink" title="机器学习"></a>机器学习</h1><h2 id="浅层学习"><a href="#浅层学习" class="headerlink" title="浅层学习"></a>浅层学习</h2><blockquote>
-<p>学习一个预测模型．一般需要首先将数据表示为一组特征（Feature），特征的表示形式可以是连续的数值、离散的符号或其他形式．然后将这些特征输入到预测模型，并输出预测结果．这类机器学习可以看作浅层学习（Shallow  Learning）</p>
-</blockquote>
-<h2 id="机器学习的步骤"><a href="#机器学习的步骤" class="headerlink" title="机器学习的步骤"></a>机器学习的步骤</h2><ol>
-<li>数据预处理：对数据的原始形式进行初步的数据清理（比如去掉一些有缺失特征的样本，或去掉一些冗余的数据特征等）和加工（对数值特征进行缩放和归一化等），并构建成可用于训练机器学习模型的数据集．</li>
-<li>特征提取：从数据的原始特征中提取一些对特定机器学习任务有用的高质量特征．比如在图像分类中提取边缘、尺度不变特征变换（Scale Invariant<br>Feature Transform，SIFT）特征，在文本分类中去除停用词等．</li>
-<li>特征转换：对特征进行进一步的加工，比如降维和升维． 很多特征转换方法也都是机器学习方法．降维包括特征抽取（Feature Extraction）和特征选择（FeatureSelection）两种途径．常用的特征转换方法有主成分分析（Principal Components Analysis，PCA）、 线性判别分析（Linear Discriminant Analysis，LDA）等．</li>
-<li>预测：机器学习的核心部分，学习一个函数并进行预测．</li>
-</ol>
-<p><img src="https://img-blog.csdnimg.cn/f3d73fb28f1342f48a6ca08638b8da68.png#pic_center" alt="传统机器学习的数据处理流程"><br>注：很多的机器学习问题变成了特征工程（Feature Engineering）问题．开发一个机器学习系统的主要工作量都消耗在了预处理、特征提取以及特征转换上。</p>
-<h1 id="表示学习"><a href="#表示学习" class="headerlink" title="表示学习"></a>表示学习</h1><p>在表示学习中，有两个核心问题：</p>
-<ul>
-<li>一是“什么是一个好的表示”；即表示 需要包含更高层的语义信息</li>
-<li>二是“如何学习到好的表示”．</li>
-</ul>
-<p>传统的特征学习一般是通过<font color="red">人为地设计一些准则</font>，然后根据这些准则来选取有效的特征。 所以 特征的学习是和最终预测模型的学习分开进行的，<font color="red">因此学习到的特征不一定可以提升最终模型的性能．</font></p>
-<h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>将输入信息转换为有效的特征。<br>如果有一种算法可以自动地学习出有效的特征，并提高最终机器学习模型的性能，那么这种学习就可以叫作表示学习（Representation Learning）．</p>
-<h2 id="语义鸿沟"><a href="#语义鸿沟" class="headerlink" title="语义鸿沟"></a>语义鸿沟</h2><p>语义鸿沟问题是指输入数据的底层特征和高层语义信息之间的不一致性和差异性。</p>
-<blockquote>
-<p>比如车，图片中每辆车的颜色和形状等属性都不尽相同，因此不同图片在像素级别上的表示（即底层特征）差异性也会非常大．但是我们理解这些图片是建立在比较抽象的高层语义概念上的</p>
-</blockquote>
-<h2 id="表示特征的方式"><a href="#表示特征的方式" class="headerlink" title="表示特征的方式"></a>表示特征的方式</h2><ol>
-<li>局部表示：例如，one-hot向量 表示颜色。 缺点在于多个颜色就多个列或者行 </li>
-<li>分布式表示：RGB 表示颜色</li>
-</ol>
-<p><img src="https://img-blog.csdnimg.cn/aa86242673364da09f8245d248914cbd.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="局部表示和分布式表示示例"></p>
-<h2 id="嵌入"><a href="#嵌入" class="headerlink" title="嵌入"></a>嵌入</h2><p>嵌入通常指将一个度量空间中的一些对象映射到另一个低维的度量空间中，并尽可能保持不同对象之间的拓扑关系．<font color="blue">比如自然语言中词的分布式表示，也经常叫作词嵌入 </font></p>
-<p><font color="red"><strong>例如：3维one-hot向量空间和一个2维嵌入空间的对比</strong></font><br><img src="https://img-blog.csdnimg.cn/007e99163fd044348e7061ebebc1af33.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_14,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="one-hot向量空间与嵌入空间"><br>在低维的嵌入空间中，每个样本都不在坐标轴上，样本之间可以计算相似度．</p>
-<h1 id="深度学习"><a href="#深度学习" class="headerlink" title="深度学习"></a>深度学习</h1><h2 id="什么是深度"><a href="#什么是深度" class="headerlink" title="什么是深度"></a>什么是深度</h2><p>“深度”是指原始数据进行非线性特征转换的次数</p>
-<h2 id="深度学习的优点"><a href="#深度学习的优点" class="headerlink" title="深度学习的优点"></a>深度学习的优点</h2><p>深度学习，其主要目的是从数据中<font color="red">自动学习到有效的特征表示 </font><br>其抽象在 数据通过多层的特征转换，学习到的表示可以代替人工设计的特征，从而避免“特征工程”<br><img src="https://img-blog.csdnimg.cn/f678fb27e01c4d989d099cfa06afe038.png#pic_center" alt="深度学习的数据处理流程"><br>其是 一种 <font color="red"><strong>端到端的学习方式</strong></font>   在学习过程中<strong>不进行分模块或分阶段训练</strong>，直接优化任务的总体目标．在端到端学习中，一般不需要明确地给出不同模块或阶段的功能，中间过程不需要人为干预</p>
-<h2 id="深度学习的关键问题"><a href="#深度学习的关键问题" class="headerlink" title="深度学习的关键问题"></a>深度学习的关键问题</h2><p>深度学习需要解决的关键问题是 <strong>贡献度分配问题</strong>，即一个系统中不同的 <strong>组件</strong> 或其 <strong>参数</strong> 对最终系统输出结果的贡献或影响 </p>
-<p>目前，深度学习采用的模型主要是神经网络模型，其主要原因是神经网络模型可以使用 <strong>误差反向传播算法</strong> ，从而可以比较好地解决贡献度分配问题</p>
-<h1 id="深度学习相关的学术会议"><a href="#深度学习相关的学术会议" class="headerlink" title="深度学习相关的学术会议"></a>深度学习相关的学术会议</h1><ul>
-<li>国际表示学习会议  ICLR ：主要聚焦于深度学习</li>
-<li>神经信息处理系统年会 NeurIPS ：交叉学科会议，但偏重于机器学习</li>
-<li>国际机器学习会议 ICML：机器学习顶级会议</li>
-<li>国际人工智能联合会议 IJCAI ：人工智能领域最顶尖的综合性会议</li>
-<li>美国人工智能协会年会  AAAI ：人工智能领域的顶级会议</li>
-</ul>
-<h2 id="计算机视觉领域"><a href="#计算机视觉领域" class="headerlink" title="计算机视觉领域"></a>计算机视觉领域</h2><ul>
-<li>计算机视觉与模式识别大会  CVPR</li>
-<li>国际计算机视觉会议  ICCV</li>
-</ul>
-<h2 id="自然语言处理领域"><a href="#自然语言处理领域" class="headerlink" title="自然语言处理领域"></a>自然语言处理领域</h2><ul>
-<li>计算语言学年会 ACL</li>
-<li>自然语言处理实证方法大会  EMNLP</li>
-</ul>
-]]></content>
-      <categories>
-        <category>深度学习基础-邱锡鹏</category>
-      </categories>
-      <tags>
-        <tag>深度学习</tag>
-        <tag>邱锡鹏</tag>
-        <tag>神经网络</tag>
       </tags>
   </entry>
   <entry>
