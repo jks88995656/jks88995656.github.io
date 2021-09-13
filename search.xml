@@ -806,92 +806,6 @@
       </tags>
   </entry>
   <entry>
-    <title>线性回归Regression 案例一：宝可梦进化CP值</title>
-    <url>/2021/07/31/%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92Regression%20%E6%A1%88%E4%BE%8B%E4%B8%80%EF%BC%9A%E5%AE%9D%E5%8F%AF%E6%A2%A6%E8%BF%9B%E5%8C%96CP%E5%80%BC/</url>
-    <content><![CDATA[<p>@<a href="线性回归Regression 案例一：宝可梦进化CP值">TOC</a></p>
-<blockquote>
-<p>本栗子：预测Pokemon精灵攻击力。<br>输入：进化前的CP值、物种（Bulbasaur）、血量（HP）、重量（Weight）、高度（Height）<br>输出：进化后的CP值</p>
-</blockquote>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/d53b2b95d30c7af9574c7a0bbaba2c82.png#pic_center" alt="在这里插入图片描述"></p>
-<h1 id="实现回归的步骤（机器学习的步骤）"><a href="#实现回归的步骤（机器学习的步骤）" class="headerlink" title="实现回归的步骤（机器学习的步骤）"></a>实现回归的步骤（机器学习的步骤）</h1><h2 id="Step1-确定一个model-线性模型"><a href="#Step1-确定一个model-线性模型" class="headerlink" title="Step1 确定一个model - 线性模型"></a>Step1 确定一个model - 线性模型</h2><blockquote>
-<p>输入的特征包括：进化前的CP值（<em>Xcp</em>）、物种（Bulbasaur）（<em>Xs</em>）、血量（HP）（<em>Xhp</em>）、重量（Weight）（<em>Xw</em>）、高度（Height）（<em>Xh</em>）</p>
-</blockquote>
-<p>先从简单的<strong>单个特征</strong> 进化前的CP值（<em>Xcp</em>）开始（<strong>后面改进再考虑多个特征</strong>）。<br><img src="https://img-blog.csdnimg.cn/img_convert/5b4df493600379c7aa0372e103eb7d79.png#pic_center" alt="在这里插入图片描述"></p>
-<h2 id="Step2-goodness-of-function（函数优化）——损失函数"><a href="#Step2-goodness-of-function（函数优化）——损失函数" class="headerlink" title="Step2 goodness of function（函数优化）——损失函数"></a>Step2 goodness of function（函数优化）——损失函数</h2><ol>
-<li>确定model后（案例为线性模型），开始训练数据（使用的为训练样本集）<img src="https://img-blog.csdnimg.cn/img_convert/ebd00bf7bee79841d6c35eac2865fd61.png#pic_center" alt="在这里插入图片描述"></li>
-<li>训练10个训练样本后得到10个的预测进化CP值（<em>y</em>）如下图所示。左侧为训练样本本身真实的进化CP值，右侧为横轴为进化前CP值（<em>Xcp</em>）<img src="https://img-blog.csdnimg.cn/img_convert/fbba4351217b730cd11ca92a7427cd51.png#pic_center" alt="在这里插入图片描述"></li>
-<li><strong>确定损失函数</strong>。损失函数用于评价一个模型的好坏。损失函数的值越小，那么模型越好。<strong>对于本案例，损失函数采用最简单的距离表示</strong>。即求<strong>实际进化后的CP值与模型预测的CP值差</strong>，来判定模型的好坏。<img src="https://img-blog.csdnimg.cn/img_convert/3abae7108681dbad20cc15a952d20bba.png#pic_center" alt="在这里插入图片描述"><ol>
-<li>List item</li>
-</ol>
-</li>
-</ol>
-<h2 id="Step3-best-function（找出最好的一个函数-即调参）——使用梯度下降法"><a href="#Step3-best-function（找出最好的一个函数-即调参）——使用梯度下降法" class="headerlink" title="Step3 best function（找出最好的一个函数 即调参）——使用梯度下降法"></a>Step3 best function（找出最好的一个函数 即调参）——使用梯度下降法</h2><ol>
-<li>案例采用<strong>梯度下降法</strong>来帮助选择 <em>w</em> 和 <em>b</em> 两个参数取何值时损失函数最小，也就意味着构建的模型越准确。 <img src="https://img-blog.csdnimg.cn/img_convert/7d75962cbe0b2dc3c54f370383912138.png#pic_center" alt="在这里插入图片描述"><blockquote>
-<p>什么是梯度下降法？梯度指的是？<br>………………………………………………………………………………………………………<br>梯度？<br>在<strong>单变量的函数</strong>中，梯度其实就是对应点<strong>函数的微分</strong>，代表着这个函数在<strong>某个给定点的切线的斜率</strong><br>在<strong>多变量函数</strong>中，梯度是一个<strong>向量</strong>，向量有方向，梯度的方向就指出了函数在给定点的上升最快的方向  <strong>即例如二维就是 偏导 i + 偏导 j</strong><br>………………………………………………………………………………………………………<br>梯度下降法(SGD  Stochastic gradient descent）？答： “下山最快路径”的一种算法<br>我们是尝试使用偏导来衡量函数随自变量的值变化关系，选择变化更为平缓的那一处  对应的 <em>w</em> 和 <em>b</em> 作为调整后的参数</p>
-</blockquote>
-</li>
-</ol>
-<h3 id="一维视角：只考虑一个参数-w"><a href="#一维视角：只考虑一个参数-w" class="headerlink" title="一维视角：只考虑一个参数 w"></a>一维视角：只考虑一个参数 <em>w</em></h3><p><img src="https://img-blog.csdnimg.cn/3c72961665a942ac87f066a129a30183.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<blockquote>
-<p>如上图  learning rate（学习率）：移动的步长 一般用η来表示<br>………………………………………………………………………………………………………<br>如何寻找一个最合适的 <em>w</em> ？<br>步骤1：随机在横轴上选取一个 <em>w0</em> 。<br>步骤2：计算微分，也就是当前的斜率，根据斜率来判定移动的方向。微分大于0应向右移动（增加 <em>w</em> ）；微分小于0向左移动（减少 <em>w</em> ）<br>步骤3：根据学习率，按步骤2得到的方向移动<br>重复步骤2和步骤3，直到找到<strong>最低点</strong>。横轴即对于的最佳 <em>w</em>  参数<br>………………………………………………………………………………………………………<br>如下图，是经过迭代多次后找到的最佳点（得是全局最优解） 。注：大部分损失函数都为正<br><img src="https://img-blog.csdnimg.cn/588186b690dd43c38a10a80600802ab0.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="二维视角：考虑两个参数-w-和-b"><a href="#二维视角：考虑两个参数-w-和-b" class="headerlink" title="二维视角：考虑两个参数 w 和 b"></a>二维视角：考虑两个参数 <em>w</em> 和 <em>b</em></h3><p><img src="https://img-blog.csdnimg.cn/55f2f295750242bfa35f9ac576602194.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>如何寻找一个最合适的 <em>w</em> ？<br>步骤1：随机在横轴上选取一个 <em>w0</em> ，<em>b0</em> 。<br>步骤2：计算各偏导，也就是当前偏导的斜率，根据斜率来判定移动的方向。微分大于0应向右移动（增加 <em>w</em> 或 <em>b</em>）；微分小于0向左移动（减少 <em>w</em> 或 <em>b</em>）<img src="https://img-blog.csdnimg.cn/6a082b40869947c2a0723b298cd36027.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>步骤3：根据学习率，按步骤2得到的方向移动<br>重复步骤2和步骤3，直到找到<strong>最低点</strong>。横轴即对于的最佳 <em>w</em> 和 <em>b</em>  参数</p>
-</blockquote>
-<p>二维情况：梯度下降法的效果<br>颜色约深的区域代表的损失函数越小？ <strong>为什么呢？</strong><br><img src="https://img-blog.csdnimg.cn/299d0d615f6640a6ae092e51579d09ea.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="梯度算法的优缺点"><a href="#梯度算法的优缺点" class="headerlink" title="梯度算法的优缺点"></a>梯度算法的优缺点</h3><blockquote>
-<p>总结一下梯度下降法：<br>　　　我们要解决使<strong>损失函数<em>L(w,b)</em></strong> 最小时参数的最佳值，梯度下降法是每次update参数值，直到损失函数最小时找到对应最佳的参数<em>w，b</em></p>
-</blockquote>
-<p><strong>缺点1</strong>：求解的未必是全局最优解，有可能是局部最优解。</p>
-<blockquote>
-<p><strong>用下山的例子讲</strong>：<br>　　　比如我们在一座大山上的某处位置，由于我们不知道怎么下山，于是决定走一步算一步，也就是在<strong>每走到一个位置的时候</strong>，<strong>求解当前位置的梯度</strong>，沿着<strong>梯度的负方向</strong>，也就是<strong>当前最陡峭的位置向下走一步</strong>，然后继续求解当前位置梯度，向这一步所在位置沿着最陡峭最易下山的位置走一步。这样一步步的走下去，一直走到觉得我们已经到了山脚。当然这样走下去，<strong>有可能我们不能走到山脚，而是到了某一个局部的山峰低处。</strong><br>………………………………………………………………………………………………………<br>　　　从上面的解释可以看出，<strong>梯度下降不一定能够找到全局的最优解，有可能是一个局部最优解</strong>。当然，如果损失函数是<strong>凸函数</strong>，梯度下降法得到的解就<strong>一定是</strong>全局最优解。</p>
-</blockquote>
-<p><strong>优点1</strong>：无论随机从哪个点出发，得到的最佳参数一定是同一组</p>
-<blockquote>
-<p><strong>用下山的例子讲</strong>：<br>　　　因为山只有一处是最低点，在确保能找到全局最优解的情况下，无论人从山上哪一点出发，一定能找到这特定一处的最低洼处。</p>
-</blockquote>
-<h2 id="Step4-回归结果分析"><a href="#Step4-回归结果分析" class="headerlink" title="Step4 回归结果分析"></a>Step4 回归结果分析</h2><blockquote>
-<p>经过上述三个步骤后，得到了<strong>训练后</strong>的“最佳参数<em>w</em>，<em>b</em>”，那么现在这个模型在<strong>测试集</strong>上是什么表现呢？<br>得到的结果是：<br><strong>测试集的误差比在训练集上得到的损失值大</strong> 这个事非常正常。因为你训练集里面可能有些数据是不典型的，同样测试集中很多也包含了训练集中没有的因素。所以一个函数模型在实际应用中，效果基本上时打折扣的。<strong>一般会采用两种方式来加强这个函数模型</strong>：<br>　　　select another model（选择另一个模型）即增加维度，增加高此项多项式<br>　　　consider the hidden factors（考虑其他隐藏因素）</p>
-</blockquote>
-<h3 id="优化模型方法一：增加高次项（一般用于拟合度不够的情况）"><a href="#优化模型方法一：增加高次项（一般用于拟合度不够的情况）" class="headerlink" title="优化模型方法一：增加高次项（一般用于拟合度不够的情况）"></a>优化模型方法一：增加高次项（一般用于拟合度不够的情况）</h3><p><strong>回到Step1</strong></p>
-<ol>
-<li>尝试二次项、三次项、四次项、五次项…… 右上图为训练集损失，下图是测试集的损失。第五次<strong>过拟合</strong>导致了，测试集损失度很高。<img src="https://img-blog.csdnimg.cn/c707638cef5c4d698813e6acfe4ec172.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/ce26490bbfc64ea6967cd7b8e1e8184d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/166aef516df14c339c45fee48a78e16a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/87e7491ce6a1464dad4c023dc9004274.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
-<li><strong>选择合适的模型</strong>，即我到底要加到几次项呢？</li>
-</ol>
-<blockquote>
-<p>越复杂的模型所包含的函数也就越多，那么它包含理想模型的可能性也就越大，但是如果过分地去拟合理想模型，就会出现<strong>过拟合</strong>的情况。<br><img src="https://img-blog.csdnimg.cn/6a394ba6b4a648a994472d8969668601.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-</blockquote>
-<ol>
-<li>横向比较各个多项次，训练集和测试集的失误。理论上，失误会随着高次项而变小，如果变大，则表示模型<strong>过拟合</strong>了。<img src="https://img-blog.csdnimg.cn/979417ba98f6475d941753e0cb71b91c.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>所以，如上图所示，在为3次的时候，训练集和测试集的误差差值最小。并且4次开始，以及存在过拟合现象了。因此本案例可选择3次项线性模型。</li>
-</ol>
-<h3 id="优化模型方法二：考虑其他隐藏因素"><a href="#优化模型方法二：考虑其他隐藏因素" class="headerlink" title="优化模型方法二：考虑其他隐藏因素"></a>优化模型方法二：考虑其他隐藏因素</h3><p><strong>回到Step1</strong></p>
-<blockquote>
-<p>输入的特征包括：进化前的CP值（<em>Xcp</em>）、物种（Bulbasaur）（<em>Xs</em>）、血量（HP）（<em>Xhp</em>）、重量（Weight）（<em>Xw</em>）、高度（Height）（<em>Xh</em>）<br>除了之前考虑的进化前的CP值（<em>Xcp</em>），其他均为隐藏因素<br>………………………………………………………………………………<br><strong>这里另外考虑的是神奇宝贝的种类</strong>？因为，有时候一个模型恰恰只能符合一种神奇宝贝，也就是<strong>不同神奇宝贝应该有不同的预测模型</strong>。<img src="https://img-blog.csdnimg.cn/72a4aadb2ba24aefb4584a8a8ca2801e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-</blockquote>
-<ol>
-<li>不同的神奇宝贝有不同的预测模型<img src="https://img-blog.csdnimg.cn/46fe5297bddb46a4bd511a7cea422e3a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
-<li>拟合这个模型的曲线，可以看出不同神奇宝贝拟合成了不同的类线性直线<img src="https://img-blog.csdnimg.cn/7a55f95269d642038715e355437600f2.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
-<li>如果还考虑了其他隐藏元素。如图是横轴是对应的隐藏元素，纵轴是对应进化后的CP值。<img src="https://img-blog.csdnimg.cn/591a6aa5537443428687ba15886ab11d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
-<li>如果都采用最高二次项，考虑所有其他的隐藏因素。该案例的数学模型就变成 如图所示的式子。<img src="https://img-blog.csdnimg.cn/0a80407d715e4dcc978bd86dee3451a3.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><blockquote>
-<p> 考虑更多的因素反而出现了过拟合的问题，<strong>说明有些因素跟本次实验的CP值预测没有关系</strong>！<br>………………………………………………………………………………<br><strong>过拟合这么讨厌，到底如何减少过拟合问题呢？往下看！</strong></p>
-</blockquote>
-</li>
-</ol>
-<h3 id="优化模型：防止过拟合（为损失函数加一个正则项）"><a href="#优化模型：防止过拟合（为损失函数加一个正则项）" class="headerlink" title="优化模型：防止过拟合（为损失函数加一个正则项）"></a>优化模型：防止过拟合（为损失函数加一个正则项）</h3><h4 id="正则项是什么"><a href="#正则项是什么" class="headerlink" title="正则项是什么?"></a>正则项是什么?</h4><blockquote>
-<p><strong>方法：正则化</strong>?<br>比如先考虑一个参数w，正则化就是在损失函数上加上一个与w（斜率）相关的值（正则项），那么要是loss function越小的话，w也会越小，w越小就使function更加平滑（function没那么大跳跃）<img src="https://img-blog.csdnimg.cn/7a87a38ed54c438c8af37860e982f775.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h4 id="正则化的缺点"><a href="#正则化的缺点" class="headerlink" title="正则化的缺点"></a>正则化的缺点</h4><p>正则化虽然能够减少过拟合的现象，但是因为加在损失函数后面的值是平白无故加上去的，所以正则化过度的话会导致<strong>bias偏差增大</strong>   ？？？？<img src="https://img-blog.csdnimg.cn/f4c9ea7efb144c8a89b7fee964b75fa8.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>1）实现参数的稀疏有什么好处吗？<br>一个好处是可以简化模型，避免过拟合。<strong>因为一个模型中真正重要的参数可能并不多，如果考虑所有的参数起作用，那么可以对训练数据可以预测的很好，但是对测试数据表现性能极差</strong>。另一个好处是参数变少可以使整个模型获得更好的可解释性。<br>2）参数值越小代表模型越简单吗？<br>是的。为什么参数越小，说明模型越简单呢，这是因为越复杂的模型，<strong>越是会尝试对所有的样本进行拟合，甚至包括一些异常样本点</strong>，这就容易造成在<strong>较小的区间里预测值产生较大的波动</strong>，这种较大的波动也反映了在这个区间里的<strong>导数很大</strong>，而<strong>只有较大的参数值才能产生较大的导数。因此复杂的模型，其参数值会比较大。</strong></p>
-</blockquote>
-<p><img src="https://img-blog.csdnimg.cn/9dcfac9366564857a226de8d73bf512e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-]]></content>
-      <categories>
-        <category>机器学习基础-李宏毅</category>
-      </categories>
-      <tags>
-        <tag>李宏毅</tag>
-        <tag>机器学习</tag>
-        <tag>线性回归</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>神经网络与深度学习 邱锡鹏 学习笔记（机器学习）</title>
     <url>/2021/09/11/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%20%E9%82%B1%E9%94%A1%E9%B9%8F%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%EF%BC%89/</url>
     <content><![CDATA[<p>@<a href="神经网络与深度学习 邱锡鹏 学习笔记（机器学习）">TOC</a></p>
@@ -1030,6 +944,92 @@
         <tag>机器学习</tag>
         <tag>邱锡鹏</tag>
         <tag>神经网络</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>线性回归Regression 案例一：宝可梦进化CP值</title>
+    <url>/2021/07/31/%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92Regression%20%E6%A1%88%E4%BE%8B%E4%B8%80%EF%BC%9A%E5%AE%9D%E5%8F%AF%E6%A2%A6%E8%BF%9B%E5%8C%96CP%E5%80%BC/</url>
+    <content><![CDATA[<p>@<a href="线性回归Regression 案例一：宝可梦进化CP值">TOC</a></p>
+<blockquote>
+<p>本栗子：预测Pokemon精灵攻击力。<br>输入：进化前的CP值、物种（Bulbasaur）、血量（HP）、重量（Weight）、高度（Height）<br>输出：进化后的CP值</p>
+</blockquote>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/d53b2b95d30c7af9574c7a0bbaba2c82.png#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="实现回归的步骤（机器学习的步骤）"><a href="#实现回归的步骤（机器学习的步骤）" class="headerlink" title="实现回归的步骤（机器学习的步骤）"></a>实现回归的步骤（机器学习的步骤）</h1><h2 id="Step1-确定一个model-线性模型"><a href="#Step1-确定一个model-线性模型" class="headerlink" title="Step1 确定一个model - 线性模型"></a>Step1 确定一个model - 线性模型</h2><blockquote>
+<p>输入的特征包括：进化前的CP值（<em>Xcp</em>）、物种（Bulbasaur）（<em>Xs</em>）、血量（HP）（<em>Xhp</em>）、重量（Weight）（<em>Xw</em>）、高度（Height）（<em>Xh</em>）</p>
+</blockquote>
+<p>先从简单的<strong>单个特征</strong> 进化前的CP值（<em>Xcp</em>）开始（<strong>后面改进再考虑多个特征</strong>）。<br><img src="https://img-blog.csdnimg.cn/img_convert/5b4df493600379c7aa0372e103eb7d79.png#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="Step2-goodness-of-function（函数优化）——损失函数"><a href="#Step2-goodness-of-function（函数优化）——损失函数" class="headerlink" title="Step2 goodness of function（函数优化）——损失函数"></a>Step2 goodness of function（函数优化）——损失函数</h2><ol>
+<li>确定model后（案例为线性模型），开始训练数据（使用的为训练样本集）<img src="https://img-blog.csdnimg.cn/img_convert/ebd00bf7bee79841d6c35eac2865fd61.png#pic_center" alt="在这里插入图片描述"></li>
+<li>训练10个训练样本后得到10个的预测进化CP值（<em>y</em>）如下图所示。左侧为训练样本本身真实的进化CP值，右侧为横轴为进化前CP值（<em>Xcp</em>）<img src="https://img-blog.csdnimg.cn/img_convert/fbba4351217b730cd11ca92a7427cd51.png#pic_center" alt="在这里插入图片描述"></li>
+<li><strong>确定损失函数</strong>。损失函数用于评价一个模型的好坏。损失函数的值越小，那么模型越好。<strong>对于本案例，损失函数采用最简单的距离表示</strong>。即求<strong>实际进化后的CP值与模型预测的CP值差</strong>，来判定模型的好坏。<img src="https://img-blog.csdnimg.cn/img_convert/3abae7108681dbad20cc15a952d20bba.png#pic_center" alt="在这里插入图片描述"><ol>
+<li>List item</li>
+</ol>
+</li>
+</ol>
+<h2 id="Step3-best-function（找出最好的一个函数-即调参）——使用梯度下降法"><a href="#Step3-best-function（找出最好的一个函数-即调参）——使用梯度下降法" class="headerlink" title="Step3 best function（找出最好的一个函数 即调参）——使用梯度下降法"></a>Step3 best function（找出最好的一个函数 即调参）——使用梯度下降法</h2><ol>
+<li>案例采用<strong>梯度下降法</strong>来帮助选择 <em>w</em> 和 <em>b</em> 两个参数取何值时损失函数最小，也就意味着构建的模型越准确。 <img src="https://img-blog.csdnimg.cn/img_convert/7d75962cbe0b2dc3c54f370383912138.png#pic_center" alt="在这里插入图片描述"><blockquote>
+<p>什么是梯度下降法？梯度指的是？<br>………………………………………………………………………………………………………<br>梯度？<br>在<strong>单变量的函数</strong>中，梯度其实就是对应点<strong>函数的微分</strong>，代表着这个函数在<strong>某个给定点的切线的斜率</strong><br>在<strong>多变量函数</strong>中，梯度是一个<strong>向量</strong>，向量有方向，梯度的方向就指出了函数在给定点的上升最快的方向  <strong>即例如二维就是 偏导 i + 偏导 j</strong><br>………………………………………………………………………………………………………<br>梯度下降法(SGD  Stochastic gradient descent）？答： “下山最快路径”的一种算法<br>我们是尝试使用偏导来衡量函数随自变量的值变化关系，选择变化更为平缓的那一处  对应的 <em>w</em> 和 <em>b</em> 作为调整后的参数</p>
+</blockquote>
+</li>
+</ol>
+<h3 id="一维视角：只考虑一个参数-w"><a href="#一维视角：只考虑一个参数-w" class="headerlink" title="一维视角：只考虑一个参数 w"></a>一维视角：只考虑一个参数 <em>w</em></h3><p><img src="https://img-blog.csdnimg.cn/3c72961665a942ac87f066a129a30183.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<blockquote>
+<p>如上图  learning rate（学习率）：移动的步长 一般用η来表示<br>………………………………………………………………………………………………………<br>如何寻找一个最合适的 <em>w</em> ？<br>步骤1：随机在横轴上选取一个 <em>w0</em> 。<br>步骤2：计算微分，也就是当前的斜率，根据斜率来判定移动的方向。微分大于0应向右移动（增加 <em>w</em> ）；微分小于0向左移动（减少 <em>w</em> ）<br>步骤3：根据学习率，按步骤2得到的方向移动<br>重复步骤2和步骤3，直到找到<strong>最低点</strong>。横轴即对于的最佳 <em>w</em>  参数<br>………………………………………………………………………………………………………<br>如下图，是经过迭代多次后找到的最佳点（得是全局最优解） 。注：大部分损失函数都为正<br><img src="https://img-blog.csdnimg.cn/588186b690dd43c38a10a80600802ab0.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="二维视角：考虑两个参数-w-和-b"><a href="#二维视角：考虑两个参数-w-和-b" class="headerlink" title="二维视角：考虑两个参数 w 和 b"></a>二维视角：考虑两个参数 <em>w</em> 和 <em>b</em></h3><p><img src="https://img-blog.csdnimg.cn/55f2f295750242bfa35f9ac576602194.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>如何寻找一个最合适的 <em>w</em> ？<br>步骤1：随机在横轴上选取一个 <em>w0</em> ，<em>b0</em> 。<br>步骤2：计算各偏导，也就是当前偏导的斜率，根据斜率来判定移动的方向。微分大于0应向右移动（增加 <em>w</em> 或 <em>b</em>）；微分小于0向左移动（减少 <em>w</em> 或 <em>b</em>）<img src="https://img-blog.csdnimg.cn/6a082b40869947c2a0723b298cd36027.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>步骤3：根据学习率，按步骤2得到的方向移动<br>重复步骤2和步骤3，直到找到<strong>最低点</strong>。横轴即对于的最佳 <em>w</em> 和 <em>b</em>  参数</p>
+</blockquote>
+<p>二维情况：梯度下降法的效果<br>颜色约深的区域代表的损失函数越小？ <strong>为什么呢？</strong><br><img src="https://img-blog.csdnimg.cn/299d0d615f6640a6ae092e51579d09ea.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="梯度算法的优缺点"><a href="#梯度算法的优缺点" class="headerlink" title="梯度算法的优缺点"></a>梯度算法的优缺点</h3><blockquote>
+<p>总结一下梯度下降法：<br>　　　我们要解决使<strong>损失函数<em>L(w,b)</em></strong> 最小时参数的最佳值，梯度下降法是每次update参数值，直到损失函数最小时找到对应最佳的参数<em>w，b</em></p>
+</blockquote>
+<p><strong>缺点1</strong>：求解的未必是全局最优解，有可能是局部最优解。</p>
+<blockquote>
+<p><strong>用下山的例子讲</strong>：<br>　　　比如我们在一座大山上的某处位置，由于我们不知道怎么下山，于是决定走一步算一步，也就是在<strong>每走到一个位置的时候</strong>，<strong>求解当前位置的梯度</strong>，沿着<strong>梯度的负方向</strong>，也就是<strong>当前最陡峭的位置向下走一步</strong>，然后继续求解当前位置梯度，向这一步所在位置沿着最陡峭最易下山的位置走一步。这样一步步的走下去，一直走到觉得我们已经到了山脚。当然这样走下去，<strong>有可能我们不能走到山脚，而是到了某一个局部的山峰低处。</strong><br>………………………………………………………………………………………………………<br>　　　从上面的解释可以看出，<strong>梯度下降不一定能够找到全局的最优解，有可能是一个局部最优解</strong>。当然，如果损失函数是<strong>凸函数</strong>，梯度下降法得到的解就<strong>一定是</strong>全局最优解。</p>
+</blockquote>
+<p><strong>优点1</strong>：无论随机从哪个点出发，得到的最佳参数一定是同一组</p>
+<blockquote>
+<p><strong>用下山的例子讲</strong>：<br>　　　因为山只有一处是最低点，在确保能找到全局最优解的情况下，无论人从山上哪一点出发，一定能找到这特定一处的最低洼处。</p>
+</blockquote>
+<h2 id="Step4-回归结果分析"><a href="#Step4-回归结果分析" class="headerlink" title="Step4 回归结果分析"></a>Step4 回归结果分析</h2><blockquote>
+<p>经过上述三个步骤后，得到了<strong>训练后</strong>的“最佳参数<em>w</em>，<em>b</em>”，那么现在这个模型在<strong>测试集</strong>上是什么表现呢？<br>得到的结果是：<br><strong>测试集的误差比在训练集上得到的损失值大</strong> 这个事非常正常。因为你训练集里面可能有些数据是不典型的，同样测试集中很多也包含了训练集中没有的因素。所以一个函数模型在实际应用中，效果基本上时打折扣的。<strong>一般会采用两种方式来加强这个函数模型</strong>：<br>　　　select another model（选择另一个模型）即增加维度，增加高此项多项式<br>　　　consider the hidden factors（考虑其他隐藏因素）</p>
+</blockquote>
+<h3 id="优化模型方法一：增加高次项（一般用于拟合度不够的情况）"><a href="#优化模型方法一：增加高次项（一般用于拟合度不够的情况）" class="headerlink" title="优化模型方法一：增加高次项（一般用于拟合度不够的情况）"></a>优化模型方法一：增加高次项（一般用于拟合度不够的情况）</h3><p><strong>回到Step1</strong></p>
+<ol>
+<li>尝试二次项、三次项、四次项、五次项…… 右上图为训练集损失，下图是测试集的损失。第五次<strong>过拟合</strong>导致了，测试集损失度很高。<img src="https://img-blog.csdnimg.cn/c707638cef5c4d698813e6acfe4ec172.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/ce26490bbfc64ea6967cd7b8e1e8184d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/166aef516df14c339c45fee48a78e16a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/87e7491ce6a1464dad4c023dc9004274.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+<li><strong>选择合适的模型</strong>，即我到底要加到几次项呢？</li>
+</ol>
+<blockquote>
+<p>越复杂的模型所包含的函数也就越多，那么它包含理想模型的可能性也就越大，但是如果过分地去拟合理想模型，就会出现<strong>过拟合</strong>的情况。<br><img src="https://img-blog.csdnimg.cn/6a394ba6b4a648a994472d8969668601.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</blockquote>
+<ol>
+<li>横向比较各个多项次，训练集和测试集的失误。理论上，失误会随着高次项而变小，如果变大，则表示模型<strong>过拟合</strong>了。<img src="https://img-blog.csdnimg.cn/979417ba98f6475d941753e0cb71b91c.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>所以，如上图所示，在为3次的时候，训练集和测试集的误差差值最小。并且4次开始，以及存在过拟合现象了。因此本案例可选择3次项线性模型。</li>
+</ol>
+<h3 id="优化模型方法二：考虑其他隐藏因素"><a href="#优化模型方法二：考虑其他隐藏因素" class="headerlink" title="优化模型方法二：考虑其他隐藏因素"></a>优化模型方法二：考虑其他隐藏因素</h3><p><strong>回到Step1</strong></p>
+<blockquote>
+<p>输入的特征包括：进化前的CP值（<em>Xcp</em>）、物种（Bulbasaur）（<em>Xs</em>）、血量（HP）（<em>Xhp</em>）、重量（Weight）（<em>Xw</em>）、高度（Height）（<em>Xh</em>）<br>除了之前考虑的进化前的CP值（<em>Xcp</em>），其他均为隐藏因素<br>………………………………………………………………………………<br><strong>这里另外考虑的是神奇宝贝的种类</strong>？因为，有时候一个模型恰恰只能符合一种神奇宝贝，也就是<strong>不同神奇宝贝应该有不同的预测模型</strong>。<img src="https://img-blog.csdnimg.cn/72a4aadb2ba24aefb4584a8a8ca2801e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</blockquote>
+<ol>
+<li>不同的神奇宝贝有不同的预测模型<img src="https://img-blog.csdnimg.cn/46fe5297bddb46a4bd511a7cea422e3a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+<li>拟合这个模型的曲线，可以看出不同神奇宝贝拟合成了不同的类线性直线<img src="https://img-blog.csdnimg.cn/7a55f95269d642038715e355437600f2.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+<li>如果还考虑了其他隐藏元素。如图是横轴是对应的隐藏元素，纵轴是对应进化后的CP值。<img src="https://img-blog.csdnimg.cn/591a6aa5537443428687ba15886ab11d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+<li>如果都采用最高二次项，考虑所有其他的隐藏因素。该案例的数学模型就变成 如图所示的式子。<img src="https://img-blog.csdnimg.cn/0a80407d715e4dcc978bd86dee3451a3.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><blockquote>
+<p> 考虑更多的因素反而出现了过拟合的问题，<strong>说明有些因素跟本次实验的CP值预测没有关系</strong>！<br>………………………………………………………………………………<br><strong>过拟合这么讨厌，到底如何减少过拟合问题呢？往下看！</strong></p>
+</blockquote>
+</li>
+</ol>
+<h3 id="优化模型：防止过拟合（为损失函数加一个正则项）"><a href="#优化模型：防止过拟合（为损失函数加一个正则项）" class="headerlink" title="优化模型：防止过拟合（为损失函数加一个正则项）"></a>优化模型：防止过拟合（为损失函数加一个正则项）</h3><h4 id="正则项是什么"><a href="#正则项是什么" class="headerlink" title="正则项是什么?"></a>正则项是什么?</h4><blockquote>
+<p><strong>方法：正则化</strong>?<br>比如先考虑一个参数w，正则化就是在损失函数上加上一个与w（斜率）相关的值（正则项），那么要是loss function越小的话，w也会越小，w越小就使function更加平滑（function没那么大跳跃）<img src="https://img-blog.csdnimg.cn/7a87a38ed54c438c8af37860e982f775.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h4 id="正则化的缺点"><a href="#正则化的缺点" class="headerlink" title="正则化的缺点"></a>正则化的缺点</h4><p>正则化虽然能够减少过拟合的现象，但是因为加在损失函数后面的值是平白无故加上去的，所以正则化过度的话会导致<strong>bias偏差增大</strong>   ？？？？<img src="https://img-blog.csdnimg.cn/f4c9ea7efb144c8a89b7fee964b75fa8.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>1）实现参数的稀疏有什么好处吗？<br>一个好处是可以简化模型，避免过拟合。<strong>因为一个模型中真正重要的参数可能并不多，如果考虑所有的参数起作用，那么可以对训练数据可以预测的很好，但是对测试数据表现性能极差</strong>。另一个好处是参数变少可以使整个模型获得更好的可解释性。<br>2）参数值越小代表模型越简单吗？<br>是的。为什么参数越小，说明模型越简单呢，这是因为越复杂的模型，<strong>越是会尝试对所有的样本进行拟合，甚至包括一些异常样本点</strong>，这就容易造成在<strong>较小的区间里预测值产生较大的波动</strong>，这种较大的波动也反映了在这个区间里的<strong>导数很大</strong>，而<strong>只有较大的参数值才能产生较大的导数。因此复杂的模型，其参数值会比较大。</strong></p>
+</blockquote>
+<p><img src="https://img-blog.csdnimg.cn/9dcfac9366564857a226de8d73bf512e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+]]></content>
+      <categories>
+        <category>机器学习基础-李宏毅</category>
+      </categories>
+      <tags>
+        <tag>李宏毅</tag>
+        <tag>机器学习</tag>
+        <tag>线性回归</tag>
       </tags>
   </entry>
   <entry>
