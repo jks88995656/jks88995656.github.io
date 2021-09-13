@@ -1,43 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Keras  RNN 实现 MNIST 手写数字识别</title>
-    <url>/2021/09/04/Keras%20%20RNN%20%E5%AE%9E%E7%8E%B0%20MNIST%20%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E8%AF%86%E5%88%AB/</url>
-    <content><![CDATA[<p>@<a href="Keras  RNN 实现 MNIST 手写数字识别">TOC</a></p>
-<p>我们就以 MNIST数据集的手写识别 为例子</p>
-<h1 id="导入需要的包"><a href="#导入需要的包" class="headerlink" title="导入需要的包"></a>导入需要的包</h1><p>首先导入我们需要的包（直接把Sequential 和 Dense 直接导入 这样之后方便）</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> keras.datasets <span class="keyword">import</span> mnist</span><br><span class="line"><span class="keyword">from</span> keras.utils <span class="keyword">import</span> np_utils</span><br><span class="line"><span class="keyword">from</span> keras.models <span class="keyword">import</span>  Sequential</span><br><span class="line"><span class="keyword">from</span> keras.layers <span class="keyword">import</span> Dense</span><br><span class="line"><span class="keyword">from</span> keras.layers.recurrent <span class="keyword">import</span> SimpleRNN</span><br><span class="line"><span class="keyword">from</span> tensorflow.keras.optimizers <span class="keyword">import</span> Adam</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> matplotlib</span><br><span class="line">matplotlib.use(<span class="string">&#x27;TkAgg&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(matplotlib.get_backend())</span><br></pre></td></tr></table></figure>
-<h1 id="载入MNIST-数据"><a href="#载入MNIST-数据" class="headerlink" title="载入MNIST 数据"></a>载入MNIST 数据</h1><p>该数据集一共有训练集 6w 张，测试集 1w 张<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">(train_images,train_labels),(test_images,test_labels)= mnist.load_data()</span><br></pre></td></tr></table></figure></p>
-<p>可以查看一下图像和标签  是什么</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 数字5</span></span><br><span class="line"><span class="built_in">print</span>(train_images[<span class="number">0</span>])</span><br><span class="line"><span class="comment"># 标签5</span></span><br><span class="line"><span class="built_in">print</span>(train_labels[<span class="number">0</span>])</span><br><span class="line"><span class="comment"># 数字7</span></span><br><span class="line"><span class="built_in">print</span>(test_images[<span class="number">0</span>])</span><br><span class="line"><span class="comment"># 标签7</span></span><br><span class="line"><span class="built_in">print</span>(test_labels[<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
-<p>可以 打印 一下图片 看看是什么样子<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">plt.imshow(train_images[<span class="number">0</span>])</span><br><span class="line">plt.show()</span><br><span class="line">plt.imshow(test_images[<span class="number">0</span>])</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure><br><img src="https://img-blog.csdnimg.cn/a745fc12bef94f93b93f80b2e89bb0d0.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_13,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
-<h1 id="图片数据处理"><a href="#图片数据处理" class="headerlink" title="图片数据处理"></a>图片数据处理</h1><h2 id="查看图片原有-shape"><a href="#查看图片原有-shape" class="headerlink" title="查看图片原有 shape"></a>查看图片原有 shape</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># train_images (60000, 28, 28)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;train_images&#x27;</span>, train_images.shape)</span><br><span class="line"><span class="comment"># train_labels (60000,)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;train_labels&#x27;</span>, train_labels.shape)</span><br></pre></td></tr></table></figure>
-<h2 id="图片数据处理：归一化"><a href="#图片数据处理：归一化" class="headerlink" title="图片数据处理：归一化"></a>图片数据处理：归一化</h2><p>除以255.0 是为了归一化，使得元素点 全部变为在 0-1 之间<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 数据处理</span></span><br><span class="line"><span class="comment">#  (60000, 28, 28) </span></span><br><span class="line">train_images_scale = train_images/<span class="number">255.0</span></span><br><span class="line">test_images_scale = test_images/<span class="number">255.0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># train_images变换后 (60000, 28, 28)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;train_images变换后&#x27;</span>, train_images_scale.shape)</span><br><span class="line"><span class="comment"># test_images变换后 (10000, 28, 28)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;test_images变换后&#x27;</span>, test_images_scale.shape)</span><br></pre></td></tr></table></figure></p>
-<h2 id="标签数据处理：转换成-one-hot-格式"><a href="#标签数据处理：转换成-one-hot-格式" class="headerlink" title="标签数据处理：转换成 one hot 格式"></a>标签数据处理：转换成 one hot 格式</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 换 one hot 格式  共十个分类</span></span><br><span class="line"><span class="comment"># np_utils.to_categorical用于将标签转化为形如(nb_samples, nb_classes)的二值序列。</span></span><br><span class="line">train_labels_hot = np_utils.to_categorical(train_labels,num_classes=<span class="number">10</span>)</span><br><span class="line">test_labels_hot = np_utils.to_categorical(test_labels,num_classes=<span class="number">10</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># train_labels (60000, 10)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;train_labels&#x27;</span>,train_labels_hot.shape)</span><br><span class="line"><span class="comment"># test_labels (10000, 10)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;test_labels&#x27;</span>,test_labels_hot.shape)</span><br></pre></td></tr></table></figure>
-<h1 id="构建模型"><a href="#构建模型" class="headerlink" title="构建模型"></a>构建模型</h1><p>先定义 RNN 所需的参数</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 定义rnn 的参数</span></span><br><span class="line"><span class="comment"># 数据长度 一行一共有28个元素</span></span><br><span class="line">input_size = <span class="number">28</span></span><br><span class="line"><span class="comment"># 序列长度 一共有28个序列 也就是28行</span></span><br><span class="line">time_steps = <span class="number">28</span></span><br><span class="line"><span class="comment"># 隐藏层cell个数</span></span><br><span class="line">cell_size = <span class="number">50</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>再定义 RNN 模型<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model = Sequential()</span><br><span class="line"></span><br><span class="line"><span class="comment">#循环神经网络</span></span><br><span class="line">model.add(SimpleRNN(</span><br><span class="line">    units=cell_size, <span class="comment">#输出</span></span><br><span class="line">    input_shape=(time_steps,input_size) <span class="comment">#输入</span></span><br><span class="line">))</span><br><span class="line"><span class="comment"># 输出层</span></span><br><span class="line">model.add(Dense(input_dim=cell_size,units=<span class="number">10</span>,activation=<span class="string">&quot;softmax&quot;</span>))</span><br></pre></td></tr></table></figure><br>优化器使用 Adam， 损失函数 选择 交叉熵   并编译</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 定义优化器  10的 -4次方</span></span><br><span class="line">adam = Adam(learning_rate=<span class="number">1e-4</span>)</span><br><span class="line"></span><br><span class="line">model.<span class="built_in">compile</span>(optimizer= adam,loss=<span class="string">&#x27;categorical_crossentropy&#x27;</span>,metrics=<span class="string">&quot;accuracy&quot;</span>)</span><br></pre></td></tr></table></figure>
-<h1 id="训练模型"><a href="#训练模型" class="headerlink" title="训练模型"></a>训练模型</h1><p> 一共 60000张训练图片 按批次训练 一批次64张   一共6w/64 个批次<br>训练完一轮6w张，表示一个epoch<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 一共 60000张训练图片 按批次训练 一批次64张   </span></span><br><span class="line"><span class="comment"># 训练完一轮6w张，表示一个epoch</span></span><br><span class="line">model.fit(train_images_scale,train_labels_hot,batch_size=<span class="number">64</span>,epochs=<span class="number">1</span>)</span><br></pre></td></tr></table></figure><br><img src="https://img-blog.csdnimg.cn/35cafae3dc0e431086f33cdf4a23dc52.png#pic_center" alt="在这里插入图片描述"></p>
-<h1 id="评估模型"><a href="#评估模型" class="headerlink" title="评估模型"></a>评估模型</h1><p>就是在 测试集上的表现<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">loss,accuracy = model.evaluate(test_images_scale,test_labels_hot)</span><br></pre></td></tr></table></figure><br>也可以看一下 在训练集上的表现</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">loss,accuracy = model.evaluate(train_images_scale,train_labels_hot)</span><br></pre></td></tr></table></figure>
-<p>下面是 结果（上训练集 下测试集）<br><img src="https://img-blog.csdnimg.cn/d93ee2873e72460e96c0c4a9a663985b.png#pic_center" alt="在这里插入图片描述"></p>
-<h1 id="预测数据"><a href="#预测数据" class="headerlink" title="预测数据"></a>预测数据</h1><font color="red">**有问题 输入的 数据维度不对 不知道错哪了？？？**</font>
-
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 看下输入的形状</span></span><br><span class="line"><span class="comment"># # 预测数据</span></span><br><span class="line"><span class="built_in">print</span>(test_images_scale[<span class="number">0</span>].shape)</span><br><span class="line"><span class="built_in">print</span>(model.predict((test_images_scale[<span class="number">0</span>]/<span class="number">255.0</span>)))</span><br><span class="line"><span class="built_in">print</span>(np.argmax(model.predict((test_images_scale[<span class="number">0</span>]/<span class="number">255.0</span>))))</span><br><span class="line"><span class="built_in">print</span>(test_labels[<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
-<p>输入的图像 变换后形状<br><img src="https://img-blog.csdnimg.cn/c6e4d5008f9c416ba48bea577a86c238.png#pic_center" alt="在这里插入图片描述"><br>模型预测 数据 输出的概率分类结果<br><img src="https://img-blog.csdnimg.cn/ba872c35347041b592db07d82b429d35.png#pic_center" alt="在这里插入图片描述"><br>选出其中最大的 以及 实际图片标签 均为 数字7<br><img src="https://img-blog.csdnimg.cn/5a585701d439431aa1853283c8592b46.png#pic_center" alt="在这里插入图片描述"></p>
-]]></content>
-      <categories>
-        <category>python框架</category>
-      </categories>
-      <tags>
-        <tag>python</tag>
-        <tag>Tensorflow</tag>
-        <tag>Keras</tag>
-        <tag>RNN</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Keras  CNN 实现 MNIST 手写数字识别</title>
     <url>/2021/09/03/Keras%20%20CNN%20%E5%AE%9E%E7%8E%B0%20MNIST%20%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E8%AF%86%E5%88%AB/</url>
     <content><![CDATA[<p>@<a href="Keras  CNN 实现 MNIST 手写数字识别">TOC</a></p>
@@ -101,6 +64,43 @@
       </tags>
   </entry>
   <entry>
+    <title>Keras  RNN 实现 MNIST 手写数字识别</title>
+    <url>/2021/09/04/Keras%20%20RNN%20%E5%AE%9E%E7%8E%B0%20MNIST%20%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E8%AF%86%E5%88%AB/</url>
+    <content><![CDATA[<p>@<a href="Keras  RNN 实现 MNIST 手写数字识别">TOC</a></p>
+<p>我们就以 MNIST数据集的手写识别 为例子</p>
+<h1 id="导入需要的包"><a href="#导入需要的包" class="headerlink" title="导入需要的包"></a>导入需要的包</h1><p>首先导入我们需要的包（直接把Sequential 和 Dense 直接导入 这样之后方便）</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> keras.datasets <span class="keyword">import</span> mnist</span><br><span class="line"><span class="keyword">from</span> keras.utils <span class="keyword">import</span> np_utils</span><br><span class="line"><span class="keyword">from</span> keras.models <span class="keyword">import</span>  Sequential</span><br><span class="line"><span class="keyword">from</span> keras.layers <span class="keyword">import</span> Dense</span><br><span class="line"><span class="keyword">from</span> keras.layers.recurrent <span class="keyword">import</span> SimpleRNN</span><br><span class="line"><span class="keyword">from</span> tensorflow.keras.optimizers <span class="keyword">import</span> Adam</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> matplotlib</span><br><span class="line">matplotlib.use(<span class="string">&#x27;TkAgg&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(matplotlib.get_backend())</span><br></pre></td></tr></table></figure>
+<h1 id="载入MNIST-数据"><a href="#载入MNIST-数据" class="headerlink" title="载入MNIST 数据"></a>载入MNIST 数据</h1><p>该数据集一共有训练集 6w 张，测试集 1w 张<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">(train_images,train_labels),(test_images,test_labels)= mnist.load_data()</span><br></pre></td></tr></table></figure></p>
+<p>可以查看一下图像和标签  是什么</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 数字5</span></span><br><span class="line"><span class="built_in">print</span>(train_images[<span class="number">0</span>])</span><br><span class="line"><span class="comment"># 标签5</span></span><br><span class="line"><span class="built_in">print</span>(train_labels[<span class="number">0</span>])</span><br><span class="line"><span class="comment"># 数字7</span></span><br><span class="line"><span class="built_in">print</span>(test_images[<span class="number">0</span>])</span><br><span class="line"><span class="comment"># 标签7</span></span><br><span class="line"><span class="built_in">print</span>(test_labels[<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
+<p>可以 打印 一下图片 看看是什么样子<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">plt.imshow(train_images[<span class="number">0</span>])</span><br><span class="line">plt.show()</span><br><span class="line">plt.imshow(test_images[<span class="number">0</span>])</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure><br><img src="https://img-blog.csdnimg.cn/a745fc12bef94f93b93f80b2e89bb0d0.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_13,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="图片数据处理"><a href="#图片数据处理" class="headerlink" title="图片数据处理"></a>图片数据处理</h1><h2 id="查看图片原有-shape"><a href="#查看图片原有-shape" class="headerlink" title="查看图片原有 shape"></a>查看图片原有 shape</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># train_images (60000, 28, 28)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;train_images&#x27;</span>, train_images.shape)</span><br><span class="line"><span class="comment"># train_labels (60000,)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;train_labels&#x27;</span>, train_labels.shape)</span><br></pre></td></tr></table></figure>
+<h2 id="图片数据处理：归一化"><a href="#图片数据处理：归一化" class="headerlink" title="图片数据处理：归一化"></a>图片数据处理：归一化</h2><p>除以255.0 是为了归一化，使得元素点 全部变为在 0-1 之间<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 数据处理</span></span><br><span class="line"><span class="comment">#  (60000, 28, 28) </span></span><br><span class="line">train_images_scale = train_images/<span class="number">255.0</span></span><br><span class="line">test_images_scale = test_images/<span class="number">255.0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># train_images变换后 (60000, 28, 28)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;train_images变换后&#x27;</span>, train_images_scale.shape)</span><br><span class="line"><span class="comment"># test_images变换后 (10000, 28, 28)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;test_images变换后&#x27;</span>, test_images_scale.shape)</span><br></pre></td></tr></table></figure></p>
+<h2 id="标签数据处理：转换成-one-hot-格式"><a href="#标签数据处理：转换成-one-hot-格式" class="headerlink" title="标签数据处理：转换成 one hot 格式"></a>标签数据处理：转换成 one hot 格式</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 换 one hot 格式  共十个分类</span></span><br><span class="line"><span class="comment"># np_utils.to_categorical用于将标签转化为形如(nb_samples, nb_classes)的二值序列。</span></span><br><span class="line">train_labels_hot = np_utils.to_categorical(train_labels,num_classes=<span class="number">10</span>)</span><br><span class="line">test_labels_hot = np_utils.to_categorical(test_labels,num_classes=<span class="number">10</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># train_labels (60000, 10)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;train_labels&#x27;</span>,train_labels_hot.shape)</span><br><span class="line"><span class="comment"># test_labels (10000, 10)</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;test_labels&#x27;</span>,test_labels_hot.shape)</span><br></pre></td></tr></table></figure>
+<h1 id="构建模型"><a href="#构建模型" class="headerlink" title="构建模型"></a>构建模型</h1><p>先定义 RNN 所需的参数</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 定义rnn 的参数</span></span><br><span class="line"><span class="comment"># 数据长度 一行一共有28个元素</span></span><br><span class="line">input_size = <span class="number">28</span></span><br><span class="line"><span class="comment"># 序列长度 一共有28个序列 也就是28行</span></span><br><span class="line">time_steps = <span class="number">28</span></span><br><span class="line"><span class="comment"># 隐藏层cell个数</span></span><br><span class="line">cell_size = <span class="number">50</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>再定义 RNN 模型<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model = Sequential()</span><br><span class="line"></span><br><span class="line"><span class="comment">#循环神经网络</span></span><br><span class="line">model.add(SimpleRNN(</span><br><span class="line">    units=cell_size, <span class="comment">#输出</span></span><br><span class="line">    input_shape=(time_steps,input_size) <span class="comment">#输入</span></span><br><span class="line">))</span><br><span class="line"><span class="comment"># 输出层</span></span><br><span class="line">model.add(Dense(input_dim=cell_size,units=<span class="number">10</span>,activation=<span class="string">&quot;softmax&quot;</span>))</span><br></pre></td></tr></table></figure><br>优化器使用 Adam， 损失函数 选择 交叉熵   并编译</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 定义优化器  10的 -4次方</span></span><br><span class="line">adam = Adam(learning_rate=<span class="number">1e-4</span>)</span><br><span class="line"></span><br><span class="line">model.<span class="built_in">compile</span>(optimizer= adam,loss=<span class="string">&#x27;categorical_crossentropy&#x27;</span>,metrics=<span class="string">&quot;accuracy&quot;</span>)</span><br></pre></td></tr></table></figure>
+<h1 id="训练模型"><a href="#训练模型" class="headerlink" title="训练模型"></a>训练模型</h1><p> 一共 60000张训练图片 按批次训练 一批次64张   一共6w/64 个批次<br>训练完一轮6w张，表示一个epoch<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 一共 60000张训练图片 按批次训练 一批次64张   </span></span><br><span class="line"><span class="comment"># 训练完一轮6w张，表示一个epoch</span></span><br><span class="line">model.fit(train_images_scale,train_labels_hot,batch_size=<span class="number">64</span>,epochs=<span class="number">1</span>)</span><br></pre></td></tr></table></figure><br><img src="https://img-blog.csdnimg.cn/35cafae3dc0e431086f33cdf4a23dc52.png#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="评估模型"><a href="#评估模型" class="headerlink" title="评估模型"></a>评估模型</h1><p>就是在 测试集上的表现<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">loss,accuracy = model.evaluate(test_images_scale,test_labels_hot)</span><br></pre></td></tr></table></figure><br>也可以看一下 在训练集上的表现</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">loss,accuracy = model.evaluate(train_images_scale,train_labels_hot)</span><br></pre></td></tr></table></figure>
+<p>下面是 结果（上训练集 下测试集）<br><img src="https://img-blog.csdnimg.cn/d93ee2873e72460e96c0c4a9a663985b.png#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="预测数据"><a href="#预测数据" class="headerlink" title="预测数据"></a>预测数据</h1><font color="red">**有问题 输入的 数据维度不对 不知道错哪了？？？**</font>
+
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 看下输入的形状</span></span><br><span class="line"><span class="comment"># # 预测数据</span></span><br><span class="line"><span class="built_in">print</span>(test_images_scale[<span class="number">0</span>].shape)</span><br><span class="line"><span class="built_in">print</span>(model.predict((test_images_scale[<span class="number">0</span>]/<span class="number">255.0</span>)))</span><br><span class="line"><span class="built_in">print</span>(np.argmax(model.predict((test_images_scale[<span class="number">0</span>]/<span class="number">255.0</span>))))</span><br><span class="line"><span class="built_in">print</span>(test_labels[<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
+<p>输入的图像 变换后形状<br><img src="https://img-blog.csdnimg.cn/c6e4d5008f9c416ba48bea577a86c238.png#pic_center" alt="在这里插入图片描述"><br>模型预测 数据 输出的概率分类结果<br><img src="https://img-blog.csdnimg.cn/ba872c35347041b592db07d82b429d35.png#pic_center" alt="在这里插入图片描述"><br>选出其中最大的 以及 实际图片标签 均为 数字7<br><img src="https://img-blog.csdnimg.cn/5a585701d439431aa1853283c8592b46.png#pic_center" alt="在这里插入图片描述"></p>
+]]></content>
+      <categories>
+        <category>python框架</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+        <tag>Tensorflow</tag>
+        <tag>Keras</tag>
+        <tag>RNN</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Keras MNIST 过拟合问题解决：Dropout 与 正则化</title>
     <url>/2021/09/02/Keras%20MNIST%20%E8%BF%87%E6%8B%9F%E5%90%88%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3%EF%BC%9ADropout%20%E4%B8%8E%20%E6%AD%A3%E5%88%99%E5%8C%96/</url>
     <content><![CDATA[<p>@<a href="Keras MNIST 过拟合问题解决：Dropout 与 正则化">TOC</a></p>
@@ -141,45 +141,6 @@
         <tag>python</tag>
         <tag>Tensorflow</tag>
         <tag>Keras</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Pytorch 实现 多维特征的输入——糖尿病预测</title>
-    <url>/2021/09/13/Pytorch%20%E5%AE%9E%E7%8E%B0%20%E5%A4%9A%E7%BB%B4%E7%89%B9%E5%BE%81%E7%9A%84%E8%BE%93%E5%85%A5%E2%80%94%E2%80%94%E7%B3%96%E5%B0%BF%E7%97%85%E9%A2%84%E6%B5%8B/</url>
-    <content><![CDATA[<p>@<a href="Pytorch 实现 多维特征的输入——糖尿病预测">TOC</a></p>
-<p>整体的设计思路<br>大致的设计步骤 分为5步 如下所示：<br><img src="https://img-blog.csdnimg.cn/66ed2d3a9e914f229e8c67a8248b1dee.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_9,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="实现的步骤"><br>第五步：是进行 评估模型并预测</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br></pre></td></tr></table></figure>
-<h1 id="Step1：准备数据"><a href="#Step1：准备数据" class="headerlink" title="Step1：准备数据"></a>Step1：准备数据</h1><p>数据格式包含759个样本，其中有8个特征已经其是否会加剧糖尿病的预测标签（1或0）。<br><img src="https://img-blog.csdnimg.cn/7475f37ead424166967915beceedd5ec.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="数据维度预览"><br>我们将759个样本，分为758个训练样本以及1个测试样本。</p>
-<p>先读入本地 csv 文件内容</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 读取数据</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    numpy读取本地文件</span></span><br><span class="line"><span class="string">    delimiter 分割号</span></span><br><span class="line"><span class="string">    dtype 读取数据类型  一般机器学习类的都是float32 </span></span><br><span class="line"><span class="string">    因为显卡一般他内核里面是按32位工作的</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line">xy = np.loadtxt(<span class="string">&#x27;./dataset/diabetes.csv&#x27;</span>,delimiter=<span class="string">&quot;,&quot;</span>,dtype=np.float32)</span><br></pre></td></tr></table></figure>
-<p>可以查看一下 读入的数据维度情况</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># (759,9) 759行 9列</span></span><br><span class="line"><span class="built_in">print</span>(xy.shape)</span><br></pre></td></tr></table></figure>
-<p>其中758个样本作为测试集</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># numpy 转 张量  最后一组样本我们当测试样本吧  其余的当训练样本</span></span><br><span class="line">x_train = torch.from_numpy(xy[:-<span class="number">1</span>,:-<span class="number">1</span>])</span><br><span class="line"><span class="built_in">print</span>(x_train.shape)</span><br><span class="line">y_train = torch.from_numpy(xy[:-<span class="number">1</span>,[-<span class="number">1</span>]])</span><br></pre></td></tr></table></figure>
-<p>最后一个样本作为训练集，用于预测结果</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 当测试样本 的 一组数据</span></span><br><span class="line">x_test = torch.from_numpy(xy[-<span class="number">1</span>:,:-<span class="number">1</span>])</span><br><span class="line"><span class="built_in">print</span>(x_test.shape)</span><br><span class="line">y_test = torch.from_numpy(xy[-<span class="number">1</span>:,[-<span class="number">1</span>]])</span><br></pre></td></tr></table></figure>
-<h1 id="Step2：定义模型"><a href="#Step2：定义模型" class="headerlink" title="Step2：定义模型"></a>Step2：定义模型</h1><p>同样每一层都为 逻辑回归模型。但这边有8个特征，所以导入的应该是个矩阵。<br><img src="https://img-blog.csdnimg.cn/79a71c6a9f0245d9914e4fcef6607793.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="怎么构建线性模型"><br><img src="https://img-blog.csdnimg.cn/ad19f89d0a57481e8f2bdb1e37e8d7ee.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="数据维度的变换 输入n行8个特征得到n行1列的预测"></p>
-<h2 id="torch-nn-Linear-in-features-out-features-bias-True-方法"><a href="#torch-nn-Linear-in-features-out-features-bias-True-方法" class="headerlink" title="torch.nn.Linear(in_features,out_features,bias=True) 方法"></a>torch.nn.Linear(in_features,out_features,bias=True) 方法</h2><p><img src="https://img-blog.csdnimg.cn/0e75527101244e56a7687acb4eaa9315.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_16,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="torch.nn.Linear函数详解"><br>下面这个函数 使得8维度线性变换为6维度<br>注：1.整个模型都是以 列向量为操作单位的（这么做其实是为了利用计算机的并行计算能力加快训练速度），所以维度指的是有多少列，比如左下角这个维度就是8。<br>2.激活函数的引入，其实就是为了引入非线性的因素。这样就可以使得我们可以非线性的变换矩阵维度。<br><img src="https://img-blog.csdnimg.cn/1c73a9cbdba047818bda33c1c9ab517f.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="8D到6D的真正含义"><br>下面是我们 构建的整体的 线性网络模型<br><img src="https://img-blog.csdnimg.cn/06e1c8bb27054087bce6ccb4c0eee8c0.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="整体网络模型"></p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 第二部 定义模型</span></span><br><span class="line"><span class="comment"># 这个其实有点类似与 神经网络的结构了 每个线性层后面都加了一个sigmoid函数 做了次非线性变换</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FullLeanerModel</span>(<span class="params">torch.nn.Module</span>):</span></span><br><span class="line">    <span class="comment"># 定义多层线性模型的结构</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="built_in">super</span>(FullLeanerModel,self).__init__()</span><br><span class="line">        <span class="comment"># 第一个线性转换 将8维转换为6维</span></span><br><span class="line">        self.linear1 = torch.nn.Linear(<span class="number">8</span>,<span class="number">6</span>)</span><br><span class="line">        self.linear2 = torch.nn.Linear(<span class="number">6</span>,<span class="number">4</span>)</span><br><span class="line">        self.linear3 = torch.nn.Linear(<span class="number">4</span>,<span class="number">1</span>)</span><br><span class="line">        self.sigmoid = torch.nn.Sigmoid()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 前馈 运行输出结果</span></span><br><span class="line">    <span class="comment"># 会被自动调用 是方法的重写</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self,x</span>):</span></span><br><span class="line">        <span class="comment"># 用一个变量比较 简单</span></span><br><span class="line">        x = self.sigmoid(self.linear1(x))</span><br><span class="line">        x = self.sigmoid(self.linear2(x))</span><br><span class="line">        x = self.sigmoid(self.linear3(x))</span><br><span class="line">        <span class="keyword">return</span>  x</span><br></pre></td></tr></table></figure>
-<p>实例化这个模型</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 实例化模型</span></span><br><span class="line">FullLeanerModel = FullLeanerModel()</span><br></pre></td></tr></table></figure>
-<h1 id="Step3：定义损失函数和优化器"><a href="#Step3：定义损失函数和优化器" class="headerlink" title="Step3：定义损失函数和优化器"></a>Step3：定义损失函数和优化器</h1><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 第三步 定义 损失函数和优化器</span></span><br><span class="line">criterion = torch.nn.BCELoss(reduction=<span class="string">&#x27;mean&#x27;</span>)</span><br><span class="line">optimizer = torch.optim.SGD(FullLeanerModel.parameters(),lr=<span class="number">0.1</span>)</span><br></pre></td></tr></table></figure>
-<h1 id="Step4：训练模型"><a href="#Step4：训练模型" class="headerlink" title="Step4：训练模型"></a>Step4：训练模型</h1><p>训练模型100次</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 第四步 训练</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string"> 前两步 就是正向传播 forward</span></span><br><span class="line"><span class="string">    1. 预测 标签</span></span><br><span class="line"><span class="string">    2. 预测 与 实际 算出损失值</span></span><br><span class="line"><span class="string">    3. 反向传播 backward 优化参数</span></span><br><span class="line"><span class="string">    4. 更新参数</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">101</span>):</span><br><span class="line">    y_pred = FullLeanerModel(x_train)</span><br><span class="line">    loss = criterion(y_pred,y_train)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;迭代次数:&#x27;</span>,epoch,<span class="string">&quot;  损失值:&quot;</span>,loss.item())</span><br><span class="line"></span><br><span class="line">    optimizer.zero_grad() <span class="comment"># 梯度清零</span></span><br><span class="line">    loss.backward() <span class="comment"># 反向传播</span></span><br><span class="line">    optimizer.step()   <span class="comment">#更新参数</span></span><br></pre></td></tr></table></figure>
-<h1 id="评估模型并预测"><a href="#评估模型并预测" class="headerlink" title="评估模型并预测"></a>评估模型并预测</h1><h2 id="输出所有层次的-权重和偏置"><a href="#输出所有层次的-权重和偏置" class="headerlink" title="输出所有层次的 权重和偏置"></a>输出所有层次的 权重和偏置</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">    <span class="comment"># 输出各层  权重w 和 偏置b</span></span><br><span class="line"><span class="keyword">for</span> weight, bias <span class="keyword">in</span> FullLeanerModel.state_dict().items():  <span class="comment"># param is weight or bias(Tensor)</span></span><br><span class="line"><span class="built_in">print</span>( weight,bias)</span><br></pre></td></tr></table></figure>
-<p><img src="https://img-blog.csdnimg.cn/5c3c93e1544a4005873d7fabd4f88e51.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="各层次的权重和偏置值"></p>
-<h2 id="预测"><a href="#预测" class="headerlink" title="预测"></a>预测</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 预测</span></span><br><span class="line">y_yuce = FullLeanerModel(x_test)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;测试样本的预测值为&quot;</span>,y_yuce.data,<span class="string">&quot;实际样本的标签值为&quot;</span>,y_test.data)</span><br></pre></td></tr></table></figure>
-<h1 id="完整代码"><a href="#完整代码" class="headerlink" title="完整代码"></a>完整代码</h1><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"><span class="comment"># 读取数据</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    numpy读取本地文件</span></span><br><span class="line"><span class="string">    delimiter 分割号</span></span><br><span class="line"><span class="string">    dtype 读取数据类型  一般机器学习类的都是float32 因为显卡一般他内核里面是按32位工作的</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line">xy = np.loadtxt(<span class="string">&#x27;./dataset/diabetes.csv&#x27;</span>,delimiter=<span class="string">&quot;,&quot;</span>,dtype=np.float32)</span><br><span class="line"><span class="comment"># (759,9) 759行 9列</span></span><br><span class="line"><span class="built_in">print</span>(xy.shape)</span><br><span class="line"><span class="comment"># numpy 转 张量  最后一组样本我们当测试样本吧  其余的当训练样本</span></span><br><span class="line">x_train = torch.from_numpy(xy[:-<span class="number">1</span>,:-<span class="number">1</span>])</span><br><span class="line"><span class="built_in">print</span>(x_train.shape)</span><br><span class="line">y_train = torch.from_numpy(xy[:-<span class="number">1</span>,[-<span class="number">1</span>]])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 当测试样本 的 一组数据</span></span><br><span class="line">x_test = torch.from_numpy(xy[-<span class="number">1</span>:,:-<span class="number">1</span>])</span><br><span class="line"><span class="built_in">print</span>(x_test.shape)</span><br><span class="line">y_test = torch.from_numpy(xy[-<span class="number">1</span>:,[-<span class="number">1</span>]])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 第二部 定义模型</span></span><br><span class="line"><span class="comment"># 这个其实有点类似与 神经网络的结构了 每个线性层后面都加了一个sigmoid函数 做了次非线性变换</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FullLeanerModel</span>(<span class="params">torch.nn.Module</span>):</span></span><br><span class="line">    <span class="comment"># 定义多层线性模型的结构</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="built_in">super</span>(FullLeanerModel,self).__init__()</span><br><span class="line">        <span class="comment"># 第一个线性转换 将8维转换为6维</span></span><br><span class="line">        self.linear1 = torch.nn.Linear(<span class="number">8</span>,<span class="number">6</span>)</span><br><span class="line">        self.linear2 = torch.nn.Linear(<span class="number">6</span>,<span class="number">4</span>)</span><br><span class="line">        self.linear3 = torch.nn.Linear(<span class="number">4</span>,<span class="number">1</span>)</span><br><span class="line">        self.sigmoid = torch.nn.Sigmoid()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 前馈 运行</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self,x</span>):</span></span><br><span class="line">        <span class="comment"># 用一个变量比较 简单</span></span><br><span class="line">        x = self.sigmoid(self.linear1(x))</span><br><span class="line">        x = self.sigmoid(self.linear2(x))</span><br><span class="line">        x = self.sigmoid(self.linear3(x))</span><br><span class="line">        <span class="keyword">return</span>  x</span><br><span class="line"></span><br><span class="line"><span class="comment"># 实例化模型</span></span><br><span class="line">FullLeanerModel = FullLeanerModel()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 第三步 定义 损失函数和优化器</span></span><br><span class="line">criterion = torch.nn.BCELoss(reduction=<span class="string">&#x27;mean&#x27;</span>)</span><br><span class="line">optimizer = torch.optim.SGD(FullLeanerModel.parameters(),lr=<span class="number">0.1</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 第四步 训练</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string"> 前两步 就是正向传播 forward</span></span><br><span class="line"><span class="string">    1. 预测 标签</span></span><br><span class="line"><span class="string">    2. 预测 与 实际 算出损失值</span></span><br><span class="line"><span class="string">    3. 反向传播 backward 优化参数</span></span><br><span class="line"><span class="string">    4. 更新参数</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">101</span>):</span><br><span class="line">    y_pred = FullLeanerModel(x_train)</span><br><span class="line">    loss = criterion(y_pred,y_train)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;迭代次数:&#x27;</span>,epoch,<span class="string">&quot;  损失值:&quot;</span>,loss.item())</span><br><span class="line">![在这里插入图片描述](https://img-blog.csdnimg.cn/f600a0b6fbe24b60b35a0f2bc26f9444.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16<span class="comment">#pic_center)</span></span><br><span class="line"></span><br><span class="line">    optimizer.zero_grad() <span class="comment"># 梯度清零</span></span><br><span class="line">    loss.backward() <span class="comment"># 反向传播</span></span><br><span class="line">    optimizer.step()   <span class="comment">#更新参数</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 第五步 评估模型</span></span><br><span class="line">    <span class="comment"># 输出各层  权重w 和 偏置b</span></span><br><span class="line"><span class="keyword">for</span> weight, bias <span class="keyword">in</span> FullLeanerModel.state_dict().items():  <span class="comment"># param is weight or bias(Tensor)</span></span><br><span class="line">    <span class="built_in">print</span>( weight,bias)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 预测</span></span><br><span class="line">y_yuce = FullLeanerModel(x_test)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;测试样本的预测值为&quot;</span>,y_yuce.data,<span class="string">&quot;实际样本的标签值为&quot;</span>,y_test.data)</span><br></pre></td></tr></table></figure>
-<h1 id="实验结果"><a href="#实验结果" class="headerlink" title="实验结果"></a>实验结果</h1><p><img src="https://img-blog.csdnimg.cn/d4fac45272664d249443217900408b79.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="实验结果"><br>可以看到 最后一个样本模型预测概率是 0.6529 。&gt;0.5 我们可以推测其标签就是1，而实际标签也是1，所以这个模型预测结果目前看是正确的。</p>
-]]></content>
-      <categories>
-        <category>Pytorch</category>
-      </categories>
-      <tags>
-        <tag>python</tag>
-        <tag>Pytorch</tag>
-        <tag>刘二</tag>
-        <tag>多维度特征</tag>
       </tags>
   </entry>
   <entry>
@@ -278,35 +239,33 @@
       </tags>
   </entry>
   <entry>
-    <title>Pytorch 实现 线性回归模型 —— 刘二</title>
-    <url>/2021/09/08/Pytorch%20%E5%AE%9E%E7%8E%B0%20%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%E6%A8%A1%E5%9E%8B%20%E2%80%94%E2%80%94%20%E5%88%98%E4%BA%8C/</url>
-    <content><![CDATA[<p>@<a href="Pytorch 实现 线性回归模型 —— 刘二">TOC</a></p>
-<p>用Pytorch 实现 线性模型。整个流程图可以如下图所示：<br><img src="https://img-blog.csdnimg.cn/0728aba4a28542838fdb11f7bf4a668c.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_18,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>大致的设计步骤 分为5步 如下所示：<br><img src="https://img-blog.csdnimg.cn/e1aa1c61b89b4e46adebe9d44c61ff2b.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>第五步：是进行 评估模型并预测</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br></pre></td></tr></table></figure>
-<h1 id="Step1：准备数据"><a href="#Step1：准备数据" class="headerlink" title="Step1：准备数据"></a>Step1：准备数据</h1><p><img src="https://img-blog.csdnimg.cn/91dc702ff784417993b5d0e5f63f75ed.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_19,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 准备数据</span></span><br><span class="line">x_data = torch.Tensor([[<span class="number">1.0</span>],[<span class="number">2.0</span>],[<span class="number">3.0</span>]])</span><br><span class="line">y_data = torch.Tensor([[<span class="number">2.0</span>],[<span class="number">4.0</span>],[<span class="number">6.0</span>]])</span><br></pre></td></tr></table></figure>
-<h1 id="Step2：设计模型"><a href="#Step2：设计模型" class="headerlink" title="Step2：设计模型"></a>Step2：设计模型</h1><p>这边的线性模型比较简单 为 $y=Wx+b$ 只有两个超参数 W 和 b<br><img src="https://img-blog.csdnimg.cn/51e148a09e1d452e8a4e9794e3c4035a.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>要通过输入的维度和 输出的维度，才能明确 $W$ 和 $b$ 的维度</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 构建一个线性模型类 所有的模型类都必须继承torch.nn.Module</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LinearModel</span>(<span class="params">torch.nn.Module</span>):</span></span><br><span class="line">	<span class="comment"># 构造方法</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="comment"># 调用父类的构造 这步必须得有</span></span><br><span class="line">        <span class="built_in">super</span>(LinearModel,self).__init__()</span><br><span class="line">        <span class="comment"># Linear 是一个模型类 这边实例化他给 对象linear</span></span><br><span class="line">        <span class="comment"># w 权重 = 1  b 偏执 = 1</span></span><br><span class="line">        self.linear = torch.nn.Linear(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">	<span class="comment"># 方法重写</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self,x</span>):</span></span><br><span class="line">    	<span class="comment"># 预测值 </span></span><br><span class="line">        y_pred = self.linear(x)</span><br><span class="line">        <span class="keyword">return</span> y_pred</span><br></pre></td></tr></table></figure>
-<h2 id="torch-nn-Linear-in-features-out-features-bias-True-方法"><a href="#torch-nn-Linear-in-features-out-features-bias-True-方法" class="headerlink" title="torch.nn.Linear(in_features,out_features,bias=True) 方法"></a>torch.nn.Linear(in_features,out_features,bias=True) 方法</h2><p><img src="https://img-blog.csdnimg.cn/0e75527101244e56a7687acb4eaa9315.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_16,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
-<p>实例化这个模型为 model</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 实例化这个模型</span></span><br><span class="line">model = LinearModel()</span><br></pre></td></tr></table></figure>
-<h1 id="Step3：构建损失函数和优化器"><a href="#Step3：构建损失函数和优化器" class="headerlink" title="Step3：构建损失函数和优化器"></a>Step3：构建损失函数和优化器</h1><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 损失函数：mean squared error</span></span><br><span class="line">criterion = torch.nn.MSELoss(reduction=<span class="string">&#x27;sum&#x27;</span>) <span class="comment"># size_average = True 的话 就 乘以 1/N  默认为true</span></span><br><span class="line"><span class="comment"># model.parameters() 可以找到模型所有需要训练的参数   优化器：SGD</span></span><br><span class="line">optimizer = torch.optim.SGD(model.parameters(),lr=<span class="number">0.01</span>) </span><br></pre></td></tr></table></figure>
-<h2 id="torch-nn-MSELoss-size-average-False-方法"><a href="#torch-nn-MSELoss-size-average-False-方法" class="headerlink" title="torch.nn.MSELoss(size_average=False) 方法"></a>torch.nn.MSELoss(size_average=False) 方法</h2><p>用于创建一个MSE损失函数<br><img src="https://img-blog.csdnimg.cn/4921387ab8ea4db6a6aaca5ed892fef5.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
-<h2 id="torch-optim-SGD-…-方法"><a href="#torch-optim-SGD-…-方法" class="headerlink" title="torch.optim.SGD(…) 方法"></a>torch.optim.SGD(…) 方法</h2><p>优化器选择 SGD   可调整学习率<br>$w^{*} = w - α\frac{\partial L}{\partial W}$<br><img src="https://img-blog.csdnimg.cn/aab4fe33c3844ea386a7c14cc9350865.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
-<h1 id="Step4-训练模型"><a href="#Step4-训练模型" class="headerlink" title="Step4: 训练模型"></a>Step4: 训练模型</h1><p> 前两步 就是正向传播 forward</p>
-<ol>
-<li>预测 标签</li>
-<li>预测 与 实际 算出损失值</li>
-<li>反向传播 backward 优化参数</li>
-<li>更新参数</li>
-</ol>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">100</span>):</span><br><span class="line"> <span class="comment">#数据跑 99次  range是不到那个数字的</span></span><br><span class="line">    y_pred = model(x_data)</span><br><span class="line">    loss = criterion(y_pred,y_data)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;迭代次数:&#x27;</span>,epoch,<span class="string">&quot;  损失值:&quot;</span>,loss)</span><br><span class="line"></span><br><span class="line">    optimizer.zero_grad() <span class="comment"># 梯度清零</span></span><br><span class="line">    loss.backward() <span class="comment"># 反向传播</span></span><br><span class="line">    optimizer.step()   <span class="comment">#更新参数</span></span><br></pre></td></tr></table></figure>
-<h1 id="Step5-评估模型并预测"><a href="#Step5-评估模型并预测" class="headerlink" title="Step5: 评估模型并预测"></a>Step5: 评估模型并预测</h1><p>这边没有准备 测试集及其标签</p>
-<p>输出 超参数  权重w 和 偏置b<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 输出 超参数  权重w 和 偏置b</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;w = &#x27;</span>,model.linear.weight.item() )</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;b = &#x27;</span>,model.linear.bias.item())</span><br><span class="line"></span><br></pre></td></tr></table></figure></p>
-<p>预测</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 预测 </span></span><br><span class="line">x_test = torch.Tensor([[<span class="number">4.0</span>]])</span><br><span class="line">y_test = model(x_test)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;x为4.0 预测的 y值为：&#x27;</span>,y_test.data)</span><br></pre></td></tr></table></figure>
-<h1 id="实验结果"><a href="#实验结果" class="headerlink" title="实验结果"></a>实验结果</h1><p><font color="red"> 这边少了 怎么输出 准确率？ </font><br><img src="https://img-blog.csdnimg.cn/c0013d6d060148b8ac02605d0fa0d163.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_15,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
-<h1 id="实现源码"><a href="#实现源码" class="headerlink" title="实现源码"></a>实现源码</h1><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"><span class="comment"># 准备数据</span></span><br><span class="line">x_data = torch.Tensor([[<span class="number">1.0</span>],[<span class="number">2.0</span>],[<span class="number">3.0</span>]])</span><br><span class="line">y_data = torch.Tensor([[<span class="number">2.0</span>],[<span class="number">4.0</span>],[<span class="number">6.0</span>]])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 第二步 设计模型</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LinearModel</span>(<span class="params">torch.nn.Module</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="comment"># 调用父类的构造 这步必须得有</span></span><br><span class="line">        <span class="built_in">super</span>(LinearModel,self).__init__()</span><br><span class="line">        <span class="comment"># Linear 是一个模型类 这边实例化他给 linear</span></span><br><span class="line">        <span class="comment"># w 权重 = 1  b 偏执 = 1</span></span><br><span class="line">        self.linear = torch.nn.Linear(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self,x</span>):</span></span><br><span class="line">        y_pred = self.linear(x)</span><br><span class="line">        <span class="keyword">return</span> y_pred</span><br><span class="line"></span><br><span class="line"><span class="comment"># 实例化这个模型</span></span><br><span class="line">model = LinearModel()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 第三步 构建损失函数和优化器</span></span><br><span class="line"><span class="comment"># mean squared error</span></span><br><span class="line">criterion = torch.nn.MSELoss(reduction=<span class="string">&#x27;sum&#x27;</span>) <span class="comment"># size_average = True 的话 就 乘以 1/N  默认为true</span></span><br><span class="line">optimizer = torch.optim.SGD(model.parameters(),lr=<span class="number">0.01</span>) <span class="comment">#model.parameters() 可以找到</span></span><br><span class="line"><span class="comment"># 模型所有需要训练的参数</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 第四步 训练</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string"> 前两步 就是正向传播 forward</span></span><br><span class="line"><span class="string">    1. 预测 标签</span></span><br><span class="line"><span class="string">    2. 预测 与 实际 算出损失值</span></span><br><span class="line"><span class="string">    3. 反向传播 backward 优化参数</span></span><br><span class="line"><span class="string">    4. 更新参数</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">100</span>):</span><br><span class="line">    y_pred = model(x_data)</span><br><span class="line">    loss = criterion(y_pred,y_data)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;迭代次数:&#x27;</span>,epoch,<span class="string">&quot;  损失值:&quot;</span>,loss)</span><br><span class="line"></span><br><span class="line">    optimizer.zero_grad() <span class="comment"># 梯度清零</span></span><br><span class="line">    loss.backward() <span class="comment"># 反向传播</span></span><br><span class="line">    optimizer.step()   <span class="comment">#更新参数</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 第五步 评估模型</span></span><br><span class="line"><span class="comment"># 输出 超参数  权重w 和 偏置b</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;w = &#x27;</span>,model.linear.weight.item() )</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;b = &#x27;</span>,model.linear.bias.item())</span><br><span class="line"><span class="comment"># 预测</span></span><br><span class="line">x_test = torch.Tensor([[<span class="number">4.0</span>]])</span><br><span class="line">y_test = model(x_test)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;x为4.0 预测的 y值为：&#x27;</span>,y_test.data)</span><br></pre></td></tr></table></figure>
+    <title>Pytorch 实现 多维特征的输入——糖尿病预测</title>
+    <url>/2021/09/13/Pytorch%20%E5%AE%9E%E7%8E%B0%20%E5%A4%9A%E7%BB%B4%E7%89%B9%E5%BE%81%E7%9A%84%E8%BE%93%E5%85%A5%E2%80%94%E2%80%94%E7%B3%96%E5%B0%BF%E7%97%85%E9%A2%84%E6%B5%8B/</url>
+    <content><![CDATA[<p>@<a href="Pytorch 实现 多维特征的输入——糖尿病预测">TOC</a></p>
+<p>整体的设计思路<br>大致的设计步骤 分为5步 如下所示：<br><img src="https://img-blog.csdnimg.cn/66ed2d3a9e914f229e8c67a8248b1dee.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_9,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="实现的步骤"><br>第五步：是进行 评估模型并预测</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br></pre></td></tr></table></figure>
+<h1 id="Step1：准备数据"><a href="#Step1：准备数据" class="headerlink" title="Step1：准备数据"></a>Step1：准备数据</h1><p>数据格式包含759个样本，其中有8个特征已经其是否会加剧糖尿病的预测标签（1或0）。<br><img src="https://img-blog.csdnimg.cn/7475f37ead424166967915beceedd5ec.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="数据维度预览"><br>我们将759个样本，分为758个训练样本以及1个测试样本。</p>
+<p>先读入本地 csv 文件内容</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 读取数据</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    numpy读取本地文件</span></span><br><span class="line"><span class="string">    delimiter 分割号</span></span><br><span class="line"><span class="string">    dtype 读取数据类型  一般机器学习类的都是float32 </span></span><br><span class="line"><span class="string">    因为显卡一般他内核里面是按32位工作的</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line">xy = np.loadtxt(<span class="string">&#x27;./dataset/diabetes.csv&#x27;</span>,delimiter=<span class="string">&quot;,&quot;</span>,dtype=np.float32)</span><br></pre></td></tr></table></figure>
+<p>可以查看一下 读入的数据维度情况</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># (759,9) 759行 9列</span></span><br><span class="line"><span class="built_in">print</span>(xy.shape)</span><br></pre></td></tr></table></figure>
+<p>其中758个样本作为测试集</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># numpy 转 张量  最后一组样本我们当测试样本吧  其余的当训练样本</span></span><br><span class="line">x_train = torch.from_numpy(xy[:-<span class="number">1</span>,:-<span class="number">1</span>])</span><br><span class="line"><span class="built_in">print</span>(x_train.shape)</span><br><span class="line">y_train = torch.from_numpy(xy[:-<span class="number">1</span>,[-<span class="number">1</span>]])</span><br></pre></td></tr></table></figure>
+<p>最后一个样本作为训练集，用于预测结果</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 当测试样本 的 一组数据</span></span><br><span class="line">x_test = torch.from_numpy(xy[-<span class="number">1</span>:,:-<span class="number">1</span>])</span><br><span class="line"><span class="built_in">print</span>(x_test.shape)</span><br><span class="line">y_test = torch.from_numpy(xy[-<span class="number">1</span>:,[-<span class="number">1</span>]])</span><br></pre></td></tr></table></figure>
+<h1 id="Step2：定义模型"><a href="#Step2：定义模型" class="headerlink" title="Step2：定义模型"></a>Step2：定义模型</h1><p>同样每一层都为 逻辑回归模型。但这边有8个特征，所以导入的应该是个矩阵。<br><img src="https://img-blog.csdnimg.cn/79a71c6a9f0245d9914e4fcef6607793.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="怎么构建线性模型"><br><img src="https://img-blog.csdnimg.cn/ad19f89d0a57481e8f2bdb1e37e8d7ee.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="数据维度的变换 输入n行8个特征得到n行1列的预测"></p>
+<h2 id="torch-nn-Linear-in-features-out-features-bias-True-方法"><a href="#torch-nn-Linear-in-features-out-features-bias-True-方法" class="headerlink" title="torch.nn.Linear(in_features,out_features,bias=True) 方法"></a>torch.nn.Linear(in_features,out_features,bias=True) 方法</h2><p><img src="https://img-blog.csdnimg.cn/0e75527101244e56a7687acb4eaa9315.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_16,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="torch.nn.Linear函数详解"><br>下面这个函数 使得8维度线性变换为6维度<br>注：1.整个模型都是以 列向量为操作单位的（这么做其实是为了利用计算机的并行计算能力加快训练速度），所以维度指的是有多少列，比如左下角这个维度就是8。<br>2.激活函数的引入，其实就是为了引入非线性的因素。这样就可以使得我们可以非线性的变换矩阵维度。<br><img src="https://img-blog.csdnimg.cn/1c73a9cbdba047818bda33c1c9ab517f.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="8D到6D的真正含义"><br>下面是我们 构建的整体的 线性网络模型<br><img src="https://img-blog.csdnimg.cn/06e1c8bb27054087bce6ccb4c0eee8c0.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="整体网络模型"></p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 第二部 定义模型</span></span><br><span class="line"><span class="comment"># 这个其实有点类似与 神经网络的结构了 每个线性层后面都加了一个sigmoid函数 做了次非线性变换</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FullLeanerModel</span>(<span class="params">torch.nn.Module</span>):</span></span><br><span class="line">    <span class="comment"># 定义多层线性模型的结构</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="built_in">super</span>(FullLeanerModel,self).__init__()</span><br><span class="line">        <span class="comment"># 第一个线性转换 将8维转换为6维</span></span><br><span class="line">        self.linear1 = torch.nn.Linear(<span class="number">8</span>,<span class="number">6</span>)</span><br><span class="line">        self.linear2 = torch.nn.Linear(<span class="number">6</span>,<span class="number">4</span>)</span><br><span class="line">        self.linear3 = torch.nn.Linear(<span class="number">4</span>,<span class="number">1</span>)</span><br><span class="line">        self.sigmoid = torch.nn.Sigmoid()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 前馈 运行输出结果</span></span><br><span class="line">    <span class="comment"># 会被自动调用 是方法的重写</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self,x</span>):</span></span><br><span class="line">        <span class="comment"># 用一个变量比较 简单</span></span><br><span class="line">        x = self.sigmoid(self.linear1(x))</span><br><span class="line">        x = self.sigmoid(self.linear2(x))</span><br><span class="line">        x = self.sigmoid(self.linear3(x))</span><br><span class="line">        <span class="keyword">return</span>  x</span><br></pre></td></tr></table></figure>
+<p>实例化这个模型</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 实例化模型</span></span><br><span class="line">FullLeanerModel = FullLeanerModel()</span><br></pre></td></tr></table></figure>
+<h1 id="Step3：定义损失函数和优化器"><a href="#Step3：定义损失函数和优化器" class="headerlink" title="Step3：定义损失函数和优化器"></a>Step3：定义损失函数和优化器</h1><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 第三步 定义 损失函数和优化器</span></span><br><span class="line">criterion = torch.nn.BCELoss(reduction=<span class="string">&#x27;mean&#x27;</span>)</span><br><span class="line">optimizer = torch.optim.SGD(FullLeanerModel.parameters(),lr=<span class="number">0.1</span>)</span><br></pre></td></tr></table></figure>
+<h1 id="Step4：训练模型"><a href="#Step4：训练模型" class="headerlink" title="Step4：训练模型"></a>Step4：训练模型</h1><p>训练模型100次</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 第四步 训练</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string"> 前两步 就是正向传播 forward</span></span><br><span class="line"><span class="string">    1. 预测 标签</span></span><br><span class="line"><span class="string">    2. 预测 与 实际 算出损失值</span></span><br><span class="line"><span class="string">    3. 反向传播 backward 优化参数</span></span><br><span class="line"><span class="string">    4. 更新参数</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">101</span>):</span><br><span class="line">    y_pred = FullLeanerModel(x_train)</span><br><span class="line">    loss = criterion(y_pred,y_train)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;迭代次数:&#x27;</span>,epoch,<span class="string">&quot;  损失值:&quot;</span>,loss.item())</span><br><span class="line"></span><br><span class="line">    optimizer.zero_grad() <span class="comment"># 梯度清零</span></span><br><span class="line">    loss.backward() <span class="comment"># 反向传播</span></span><br><span class="line">    optimizer.step()   <span class="comment">#更新参数</span></span><br></pre></td></tr></table></figure>
+<h1 id="评估模型并预测"><a href="#评估模型并预测" class="headerlink" title="评估模型并预测"></a>评估模型并预测</h1><h2 id="输出所有层次的-权重和偏置"><a href="#输出所有层次的-权重和偏置" class="headerlink" title="输出所有层次的 权重和偏置"></a>输出所有层次的 权重和偏置</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">    <span class="comment"># 输出各层  权重w 和 偏置b</span></span><br><span class="line"><span class="keyword">for</span> weight, bias <span class="keyword">in</span> FullLeanerModel.state_dict().items():  <span class="comment"># param is weight or bias(Tensor)</span></span><br><span class="line"><span class="built_in">print</span>( weight,bias)</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/5c3c93e1544a4005873d7fabd4f88e51.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="各层次的权重和偏置值"></p>
+<h2 id="预测"><a href="#预测" class="headerlink" title="预测"></a>预测</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 预测</span></span><br><span class="line">y_yuce = FullLeanerModel(x_test)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;测试样本的预测值为&quot;</span>,y_yuce.data,<span class="string">&quot;实际样本的标签值为&quot;</span>,y_test.data)</span><br></pre></td></tr></table></figure>
+<h1 id="完整代码"><a href="#完整代码" class="headerlink" title="完整代码"></a>完整代码</h1><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"><span class="comment"># 读取数据</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    numpy读取本地文件</span></span><br><span class="line"><span class="string">    delimiter 分割号</span></span><br><span class="line"><span class="string">    dtype 读取数据类型  一般机器学习类的都是float32 因为显卡一般他内核里面是按32位工作的</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line">xy = np.loadtxt(<span class="string">&#x27;./dataset/diabetes.csv&#x27;</span>,delimiter=<span class="string">&quot;,&quot;</span>,dtype=np.float32)</span><br><span class="line"><span class="comment"># (759,9) 759行 9列</span></span><br><span class="line"><span class="built_in">print</span>(xy.shape)</span><br><span class="line"><span class="comment"># numpy 转 张量  最后一组样本我们当测试样本吧  其余的当训练样本</span></span><br><span class="line">x_train = torch.from_numpy(xy[:-<span class="number">1</span>,:-<span class="number">1</span>])</span><br><span class="line"><span class="built_in">print</span>(x_train.shape)</span><br><span class="line">y_train = torch.from_numpy(xy[:-<span class="number">1</span>,[-<span class="number">1</span>]])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 当测试样本 的 一组数据</span></span><br><span class="line">x_test = torch.from_numpy(xy[-<span class="number">1</span>:,:-<span class="number">1</span>])</span><br><span class="line"><span class="built_in">print</span>(x_test.shape)</span><br><span class="line">y_test = torch.from_numpy(xy[-<span class="number">1</span>:,[-<span class="number">1</span>]])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 第二部 定义模型</span></span><br><span class="line"><span class="comment"># 这个其实有点类似与 神经网络的结构了 每个线性层后面都加了一个sigmoid函数 做了次非线性变换</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FullLeanerModel</span>(<span class="params">torch.nn.Module</span>):</span></span><br><span class="line">    <span class="comment"># 定义多层线性模型的结构</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="built_in">super</span>(FullLeanerModel,self).__init__()</span><br><span class="line">        <span class="comment"># 第一个线性转换 将8维转换为6维</span></span><br><span class="line">        self.linear1 = torch.nn.Linear(<span class="number">8</span>,<span class="number">6</span>)</span><br><span class="line">        self.linear2 = torch.nn.Linear(<span class="number">6</span>,<span class="number">4</span>)</span><br><span class="line">        self.linear3 = torch.nn.Linear(<span class="number">4</span>,<span class="number">1</span>)</span><br><span class="line">        self.sigmoid = torch.nn.Sigmoid()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 前馈 运行</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self,x</span>):</span></span><br><span class="line">        <span class="comment"># 用一个变量比较 简单</span></span><br><span class="line">        x = self.sigmoid(self.linear1(x))</span><br><span class="line">        x = self.sigmoid(self.linear2(x))</span><br><span class="line">        x = self.sigmoid(self.linear3(x))</span><br><span class="line">        <span class="keyword">return</span>  x</span><br><span class="line"></span><br><span class="line"><span class="comment"># 实例化模型</span></span><br><span class="line">FullLeanerModel = FullLeanerModel()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 第三步 定义 损失函数和优化器</span></span><br><span class="line">criterion = torch.nn.BCELoss(reduction=<span class="string">&#x27;mean&#x27;</span>)</span><br><span class="line">optimizer = torch.optim.SGD(FullLeanerModel.parameters(),lr=<span class="number">0.1</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 第四步 训练</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string"> 前两步 就是正向传播 forward</span></span><br><span class="line"><span class="string">    1. 预测 标签</span></span><br><span class="line"><span class="string">    2. 预测 与 实际 算出损失值</span></span><br><span class="line"><span class="string">    3. 反向传播 backward 优化参数</span></span><br><span class="line"><span class="string">    4. 更新参数</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">101</span>):</span><br><span class="line">    y_pred = FullLeanerModel(x_train)</span><br><span class="line">    loss = criterion(y_pred,y_train)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;迭代次数:&#x27;</span>,epoch,<span class="string">&quot;  损失值:&quot;</span>,loss.item())</span><br><span class="line">![在这里插入图片描述](https://img-blog.csdnimg.cn/f600a0b6fbe24b60b35a0f2bc26f9444.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16<span class="comment">#pic_center)</span></span><br><span class="line"></span><br><span class="line">    optimizer.zero_grad() <span class="comment"># 梯度清零</span></span><br><span class="line">    loss.backward() <span class="comment"># 反向传播</span></span><br><span class="line">    optimizer.step()   <span class="comment">#更新参数</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 第五步 评估模型</span></span><br><span class="line">    <span class="comment"># 输出各层  权重w 和 偏置b</span></span><br><span class="line"><span class="keyword">for</span> weight, bias <span class="keyword">in</span> FullLeanerModel.state_dict().items():  <span class="comment"># param is weight or bias(Tensor)</span></span><br><span class="line">    <span class="built_in">print</span>( weight,bias)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 预测</span></span><br><span class="line">y_yuce = FullLeanerModel(x_test)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;测试样本的预测值为&quot;</span>,y_yuce.data,<span class="string">&quot;实际样本的标签值为&quot;</span>,y_test.data)</span><br></pre></td></tr></table></figure>
+<h1 id="实验结果"><a href="#实验结果" class="headerlink" title="实验结果"></a>实验结果</h1><p><img src="https://img-blog.csdnimg.cn/d4fac45272664d249443217900408b79.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="实验结果"><br>可以看到 最后一个样本模型预测概率是 0.6529 。&gt;0.5 我们可以推测其标签就是1，而实际标签也是1，所以这个模型预测结果目前看是正确的。</p>
 ]]></content>
       <categories>
         <category>Pytorch</category>
@@ -315,6 +274,7 @@
         <tag>python</tag>
         <tag>Pytorch</tag>
         <tag>刘二</tag>
+        <tag>多维度特征</tag>
       </tags>
   </entry>
   <entry>
@@ -358,6 +318,46 @@
         <tag>Pytorch</tag>
         <tag>刘二</tag>
         <tag>逻辑回归</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Pytorch 实现 线性回归模型 —— 刘二</title>
+    <url>/2021/09/08/Pytorch%20%E5%AE%9E%E7%8E%B0%20%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%E6%A8%A1%E5%9E%8B%20%E2%80%94%E2%80%94%20%E5%88%98%E4%BA%8C/</url>
+    <content><![CDATA[<p>@<a href="Pytorch 实现 线性回归模型 —— 刘二">TOC</a></p>
+<p>用Pytorch 实现 线性模型。整个流程图可以如下图所示：<br><img src="https://img-blog.csdnimg.cn/0728aba4a28542838fdb11f7bf4a668c.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_18,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>大致的设计步骤 分为5步 如下所示：<br><img src="https://img-blog.csdnimg.cn/e1aa1c61b89b4e46adebe9d44c61ff2b.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>第五步：是进行 评估模型并预测</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br></pre></td></tr></table></figure>
+<h1 id="Step1：准备数据"><a href="#Step1：准备数据" class="headerlink" title="Step1：准备数据"></a>Step1：准备数据</h1><p><img src="https://img-blog.csdnimg.cn/91dc702ff784417993b5d0e5f63f75ed.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_19,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 准备数据</span></span><br><span class="line">x_data = torch.Tensor([[<span class="number">1.0</span>],[<span class="number">2.0</span>],[<span class="number">3.0</span>]])</span><br><span class="line">y_data = torch.Tensor([[<span class="number">2.0</span>],[<span class="number">4.0</span>],[<span class="number">6.0</span>]])</span><br></pre></td></tr></table></figure>
+<h1 id="Step2：设计模型"><a href="#Step2：设计模型" class="headerlink" title="Step2：设计模型"></a>Step2：设计模型</h1><p>这边的线性模型比较简单 为 $y=Wx+b$ 只有两个超参数 W 和 b<br><img src="https://img-blog.csdnimg.cn/51e148a09e1d452e8a4e9794e3c4035a.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br>要通过输入的维度和 输出的维度，才能明确 $W$ 和 $b$ 的维度</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 构建一个线性模型类 所有的模型类都必须继承torch.nn.Module</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LinearModel</span>(<span class="params">torch.nn.Module</span>):</span></span><br><span class="line">	<span class="comment"># 构造方法</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="comment"># 调用父类的构造 这步必须得有</span></span><br><span class="line">        <span class="built_in">super</span>(LinearModel,self).__init__()</span><br><span class="line">        <span class="comment"># Linear 是一个模型类 这边实例化他给 对象linear</span></span><br><span class="line">        <span class="comment"># w 权重 = 1  b 偏执 = 1</span></span><br><span class="line">        self.linear = torch.nn.Linear(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">	<span class="comment"># 方法重写</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self,x</span>):</span></span><br><span class="line">    	<span class="comment"># 预测值 </span></span><br><span class="line">        y_pred = self.linear(x)</span><br><span class="line">        <span class="keyword">return</span> y_pred</span><br></pre></td></tr></table></figure>
+<h2 id="torch-nn-Linear-in-features-out-features-bias-True-方法"><a href="#torch-nn-Linear-in-features-out-features-bias-True-方法" class="headerlink" title="torch.nn.Linear(in_features,out_features,bias=True) 方法"></a>torch.nn.Linear(in_features,out_features,bias=True) 方法</h2><p><img src="https://img-blog.csdnimg.cn/0e75527101244e56a7687acb4eaa9315.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_16,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<p>实例化这个模型为 model</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 实例化这个模型</span></span><br><span class="line">model = LinearModel()</span><br></pre></td></tr></table></figure>
+<h1 id="Step3：构建损失函数和优化器"><a href="#Step3：构建损失函数和优化器" class="headerlink" title="Step3：构建损失函数和优化器"></a>Step3：构建损失函数和优化器</h1><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 损失函数：mean squared error</span></span><br><span class="line">criterion = torch.nn.MSELoss(reduction=<span class="string">&#x27;sum&#x27;</span>) <span class="comment"># size_average = True 的话 就 乘以 1/N  默认为true</span></span><br><span class="line"><span class="comment"># model.parameters() 可以找到模型所有需要训练的参数   优化器：SGD</span></span><br><span class="line">optimizer = torch.optim.SGD(model.parameters(),lr=<span class="number">0.01</span>) </span><br></pre></td></tr></table></figure>
+<h2 id="torch-nn-MSELoss-size-average-False-方法"><a href="#torch-nn-MSELoss-size-average-False-方法" class="headerlink" title="torch.nn.MSELoss(size_average=False) 方法"></a>torch.nn.MSELoss(size_average=False) 方法</h2><p>用于创建一个MSE损失函数<br><img src="https://img-blog.csdnimg.cn/4921387ab8ea4db6a6aaca5ed892fef5.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="torch-optim-SGD-…-方法"><a href="#torch-optim-SGD-…-方法" class="headerlink" title="torch.optim.SGD(…) 方法"></a>torch.optim.SGD(…) 方法</h2><p>优化器选择 SGD   可调整学习率<br>$w^{*} = w - α\frac{\partial L}{\partial W}$<br><img src="https://img-blog.csdnimg.cn/aab4fe33c3844ea386a7c14cc9350865.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="Step4-训练模型"><a href="#Step4-训练模型" class="headerlink" title="Step4: 训练模型"></a>Step4: 训练模型</h1><p> 前两步 就是正向传播 forward</p>
+<ol>
+<li>预测 标签</li>
+<li>预测 与 实际 算出损失值</li>
+<li>反向传播 backward 优化参数</li>
+<li>更新参数</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">100</span>):</span><br><span class="line"> <span class="comment">#数据跑 99次  range是不到那个数字的</span></span><br><span class="line">    y_pred = model(x_data)</span><br><span class="line">    loss = criterion(y_pred,y_data)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;迭代次数:&#x27;</span>,epoch,<span class="string">&quot;  损失值:&quot;</span>,loss)</span><br><span class="line"></span><br><span class="line">    optimizer.zero_grad() <span class="comment"># 梯度清零</span></span><br><span class="line">    loss.backward() <span class="comment"># 反向传播</span></span><br><span class="line">    optimizer.step()   <span class="comment">#更新参数</span></span><br></pre></td></tr></table></figure>
+<h1 id="Step5-评估模型并预测"><a href="#Step5-评估模型并预测" class="headerlink" title="Step5: 评估模型并预测"></a>Step5: 评估模型并预测</h1><p>这边没有准备 测试集及其标签</p>
+<p>输出 超参数  权重w 和 偏置b<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 输出 超参数  权重w 和 偏置b</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;w = &#x27;</span>,model.linear.weight.item() )</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;b = &#x27;</span>,model.linear.bias.item())</span><br><span class="line"></span><br></pre></td></tr></table></figure></p>
+<p>预测</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 预测 </span></span><br><span class="line">x_test = torch.Tensor([[<span class="number">4.0</span>]])</span><br><span class="line">y_test = model(x_test)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;x为4.0 预测的 y值为：&#x27;</span>,y_test.data)</span><br></pre></td></tr></table></figure>
+<h1 id="实验结果"><a href="#实验结果" class="headerlink" title="实验结果"></a>实验结果</h1><p><font color="red"> 这边少了 怎么输出 准确率？ </font><br><img src="https://img-blog.csdnimg.cn/c0013d6d060148b8ac02605d0fa0d163.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_15,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="实现源码"><a href="#实现源码" class="headerlink" title="实现源码"></a>实现源码</h1><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"><span class="comment"># 准备数据</span></span><br><span class="line">x_data = torch.Tensor([[<span class="number">1.0</span>],[<span class="number">2.0</span>],[<span class="number">3.0</span>]])</span><br><span class="line">y_data = torch.Tensor([[<span class="number">2.0</span>],[<span class="number">4.0</span>],[<span class="number">6.0</span>]])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 第二步 设计模型</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LinearModel</span>(<span class="params">torch.nn.Module</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="comment"># 调用父类的构造 这步必须得有</span></span><br><span class="line">        <span class="built_in">super</span>(LinearModel,self).__init__()</span><br><span class="line">        <span class="comment"># Linear 是一个模型类 这边实例化他给 linear</span></span><br><span class="line">        <span class="comment"># w 权重 = 1  b 偏执 = 1</span></span><br><span class="line">        self.linear = torch.nn.Linear(<span class="number">1</span>,<span class="number">1</span>)</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self,x</span>):</span></span><br><span class="line">        y_pred = self.linear(x)</span><br><span class="line">        <span class="keyword">return</span> y_pred</span><br><span class="line"></span><br><span class="line"><span class="comment"># 实例化这个模型</span></span><br><span class="line">model = LinearModel()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 第三步 构建损失函数和优化器</span></span><br><span class="line"><span class="comment"># mean squared error</span></span><br><span class="line">criterion = torch.nn.MSELoss(reduction=<span class="string">&#x27;sum&#x27;</span>) <span class="comment"># size_average = True 的话 就 乘以 1/N  默认为true</span></span><br><span class="line">optimizer = torch.optim.SGD(model.parameters(),lr=<span class="number">0.01</span>) <span class="comment">#model.parameters() 可以找到</span></span><br><span class="line"><span class="comment"># 模型所有需要训练的参数</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 第四步 训练</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string"> 前两步 就是正向传播 forward</span></span><br><span class="line"><span class="string">    1. 预测 标签</span></span><br><span class="line"><span class="string">    2. 预测 与 实际 算出损失值</span></span><br><span class="line"><span class="string">    3. 反向传播 backward 优化参数</span></span><br><span class="line"><span class="string">    4. 更新参数</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">100</span>):</span><br><span class="line">    y_pred = model(x_data)</span><br><span class="line">    loss = criterion(y_pred,y_data)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;迭代次数:&#x27;</span>,epoch,<span class="string">&quot;  损失值:&quot;</span>,loss)</span><br><span class="line"></span><br><span class="line">    optimizer.zero_grad() <span class="comment"># 梯度清零</span></span><br><span class="line">    loss.backward() <span class="comment"># 反向传播</span></span><br><span class="line">    optimizer.step()   <span class="comment">#更新参数</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 第五步 评估模型</span></span><br><span class="line"><span class="comment"># 输出 超参数  权重w 和 偏置b</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;w = &#x27;</span>,model.linear.weight.item() )</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;b = &#x27;</span>,model.linear.bias.item())</span><br><span class="line"><span class="comment"># 预测</span></span><br><span class="line">x_test = torch.Tensor([[<span class="number">4.0</span>]])</span><br><span class="line">y_test = model(x_test)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;x为4.0 预测的 y值为：&#x27;</span>,y_test.data)</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>Pytorch</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+        <tag>Pytorch</tag>
+        <tag>刘二</tag>
       </tags>
   </entry>
   <entry>
@@ -417,22 +417,6 @@
       </tags>
   </entry>
   <entry>
-    <title>keras 包方法集合</title>
-    <url>/2021/08/29/keras%20%E5%8C%85%E6%96%B9%E6%B3%95%E9%9B%86%E5%90%88/</url>
-    <content><![CDATA[<p>@<a href="keras 包方法集合">TOC</a></p>
-<h1 id="keras-util-库-np-utils"><a href="#keras-util-库-np-utils" class="headerlink" title="keras.util 库  np_utils"></a>keras.util 库  np_utils</h1><h2 id="np-utils-to-categorical"><a href="#np-utils-to-categorical" class="headerlink" title="np_utils.to_categorical"></a>np_utils.to_categorical</h2><p>np_utils.to_categorical用于将标签转化为形如(nb_samples, nb_classes)的二值序列。</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">train_labels_hot = np_utils.to_categorical(train_labels,num_classes=<span class="number">10</span>)</span><br></pre></td></tr></table></figure>
-<p>如将 $[1,2,3,……4]$ 转化成：<br><img src="https://img-blog.csdnimg.cn/379535ca64bc4e5987673ecd12af0c75.png#pic_center" alt="在这里插入图片描述"><br>这样的形态。</p>
-]]></content>
-      <categories>
-        <category>python框架</category>
-      </categories>
-      <tags>
-        <tag>python</tag>
-        <tag>Keras</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Tensorflow 代码学习</title>
     <url>/2021/08/22/Tensorflow%20%E4%BB%A3%E7%A0%81%E5%AD%A6%E4%B9%A0/</url>
     <content><![CDATA[<p>@<a href="Tensorflow 代码学习">TOC</a></p>
@@ -481,6 +465,43 @@
       </tags>
   </entry>
   <entry>
+    <title>keras 包方法集合</title>
+    <url>/2021/08/29/keras%20%E5%8C%85%E6%96%B9%E6%B3%95%E9%9B%86%E5%90%88/</url>
+    <content><![CDATA[<p>@<a href="keras 包方法集合">TOC</a></p>
+<h1 id="keras-util-库-np-utils"><a href="#keras-util-库-np-utils" class="headerlink" title="keras.util 库  np_utils"></a>keras.util 库  np_utils</h1><h2 id="np-utils-to-categorical"><a href="#np-utils-to-categorical" class="headerlink" title="np_utils.to_categorical"></a>np_utils.to_categorical</h2><p>np_utils.to_categorical用于将标签转化为形如(nb_samples, nb_classes)的二值序列。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">train_labels_hot = np_utils.to_categorical(train_labels,num_classes=<span class="number">10</span>)</span><br></pre></td></tr></table></figure>
+<p>如将 $[1,2,3,……4]$ 转化成：<br><img src="https://img-blog.csdnimg.cn/379535ca64bc4e5987673ecd12af0c75.png#pic_center" alt="在这里插入图片描述"><br>这样的形态。</p>
+]]></content>
+      <categories>
+        <category>python框架</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+        <tag>Keras</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>为什么要Deep？深而不是宽</title>
+    <url>/2021/08/10/%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81Deep%EF%BC%9F%E6%B7%B1%E8%80%8C%E4%B8%8D%E6%98%AF%E5%AE%BD/</url>
+    <content><![CDATA[<p>@<a href="为什么要Deep？深而不是宽">TOC</a></p>
+<blockquote>
+<p><strong>Q：为什么要用要用深度？而不是广度？</strong><br>答：1.因为深度可以用少量的数据，就完成对数据的分类。<br>2.深度，每个层次都是基于上个层次得到的（其实就是学习的过程），我们可以将神经元的数量减少。如果层次很少的话，会导致神经元可能非常多。可以类比逻辑电路。<img src="https://img-blog.csdnimg.cn/3889abe5617e426d91f92e842ba3af83.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"></p>
+<h1 id="模组化"><a href="#模组化" class="headerlink" title="模组化"></a>模组化</h1><p>在比较浅层网络与深层网络时，要让“矮胖”的网络和“高瘦”的网络的参数数目相等，这样比较才公平。<br><strong>但即便是在深层网络参数较少的情况下，深层网络也会比浅层网络表现好。</strong><br>这是因为<font color="red"> 深层”其实相当于“模组化”</font>，第一个隐层是最基本的分类器，第二个隐层是用第一个隐层建造的分类器，以此类推。</p>
+<p><strong>举个栗子，为什么说深度好！</strong><br>左边第一幅图可以看到，我们需要分四个类，包括长发女，长发男，短发女，短发男。一共四类，其中长发男的数据样本很少，那区分这个类的能力就非常的弱。<br>这个时候，我们就可以先分为两个神经元，一个区分男女，一个区分长发短发，这样中间加一层，可以使得数据样本少的类 鉴定的效果更好。<br><img src="https://img-blog.csdnimg.cn/dc3ef77e42724c1ebbcb6d0d29067206.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><strong>对于分类一个图像来说，深度使得模块化。</strong><img src="https://img-blog.csdnimg.cn/81cf2b79b06440e789ad2a03937c7e2e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"></p>
+</blockquote>
+<h1 id="类比逻辑电路"><a href="#类比逻辑电路" class="headerlink" title="类比逻辑电路"></a>类比逻辑电路</h1><p><img src="https://img-blog.csdnimg.cn/8635e890e73f4834900ea683446b9f0a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"><br>浅层网络确实可以表示任意函数，但是使用深层结构更有效率。<br><strong>好比逻辑门电路，用两层逻辑门就可以实现任何布尔函数，但是用多层结构更简单、需要的逻辑门更少。</strong><br><img src="https://img-blog.csdnimg.cn/3889abe5617e426d91f92e842ba3af83.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"></p>
+<p>神经网络也是如此，单隐层网络可以表示任何连续函数，但是多层结构表示起来更简单、需要的神经元更少，<strong>所以比较不容易overfitting，或只需较少的data。</strong>而且，深层结构可以比较有效率地使用data。</p>
+<h1 id="类比图形"><a href="#类比图形" class="headerlink" title="类比图形"></a>类比图形</h1><p><img src="https://img-blog.csdnimg.cn/e4e96dfdc69b4c47b96640efa2f70be8.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"><br>1层hidden layer与3层hidden layer（相同数目的参数），3层的效果更好。<br>但理论上，3层可达到的效果，1层也能达到：要在1层learn的时候，target从真实label改为3层的output，这样1层的结果会接近3层的结果。</p>
+]]></content>
+      <categories>
+        <category>机器学习基础-李宏毅</category>
+      </categories>
+      <tags>
+        <tag>深度学习</tag>
+        <tag>李宏毅</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>分类问题 Classification 案例一：神奇宝贝是水系还是普通系？</title>
     <url>/2021/08/04/%E5%88%86%E7%B1%BB%E9%97%AE%E9%A2%98%20Classification%20%E6%A1%88%E4%BE%8B%E4%B8%80%EF%BC%9A%E7%A5%9E%E5%A5%87%E5%AE%9D%E8%B4%9D%E6%98%AF%E6%B0%B4%E7%B3%BB%E8%BF%98%E6%98%AF%E6%99%AE%E9%80%9A%E7%B3%BB%EF%BC%9F/</url>
     <content><![CDATA[<p>@<a href="分类问题 Classification">TOC</a></p>
@@ -524,30 +545,9 @@
         <category>机器学习基础-李宏毅</category>
       </categories>
       <tags>
+        <tag>李宏毅</tag>
         <tag>机器学习</tag>
-        <tag>李宏毅</tag>
         <tag>分类问题</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>为什么要Deep？深而不是宽</title>
-    <url>/2021/08/10/%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81Deep%EF%BC%9F%E6%B7%B1%E8%80%8C%E4%B8%8D%E6%98%AF%E5%AE%BD/</url>
-    <content><![CDATA[<p>@<a href="为什么要Deep？深而不是宽">TOC</a></p>
-<blockquote>
-<p><strong>Q：为什么要用要用深度？而不是广度？</strong><br>答：1.因为深度可以用少量的数据，就完成对数据的分类。<br>2.深度，每个层次都是基于上个层次得到的（其实就是学习的过程），我们可以将神经元的数量减少。如果层次很少的话，会导致神经元可能非常多。可以类比逻辑电路。<img src="https://img-blog.csdnimg.cn/3889abe5617e426d91f92e842ba3af83.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"></p>
-<h1 id="模组化"><a href="#模组化" class="headerlink" title="模组化"></a>模组化</h1><p>在比较浅层网络与深层网络时，要让“矮胖”的网络和“高瘦”的网络的参数数目相等，这样比较才公平。<br><strong>但即便是在深层网络参数较少的情况下，深层网络也会比浅层网络表现好。</strong><br>这是因为<font color="red"> 深层”其实相当于“模组化”</font>，第一个隐层是最基本的分类器，第二个隐层是用第一个隐层建造的分类器，以此类推。</p>
-<p><strong>举个栗子，为什么说深度好！</strong><br>左边第一幅图可以看到，我们需要分四个类，包括长发女，长发男，短发女，短发男。一共四类，其中长发男的数据样本很少，那区分这个类的能力就非常的弱。<br>这个时候，我们就可以先分为两个神经元，一个区分男女，一个区分长发短发，这样中间加一层，可以使得数据样本少的类 鉴定的效果更好。<br><img src="https://img-blog.csdnimg.cn/dc3ef77e42724c1ebbcb6d0d29067206.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><strong>对于分类一个图像来说，深度使得模块化。</strong><img src="https://img-blog.csdnimg.cn/81cf2b79b06440e789ad2a03937c7e2e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"></p>
-</blockquote>
-<h1 id="类比逻辑电路"><a href="#类比逻辑电路" class="headerlink" title="类比逻辑电路"></a>类比逻辑电路</h1><p><img src="https://img-blog.csdnimg.cn/8635e890e73f4834900ea683446b9f0a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"><br>浅层网络确实可以表示任意函数，但是使用深层结构更有效率。<br><strong>好比逻辑门电路，用两层逻辑门就可以实现任何布尔函数，但是用多层结构更简单、需要的逻辑门更少。</strong><br><img src="https://img-blog.csdnimg.cn/3889abe5617e426d91f92e842ba3af83.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"></p>
-<p>神经网络也是如此，单隐层网络可以表示任何连续函数，但是多层结构表示起来更简单、需要的神经元更少，<strong>所以比较不容易overfitting，或只需较少的data。</strong>而且，深层结构可以比较有效率地使用data。</p>
-<h1 id="类比图形"><a href="#类比图形" class="headerlink" title="类比图形"></a>类比图形</h1><p><img src="https://img-blog.csdnimg.cn/e4e96dfdc69b4c47b96640efa2f70be8.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center=300×300" alt="在这里插入图片描述"><br>1层hidden layer与3层hidden layer（相同数目的参数），3层的效果更好。<br>但理论上，3层可达到的效果，1层也能达到：要在1层learn的时候，target从真实label改为3层的output，这样1层的结果会接近3层的结果。</p>
-]]></content>
-      <categories>
-        <category>机器学习基础-李宏毅</category>
-      </categories>
-      <tags>
-        <tag>李宏毅</tag>
-        <tag>深度学习</tag>
       </tags>
   </entry>
   <entry>
@@ -568,6 +568,18 @@
     <content><![CDATA[<p>@<a href="各类 损失函数 详解与选择">TOC</a></p>
 <h1 id="mean-squared-error-均方误差"><a href="#mean-squared-error-均方误差" class="headerlink" title="mean_squared_error 均方误差"></a>mean_squared_error 均方误差</h1><p><img src="https://img-blog.csdnimg.cn/a55e390e62dd4e0b8bd1c9ff5cfb7826.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
 ]]></content>
+      <categories>
+        <category>损失函数与激活函数</category>
+      </categories>
+      <tags>
+        <tag>激活函数</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>各类 激活函数 详解与选择</title>
+    <url>/2021/08/24/%E5%90%84%E7%B1%BB%20%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%20%E8%AF%A6%E8%A7%A3%E4%B8%8E%E9%80%89%E6%8B%A9/</url>
+    <content><![CDATA[<p>@<a href="各类 激活函数 详解与选择">TOC</a></p>
+<h1 id="Relu"><a href="#Relu" class="headerlink" title="Relu"></a>Relu</h1><h1 id="tanh"><a href="#tanh" class="headerlink" title="tanh"></a>tanh</h1><h1 id="sigmiod"><a href="#sigmiod" class="headerlink" title="sigmiod"></a>sigmiod</h1><h1 id="softmax"><a href="#softmax" class="headerlink" title="softmax"></a>softmax</h1>]]></content>
       <categories>
         <category>损失函数与激活函数</category>
       </categories>
@@ -597,15 +609,52 @@
       </tags>
   </entry>
   <entry>
-    <title>各类 激活函数 详解与选择</title>
-    <url>/2021/08/24/%E5%90%84%E7%B1%BB%20%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%20%E8%AF%A6%E8%A7%A3%E4%B8%8E%E9%80%89%E6%8B%A9/</url>
-    <content><![CDATA[<p>@<a href="各类 激活函数 详解与选择">TOC</a></p>
-<h1 id="Relu"><a href="#Relu" class="headerlink" title="Relu"></a>Relu</h1><h1 id="tanh"><a href="#tanh" class="headerlink" title="tanh"></a>tanh</h1><h1 id="sigmiod"><a href="#sigmiod" class="headerlink" title="sigmiod"></a>sigmiod</h1><h1 id="softmax"><a href="#softmax" class="headerlink" title="softmax"></a>softmax</h1>]]></content>
+    <title>梯度下降算法 进阶</title>
+    <url>/2021/08/04/%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%AE%97%E6%B3%95%20%E8%BF%9B%E9%98%B6/</url>
+    <content><![CDATA[<p>@<a href="梯度算法 进阶">TOC</a></p>
+<h1 id="回顾梯度算法"><a href="#回顾梯度算法" class="headerlink" title="回顾梯度算法"></a>回顾梯度算法</h1><p><strong>是一种迭代的算法，每看一个参数都会更新。</strong><br><img src="https://img-blog.csdnimg.cn/eee493cfe8f24755a2aa3cfd41f486f4.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/62ccf5ddd84348308c79a70233b0da19.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="学习率η（Learning-Rate）"><a href="#学习率η（Learning-Rate）" class="headerlink" title="学习率η（Learning Rate）"></a>学习率η（Learning Rate）</h1><h2 id="自定义的学习率对参数选择的影响"><a href="#自定义的学习率对参数选择的影响" class="headerlink" title="自定义的学习率对参数选择的影响"></a>自定义的学习率对参数选择的影响</h2><p><img src="https://img-blog.csdnimg.cn/6c39ce49d85048098ac7303a552bc184.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><strong>学习率需要选取合适的值，过小会导致模型调参的速度太慢，但过大会导致错失掉了最佳参数点</strong></p>
+<h2 id="如何调整学习率η？"><a href="#如何调整学习率η？" class="headerlink" title="如何调整学习率η？"></a>如何调整学习率η？</h2><ol>
+<li><p>在最开始的时候，随机点离目标点很远，我们一般会选取一个比较大的学习率；当做了几期后，我们离目标点很近了，所以我们会减小学习率 缩减为 如下图所示的公式<img src="https://img-blog.csdnimg.cn/b9bc45580c004a6cbb708595125b1a1a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</li>
+<li><p><strong>不同的参数应该设置不同的学习率</strong></p>
+</li>
+</ol>
+<p>下面是常用的 调整学习率的方法：</p>
+<h3 id="Adagrad"><a href="#Adagrad" class="headerlink" title="Adagrad"></a>Adagrad</h3><p>Adagrad是解决不同参数应该使用不同的更新速率的问题。<strong>Adagrad自适应地为各个参数分配不同学习率的算法。</strong></p>
+<blockquote>
+<p><strong>其原理为：</strong><img src="https://img-blog.csdnimg.cn/4423c0afa60f462cb444f37cd1307576.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>里面比较核心的部分在 每次σ的取值。<strong>每次σ规定为之前所有<em>g</em>平方对应的之和的均方根</strong>。例如下图所示：其中 <em>g</em> 是每次的偏导值<img src="https://img-blog.csdnimg.cn/82780afd2b0347ad8505db41024b9f7d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>结合之前说的 <em>η</em> 值的变化 可以得到如下的公式推导：<img src="https://img-blog.csdnimg.cn/cf79f34d94b44c72abdd283ebb0f3431.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</blockquote>
+<p><strong>提问:</strong>    发现一个现象，本来应该是随着gradient的增大，我们的学习率是希望增大的，也就是图中的g上标t；但是与此同时随着gradient的增大，我们的分母是在逐渐增大，也就对整体学习率是减少的，这是为什么呢？<img src="https://img-blog.csdnimg.cn/64154f52e91f4486be92171800f09815.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>这是因为随着我们更新次数的增大，我们是希望我们的学习率越来越慢。因为我们认为在学习率的最初阶段，我们是距离损失函数最优解很远的，随着更新的次数的增多，<strong>我们认为越来越接近最优解，于是学习速率也随之变慢。</strong>  为什么化简之后是如上这个式子呢，其在图像上的意义是 一阶导数比上二阶数的值。如下图所示：<img src="https://img-blog.csdnimg.cn/90fda3afedce4958a877451546c006e2.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="Stochastic-Gradient-Descent（SGD随机梯度下降法）-？？？"><a href="#Stochastic-Gradient-Descent（SGD随机梯度下降法）-？？？" class="headerlink" title="Stochastic Gradient Descent（SGD随机梯度下降法） ？？？"></a>Stochastic Gradient Descent（SGD随机梯度下降法） ？？？</h3><p>其和 普通的梯度下降算法区别在。普通遍历在求和的时候需要浪费大量时间，进而去掉求和产生了随机梯度下降算法。<img src="https://img-blog.csdnimg.cn/e92e87942f4443cbac50e52369c68151.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>和下图看到的一样：<br><img src="https://img-blog.csdnimg.cn/76673f0f26614df6a9ac37311fe015b1.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<blockquote>
+<p> 只是要注意一下标准的梯度下降和随机梯度下降的区别：</p>
+<ol>
+<li><p>标准下降时在权值更新前汇总所有样例得到的标准梯度，随机下降则是通过考察每次训练实例来更新（<strong>就是随机选择一些按顺序的后续样本点来，而不是全体数据</strong>）。<img src="https://img-blog.csdnimg.cn/32da14cad9bf4a2ba439745929b7ec11.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</li>
+<li><p>对于步长 <em>η</em> 的取值，标准梯度下降的 <em>η</em> 比随机梯度下降的大。因为标准梯度下降的是使用准确的梯度，理直气壮地走，随机梯度下降<strong>使用的是近似的梯度</strong>，就得小心翼翼地走，怕一不小心误入歧途南辕北辙了。</p>
+</li>
+<li>当损失函数有多个局部极小值时，随机梯度反而更可能避免进入局部极小值中。</li>
+</ol>
+</blockquote>
+<h4 id="小批量随机梯度下降（batch-gradient-descent）"><a href="#小批量随机梯度下降（batch-gradient-descent）" class="headerlink" title="小批量随机梯度下降（batch gradient descent）"></a>小批量随机梯度下降（batch gradient descent）</h4><p>如果在每次迭代中，梯度下降是用整个训练数据集来计算梯度的话，则会带来大量的计算量。因此提出批量梯度下降来进行优化。<strong>每次优化不再是对整体数据集来计算损失，取而代之使用随机采样小批量的样本来计算梯度。</strong><img src="https://img-blog.csdnimg.cn/0d8e8d1e6c234e36b0972e5b95c9f46a.png#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="Feature-Scaling-（特征缩放）"><a href="#Feature-Scaling-（特征缩放）" class="headerlink" title="Feature Scaling （特征缩放）"></a>Feature Scaling （特征缩放）</h3><p>其意思就是说要<strong>将所有特征有相同的规模</strong>。例如下图所示，<em>X2</em> 的范围明显大宇 <em>X1</em>，所以要将 <em>X2</em> 进行缩放。<br><img src="https://img-blog.csdnimg.cn/2b4681ef27884c0bbf400db0624e8740.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h4 id="为什么要做Feature-Scaling？"><a href="#为什么要做Feature-Scaling？" class="headerlink" title="为什么要做Feature Scaling？"></a>为什么要做Feature Scaling？</h4><blockquote>
+<p>为什么要做Feature Scaling？<img src="https://img-blog.csdnimg.cn/456a5666c6bf40b7a1e5f7a8727b529f.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>如左图，<em>X1</em> 和 <em>X2</em> 数值规模大小相差很大，那 <em>W2</em> 这参数的变动会极大的影响损失函数，而 <em>W1</em> 影响度就很小。所以我们<strong>需要对 <em>X2</em> 进行特征缩放，使其与 <em>X1</em> 保持一个规模</strong>。并且其实从图像可以看出，如果按左图来做的话，我们很难找到一组合适的参数集合，因为他梯度下降的方法不是直线的而是曲线；而右图是近乎直线。（<strong>最里面圈的损失函数最小</strong>）</p>
+</blockquote>
+<h4 id="如何实现Feature-Scaling？"><a href="#如何实现Feature-Scaling？" class="headerlink" title="如何实现Feature Scaling？"></a>如何实现Feature Scaling？</h4><p><img src="https://img-blog.csdnimg.cn/f129b6a000c841ec926df684d2c77a15.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>如上图所示，假如有R个数据样本，每个样本有<em>X1 - Xi</em> 个特征。我们用上面的公式计算出其应该的scale（其实说实在的这不就是化成标准正太分布么）</p>
+<h1 id="梯度下降算法数学总结"><a href="#梯度下降算法数学总结" class="headerlink" title="梯度下降算法数学总结"></a>梯度下降算法数学总结</h1><p>提出问题：如下图所示<strong>（我怎么样才能在红圈里找到最小损失的那个点呢）</strong><img src="https://img-blog.csdnimg.cn/53c25201a11349b6bc3af9e1dfc9fcc6.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="首先要回顾泰勒公式"><a href="#首先要回顾泰勒公式" class="headerlink" title="首先要回顾泰勒公式"></a>首先要回顾泰勒公式</h2><p><img src="https://img-blog.csdnimg.cn/c9b154d4d14c43c8bf5e2609789bb094.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/205bb83b97d849fc9b8c7451e044fdab.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>二元泰勒：<br><img src="https://img-blog.csdnimg.cn/2efa8bf67ffa419e90221154515a3712.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="用泰勒展开损失函数"><a href="#用泰勒展开损失函数" class="headerlink" title="用泰勒展开损失函数"></a>用泰勒展开损失函数</h2><p><img src="https://img-blog.csdnimg.cn/3ce8a2749e644d1f978c43d485798dde.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>理解为点乘，反向180度的时候，损失函数才是最小的：<img src="https://img-blog.csdnimg.cn/235fc97c36b74012b0663975ba0dc8a9.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>最终可以表达成：<img src="https://img-blog.csdnimg.cn/83f0037797f64c048376868ee2c21fae.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="梯度下降算法缺点在哪"><a href="#梯度下降算法缺点在哪" class="headerlink" title="梯度下降算法缺点在哪"></a>梯度下降算法缺点在哪</h1><p>其不仅仅包括可能有找到是局部最优解问题，有可能在中间的时候就有偏微分为0的时候，而这时这个点可能离全局最优解点 很远。<br><img src="https://img-blog.csdnimg.cn/cd31675e6d8e4c83925852218d4f2acc.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+]]></content>
       <categories>
-        <category>损失函数与激活函数</category>
+        <category>机器学习基础-李宏毅</category>
       </categories>
       <tags>
-        <tag>激活函数</tag>
+        <tag>李宏毅</tag>
+        <tag>机器学习</tag>
       </tags>
   </entry>
   <entry>
@@ -656,57 +705,166 @@
         <category>机器学习基础-李宏毅</category>
       </categories>
       <tags>
-        <tag>机器学习</tag>
         <tag>李宏毅</tag>
+        <tag>机器学习</tag>
       </tags>
   </entry>
   <entry>
-    <title>梯度下降算法 进阶</title>
-    <url>/2021/08/04/%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%AE%97%E6%B3%95%20%E8%BF%9B%E9%98%B6/</url>
-    <content><![CDATA[<p>@<a href="梯度算法 进阶">TOC</a></p>
-<h1 id="回顾梯度算法"><a href="#回顾梯度算法" class="headerlink" title="回顾梯度算法"></a>回顾梯度算法</h1><p><strong>是一种迭代的算法，每看一个参数都会更新。</strong><br><img src="https://img-blog.csdnimg.cn/eee493cfe8f24755a2aa3cfd41f486f4.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/62ccf5ddd84348308c79a70233b0da19.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h1 id="学习率η（Learning-Rate）"><a href="#学习率η（Learning-Rate）" class="headerlink" title="学习率η（Learning Rate）"></a>学习率η（Learning Rate）</h1><h2 id="自定义的学习率对参数选择的影响"><a href="#自定义的学习率对参数选择的影响" class="headerlink" title="自定义的学习率对参数选择的影响"></a>自定义的学习率对参数选择的影响</h2><p><img src="https://img-blog.csdnimg.cn/6c39ce49d85048098ac7303a552bc184.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><strong>学习率需要选取合适的值，过小会导致模型调参的速度太慢，但过大会导致错失掉了最佳参数点</strong></p>
-<h2 id="如何调整学习率η？"><a href="#如何调整学习率η？" class="headerlink" title="如何调整学习率η？"></a>如何调整学习率η？</h2><ol>
-<li><p>在最开始的时候，随机点离目标点很远，我们一般会选取一个比较大的学习率；当做了几期后，我们离目标点很近了，所以我们会减小学习率 缩减为 如下图所示的公式<img src="https://img-blog.csdnimg.cn/b9bc45580c004a6cbb708595125b1a1a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-</li>
-<li><p><strong>不同的参数应该设置不同的学习率</strong></p>
-</li>
-</ol>
-<p>下面是常用的 调整学习率的方法：</p>
-<h3 id="Adagrad"><a href="#Adagrad" class="headerlink" title="Adagrad"></a>Adagrad</h3><p>Adagrad是解决不同参数应该使用不同的更新速率的问题。<strong>Adagrad自适应地为各个参数分配不同学习率的算法。</strong></p>
-<blockquote>
-<p><strong>其原理为：</strong><img src="https://img-blog.csdnimg.cn/4423c0afa60f462cb444f37cd1307576.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>里面比较核心的部分在 每次σ的取值。<strong>每次σ规定为之前所有<em>g</em>平方对应的之和的均方根</strong>。例如下图所示：其中 <em>g</em> 是每次的偏导值<img src="https://img-blog.csdnimg.cn/82780afd2b0347ad8505db41024b9f7d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>结合之前说的 <em>η</em> 值的变化 可以得到如下的公式推导：<img src="https://img-blog.csdnimg.cn/cf79f34d94b44c72abdd283ebb0f3431.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-</blockquote>
-<p><strong>提问:</strong>    发现一个现象，本来应该是随着gradient的增大，我们的学习率是希望增大的，也就是图中的g上标t；但是与此同时随着gradient的增大，我们的分母是在逐渐增大，也就对整体学习率是减少的，这是为什么呢？<img src="https://img-blog.csdnimg.cn/64154f52e91f4486be92171800f09815.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>这是因为随着我们更新次数的增大，我们是希望我们的学习率越来越慢。因为我们认为在学习率的最初阶段，我们是距离损失函数最优解很远的，随着更新的次数的增多，<strong>我们认为越来越接近最优解，于是学习速率也随之变慢。</strong>  为什么化简之后是如上这个式子呢，其在图像上的意义是 一阶导数比上二阶数的值。如下图所示：<img src="https://img-blog.csdnimg.cn/90fda3afedce4958a877451546c006e2.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="Stochastic-Gradient-Descent（SGD随机梯度下降法）-？？？"><a href="#Stochastic-Gradient-Descent（SGD随机梯度下降法）-？？？" class="headerlink" title="Stochastic Gradient Descent（SGD随机梯度下降法） ？？？"></a>Stochastic Gradient Descent（SGD随机梯度下降法） ？？？</h3><p>其和 普通的梯度下降算法区别在。普通遍历在求和的时候需要浪费大量时间，进而去掉求和产生了随机梯度下降算法。<img src="https://img-blog.csdnimg.cn/e92e87942f4443cbac50e52369c68151.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>和下图看到的一样：<br><img src="https://img-blog.csdnimg.cn/76673f0f26614df6a9ac37311fe015b1.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<blockquote>
-<p> 只是要注意一下标准的梯度下降和随机梯度下降的区别：</p>
+    <title>深度学习 Deep Learning 基础</title>
+    <url>/2021/08/07/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%20Deep%20Learning%20%E5%9F%BA%E7%A1%80/</url>
+    <content><![CDATA[<p>@<a href="深度学习 Deep Learning 基础">TOC</a></p>
+<p><strong>深度学习需要明白的几个问题？</strong><br>思路：</p>
 <ol>
-<li><p>标准下降时在权值更新前汇总所有样例得到的标准梯度，随机下降则是通过考察每次训练实例来更新（<strong>就是随机选择一些按顺序的后续样本点来，而不是全体数据</strong>）。<img src="https://img-blog.csdnimg.cn/32da14cad9bf4a2ba439745929b7ec11.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-</li>
-<li><p>对于步长 <em>η</em> 的取值，标准梯度下降的 <em>η</em> 比随机梯度下降的大。因为标准梯度下降的是使用准确的梯度，理直气壮地走，随机梯度下降<strong>使用的是近似的梯度</strong>，就得小心翼翼地走，怕一不小心误入歧途南辕北辙了。</p>
-</li>
-<li>当损失函数有多个局部极小值时，随机梯度反而更可能避免进入局部极小值中。</li>
+<li>什么是深度学习？为什么需要深度学习？深度学习和机器学习的关系？</li>
+<li>深度学习的步骤</li>
+<li>确定神经网络模型的损失函数，如何优化模型，即调参问题</li>
+<li>如何使用Back Propagation（反向传播） 方法 update DNN（深度神经网络）参数</li>
 </ol>
+<h1 id="深度学习的概念"><a href="#深度学习的概念" class="headerlink" title="深度学习的概念"></a>深度学习的概念</h1><h2 id="什么是深度学习？"><a href="#什么是深度学习？" class="headerlink" title="什么是深度学习？"></a>什么是深度学习？</h2><p>深度学习（Deep Learning，DL）是指多层的人工神经网络和训练它的方法。一层神经网络会把大量矩阵数字作为输入，通过<strong>非线性激活方法</strong>取权重，再产生另一个数据集合作为输出。这就像生物神经大脑的工作机理一样，通过合适的矩阵数量，多层组织链接一起，形成神经网络“大脑”进行精准复杂的处理，就像人们识别物体标注图片一样。</p>
+<ul>
+<li>深度学习的model是一个深度神经网络结构（neural structure）</li>
+<li>深度学习的“深度”是指神经网络的隐层（hidden layer）数量足够多</li>
+<li>深度学习是<strong>自动提取特征</strong>（Feature extractor），<strong>不需要像逻辑回归那样特征转换</strong>（Feature engineering）</li>
+</ul>
+<h2 id="为什么需要深度学习？-深度学习和机器学习的关系？"><a href="#为什么需要深度学习？-深度学习和机器学习的关系？" class="headerlink" title="为什么需要深度学习？ 深度学习和机器学习的关系？"></a>为什么需要深度学习？ 深度学习和机器学习的关系？</h2><ul>
+<li>传统机器学习的模型结构较简单，很依赖算法工程师做特征工程甚至子模型来提升模型效果。就像我们之前上节那个栗子一样，做多分类的问题，四个角对角是一个类的情况，没办法进行分类，所以只能使用特征工程来进行特征的变换。</li>
+<li>深度学习由于其层次化的结构，理论上可以拟合任意函数，整个复杂结构即可以用来对特征进行自动组合（如图像），也可以用来构建复杂的模型（如nlp领域里的LSTM，能够考虑上下文）。</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/b8b8df57f814494d8199e0e7b708e597.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="深度学习的步骤"><a href="#深度学习的步骤" class="headerlink" title="深度学习的步骤"></a>深度学习的步骤</h1><p>其实和机器学习一样分为三步。<img src="https://img-blog.csdnimg.cn/514f075664384cdcb62f6062fd5bd722.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="Step-1：定义一个神经网络结构（neural-structure）"><a href="#Step-1：定义一个神经网络结构（neural-structure）" class="headerlink" title="Step 1：定义一个神经网络结构（neural structure）"></a>Step 1：定义一个神经网络结构（neural structure）</h2><p>神经网络的创建包括3部分：</p>
+<ol>
+<li>神经网络有多少<strong>隐层（layer）</strong></li>
+<li>每一层有多少<strong>神经元（neuron）</strong></li>
+<li>每个神经元之间如何连接</li>
+</ol>
+<p>常见的出名神经网络<img src="https://img-blog.csdnimg.cn/5394cd49b44545c8ab4b8c1191d69239.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="神经元怎么定义？"><a href="#神经元怎么定义？" class="headerlink" title="神经元怎么定义？"></a>神经元怎么定义？</h3><p>每个神经元都有一个 bias 和一个 function ，每条输入的边都有一个 weight<img src="https://img-blog.csdnimg.cn/52bc001e984c4bdf980921c7f2458fdf.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="一个神经网络的栗子"><a href="#一个神经网络的栗子" class="headerlink" title="一个神经网络的栗子"></a>一个神经网络的栗子</h3><p>下面是一个 3个隐层（layer）、六个神经元（neuron）（每个球都是一个神经元）、全连接<strong>前馈</strong>网络（Fully Connection Feedforward Network）</p>
+<blockquote>
+<p>“<strong>前馈</strong>”是指整个网络中无反馈，信号从输入层向输出层单向传播，可用一个有向无环图表示<br>其实我们常用的网络，都是前馈神经网络，从输入到输出是一个有向图，中间不会有环或者反向传播。<br>当然，我们在训练前馈神经网络的时候，会用到反向传播进行参数调整。但仍不影响整个网络的有向和前馈性质。</p>
 </blockquote>
-<h4 id="小批量随机梯度下降（batch-gradient-descent）"><a href="#小批量随机梯度下降（batch-gradient-descent）" class="headerlink" title="小批量随机梯度下降（batch gradient descent）"></a>小批量随机梯度下降（batch gradient descent）</h4><p>如果在每次迭代中，梯度下降是用整个训练数据集来计算梯度的话，则会带来大量的计算量。因此提出批量梯度下降来进行优化。<strong>每次优化不再是对整体数据集来计算损失，取而代之使用随机采样小批量的样本来计算梯度。</strong><img src="https://img-blog.csdnimg.cn/0d8e8d1e6c234e36b0972e5b95c9f46a.png#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="Feature-Scaling-（特征缩放）"><a href="#Feature-Scaling-（特征缩放）" class="headerlink" title="Feature Scaling （特征缩放）"></a>Feature Scaling （特征缩放）</h3><p>其意思就是说要<strong>将所有特征有相同的规模</strong>。例如下图所示，<em>X2</em> 的范围明显大宇 <em>X1</em>，所以要将 <em>X2</em> 进行缩放。<br><img src="https://img-blog.csdnimg.cn/2b4681ef27884c0bbf400db0624e8740.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h4 id="为什么要做Feature-Scaling？"><a href="#为什么要做Feature-Scaling？" class="headerlink" title="为什么要做Feature Scaling？"></a>为什么要做Feature Scaling？</h4><blockquote>
-<p>为什么要做Feature Scaling？<img src="https://img-blog.csdnimg.cn/456a5666c6bf40b7a1e5f7a8727b529f.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>如左图，<em>X1</em> 和 <em>X2</em> 数值规模大小相差很大，那 <em>W2</em> 这参数的变动会极大的影响损失函数，而 <em>W1</em> 影响度就很小。所以我们<strong>需要对 <em>X2</em> 进行特征缩放，使其与 <em>X1</em> 保持一个规模</strong>。并且其实从图像可以看出，如果按左图来做的话，我们很难找到一组合适的参数集合，因为他梯度下降的方法不是直线的而是曲线；而右图是近乎直线。（<strong>最里面圈的损失函数最小</strong>）</p>
+<p><img src="https://img-blog.csdnimg.cn/748979f3a3c74e0ab0c19ea60bd13142.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="神经网络如何工作？"><a href="#神经网络如何工作？" class="headerlink" title="神经网络如何工作？"></a>神经网络如何工作？</h3><p><img src="https://img-blog.csdnimg.cn/d685eb4da45646df93096525226bb59f.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>其实 这就是矩阵运算（可以使用GPU加速计算）<img src="https://img-blog.csdnimg.cn/34294cf6a4254049b0f8bbc0aaf631a1.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>总体可以归纳为：<br><img src="https://img-blog.csdnimg.cn/9baa5b003ea04ff7ad3bc25076e2bb58.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="栗子：识别手写数字图像"><a href="#栗子：识别手写数字图像" class="headerlink" title="栗子：识别手写数字图像"></a>栗子：识别手写数字图像</h3><p>从图像中识别是数字几？<br><img src="https://img-blog.csdnimg.cn/5fb1bc809a444ff5bc19325453eb703d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="制作神经网络模型-的FAQ（最容易被问得问题）"><a href="#制作神经网络模型-的FAQ（最容易被问得问题）" class="headerlink" title="制作神经网络模型 的FAQ（最容易被问得问题）"></a>制作神经网络模型 的FAQ（最容易被问得问题）</h3><ul>
+<li>Q1： 神经网络需要几个隐层（layers）？每个层需要多少个神经元呢？<ul>
+<li>反复试验+ 直觉 （说白了就是要慢慢试= = 看经验呗）</li>
+</ul>
+</li>
+<li>Q2：神经网络可以自动确定结构吗？<ul>
+<li>理论上其实是可以的，不过这些方法我们还没学到。Evoluntionary Artifical Neural Networks</li>
+</ul>
+</li>
+<li>Q3：我们可以设计层次之间的结构么？<ul>
+<li>意思就是说例如Layer1 链接 Layer3 这样跳着的 等等。当然可以 CNN就是不按顺序来的，具体看下一节。<br><img src="https://img-blog.csdnimg.cn/6c74000cf96a4af0b33146e9dca6efc3.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+</ul>
+</li>
+</ul>
+<h2 id="Step-2：确定神经网络模型的损失函数"><a href="#Step-2：确定神经网络模型的损失函数" class="headerlink" title="Step 2：确定神经网络模型的损失函数"></a>Step 2：确定神经网络模型的损失函数</h2><p>还是和逻辑回归一样，用<strong>交叉熵损失函数</strong>，调参使得交叉熵损失函数最小，如下图所示：<br><img src="https://img-blog.csdnimg.cn/29c36a171c584a36bead0693b41b9027.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>当然上面只是一个点的，把每个样本结合起来看。 <img src="https://img-blog.csdnimg.cn/ef62afa46f1248a09b17cea823c91513.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>不过这个地方有几个疑问？</p>
+<blockquote>
+<ul>
+<li>Q1：神经网络里面有很多层，所以有很多 <em>w</em> 和 <em>b</em> 调整。那是全体都一次性调整么？</li>
+<li>答：  <strong>现在不知道啊！</strong></li>
+<li>Q2：上面我是把所有的 交叉熵 都加在一起 然后对 整个大的损失函数进行调参是这样嘛？ 那我的训练样本应该是 各个数字都有是吗？</li>
+<li>答： <strong>现在不知道啊！</strong></li>
+</ul>
 </blockquote>
-<h4 id="如何实现Feature-Scaling？"><a href="#如何实现Feature-Scaling？" class="headerlink" title="如何实现Feature Scaling？"></a>如何实现Feature Scaling？</h4><p><img src="https://img-blog.csdnimg.cn/f129b6a000c841ec926df684d2c77a15.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p>如上图所示，假如有R个数据样本，每个样本有<em>X1 - Xi</em> 个特征。我们用上面的公式计算出其应该的scale（其实说实在的这不就是化成标准正太分布么）</p>
-<h1 id="梯度下降算法数学总结"><a href="#梯度下降算法数学总结" class="headerlink" title="梯度下降算法数学总结"></a>梯度下降算法数学总结</h1><p>提出问题：如下图所示<strong>（我怎么样才能在红圈里找到最小损失的那个点呢）</strong><img src="https://img-blog.csdnimg.cn/53c25201a11349b6bc3af9e1dfc9fcc6.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h2 id="首先要回顾泰勒公式"><a href="#首先要回顾泰勒公式" class="headerlink" title="首先要回顾泰勒公式"></a>首先要回顾泰勒公式</h2><p><img src="https://img-blog.csdnimg.cn/c9b154d4d14c43c8bf5e2609789bb094.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/205bb83b97d849fc9b8c7451e044fdab.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>二元泰勒：<br><img src="https://img-blog.csdnimg.cn/2efa8bf67ffa419e90221154515a3712.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h2 id="用泰勒展开损失函数"><a href="#用泰勒展开损失函数" class="headerlink" title="用泰勒展开损失函数"></a>用泰勒展开损失函数</h2><p><img src="https://img-blog.csdnimg.cn/3ce8a2749e644d1f978c43d485798dde.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>理解为点乘，反向180度的时候，损失函数才是最小的：<img src="https://img-blog.csdnimg.cn/235fc97c36b74012b0663975ba0dc8a9.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>最终可以表达成：<img src="https://img-blog.csdnimg.cn/83f0037797f64c048376868ee2c21fae.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h1 id="梯度下降算法缺点在哪"><a href="#梯度下降算法缺点在哪" class="headerlink" title="梯度下降算法缺点在哪"></a>梯度下降算法缺点在哪</h1><p>其不仅仅包括可能有找到是局部最优解问题，有可能在中间的时候就有偏微分为0的时候，而这时这个点可能离全局最优解点 很远。<br><img src="https://img-blog.csdnimg.cn/cd31675e6d8e4c83925852218d4f2acc.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="Step-3：如何找到一个最好的函数（最佳参数），即调参"><a href="#Step-3：如何找到一个最好的函数（最佳参数），即调参" class="headerlink" title="Step 3：如何找到一个最好的函数（最佳参数），即调参"></a>Step 3：如何找到一个最好的函数（最佳参数），即调参</h2><p>用的还是 <strong>梯度下降法</strong>  </p>
+<ol>
+<li>随机选取一组参数</li>
+<li>输入所有的训练样本</li>
+<li>然后样本数据不变，参数不断变，用梯度下降法更新参数</li>
+</ol>
+<p><img src="https://img-blog.csdnimg.cn/72b790c9e1764d88bfef2b9f447c36c3.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><img src="https://img-blog.csdnimg.cn/24ebb0869baf46e899e8f509d26ba720.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="Backpropagation（反向传播）-来优化调参速度"><a href="#Backpropagation（反向传播）-来优化调参速度" class="headerlink" title="Backpropagation（反向传播） 来优化调参速度"></a>Backpropagation（反向传播） 来优化调参速度</h1><p>神经网络可能有很多个隐层，因此可能有百万数量级的参数，为了在<strong>梯度下降时有效地快速计算梯度</strong>，使用<strong>反向传播</strong>。<br>下图是 使用的损失函数为：交叉熵损失函数 ， 梯度下降法就是对每个参数求偏导，然后根据偏导大小进行左右移动，找到偏导为0的点，就是最佳参数值。</p>
+<h2 id="计算对参数偏导的表达式"><a href="#计算对参数偏导的表达式" class="headerlink" title="计算对参数偏导的表达式"></a>计算对参数偏导的表达式</h2><p><img src="https://img-blog.csdnimg.cn/52fb4c86e71843b3b44aec5e596d4324.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<blockquote>
+<p>交叉熵损失函数，为 正确值乘以 ln的带入x样本的线性模型 +<br>（1-正确值）乘以ln（1-带入x样本线性模型）<img src="https://img-blog.csdnimg.cn/cf25205ad5354582b0355f3aba098387.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>只考虑刚输入阶段的神经元，可以得到用 <em>sigmoid</em>激活函数之前的量 <em>z</em>，而 <em>z</em> 是由线性模型（按权重分配向量 + 偏值 <em>b</em> 得到）。如下图所示，可以看到对参数 w 的偏导可以按照链式法则为  <script type="math/tex">∂C/∂w=∂z/∂w × ∂C/∂z</script>  前项为前项传递，后项为后向传递<br><img src="https://img-blog.csdnimg.cn/0438d1f3d1384270bf8a8abc93a6fe81.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</blockquote>
+<ul>
+<li>前项传递非常好看出来，就是对应的输入值，比如 <code>∂C/∂w1=∂z/∂w1 × ∂C/∂z</code> 。其中<code>∂z/∂w1</code> 看图上所示，不就是对 <em>w1</em> 进行偏导么，那就是 <em>x1</em>。</li>
+<li>后项过程比较复杂，根据链式法则，<code>∂C/∂z=∂a/∂z × ∂C/∂a</code>，其中<code>∂a/∂z = σ&#39;(z)</code> 如下图所示<img src="https://img-blog.csdnimg.cn/636c2b53744d478ab268bf80073be7fa.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+<li>归纳一下得到如下：<img src="https://img-blog.csdnimg.cn/c03a971beb4940cd93cb185b340bf470.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述">这个时候我们从另一观点看待上面的式子：有另外一个神经元（下图中的三角形，表示乘法/放大器），input是<code>∂C/∂z</code>‘与<code>∂C/∂z′&#39;</code>  ，权重分别是 <em>w3,w4</em>，求和经过神经元（乘以σ′(z)），得到 <code>∂C/∂z</code>。（相当于反向传播，先线性加权再乘以一个σ′(z) 和正向非常类似）<img src="https://img-blog.csdnimg.cn/6ec05d31b6ed4eb89ab2c5bcc39b6282.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+</ul>
+<h2 id="后项传递-的两种情况"><a href="#后项传递-的两种情况" class="headerlink" title="后项传递 的两种情况"></a>后项传递 的两种情况</h2><p>如上图所示是我们最后得到的后项传递的式子，其中我们还有两个项不知道。那我们现在需要计算这两个部分，但分为两种情况</p>
+<h3 id="case-1：下一层是最终输出层"><a href="#case-1：下一层是最终输出层" class="headerlink" title="case 1：下一层是最终输出层"></a>case 1：下一层是最终输出层</h3><p>第一种情况，z′,z′′ 所接的neuron是output layer的neuron。<br>这个就比较简单，直接根据最后一层的输出反向写出即可。<img src="https://img-blog.csdnimg.cn/5683f53fae4b4b619a617d5513159510.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="case-2：下一层不是最终输出层"><a href="#case-2：下一层不是最终输出层" class="headerlink" title="case 2：下一层不是最终输出层"></a>case 2：下一层不是最终输出层</h3><p>第二种情况，z′,z′′ 所接的neuron不是output layer的neuron。<img src="https://img-blog.csdnimg.cn/935435dd3b0b435c9ab31388786acd78.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述">就上面那个图，我们可以推得类似后项传递的式子<img src="https://img-blog.csdnimg.cn/783ca76c842846efa9b6d89de1a874d9.png#pic_center" alt="在这里插入图片描述">就这样反复迭代(递归)，直到遇到case1的情况，就可以算出整个后项传递。然后结合之前的前项传递，就是我们要得到的对这个参数的偏微分值。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><img src="https://img-blog.csdnimg.cn/9796822a131546fabd92e1a1bac1a2d1.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>梯度下降时需要计算损失函数对每个参数偏微分<code>∂C/∂w</code>，<em>w</em> 代表相邻隐层之间的一条连线（即权值），每个 <em>w</em> 只有一个所指的神经元。</p>
+<ul>
+<li>链式法则将计算 <code>∂C/∂w</code> 拆成前向过程与后向过程。</li>
+<li>前向过程计算的是<code>∂z/∂w</code> ，这里 <em>z</em> 是 <em>w</em> 所指neuron的input，<strong>计算结果是与 <em>w</em> 相连的值。</strong><br>后向过程计算的是<code>∂C/∂z</code>，这里 <em>z</em> 仍是 <em>w</em> 所指neuron的input，计算结果通过从后至前递归得到。</li>
+</ul>
 ]]></content>
       <categories>
         <category>机器学习基础-李宏毅</category>
       </categories>
       <tags>
-        <tag>机器学习</tag>
+        <tag>深度学习</tag>
         <tag>李宏毅</tag>
+        <tag>反向传播</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>神经网络与深度学习 学习笔记（第一章）</title>
+    <url>/2021/09/10/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E7%AC%AC%E4%B8%80%E7%AB%A0%EF%BC%89/</url>
+    <content><![CDATA[<p>@<a href="神经网络与深度学习 邱锡鹏 学习笔记（第一章）">TOC</a></p>
+<h1 id="机器学习"><a href="#机器学习" class="headerlink" title="机器学习"></a>机器学习</h1><h2 id="浅层学习"><a href="#浅层学习" class="headerlink" title="浅层学习"></a>浅层学习</h2><blockquote>
+<p>学习一个预测模型．一般需要首先将数据表示为一组特征（Feature），特征的表示形式可以是连续的数值、离散的符号或其他形式．然后将这些特征输入到预测模型，并输出预测结果．这类机器学习可以看作浅层学习（Shallow  Learning）</p>
+</blockquote>
+<h2 id="机器学习的步骤"><a href="#机器学习的步骤" class="headerlink" title="机器学习的步骤"></a>机器学习的步骤</h2><ol>
+<li>数据预处理：对数据的原始形式进行初步的数据清理（比如去掉一些有缺失特征的样本，或去掉一些冗余的数据特征等）和加工（对数值特征进行缩放和归一化等），并构建成可用于训练机器学习模型的数据集．</li>
+<li>特征提取：从数据的原始特征中提取一些对特定机器学习任务有用的高质量特征．比如在图像分类中提取边缘、尺度不变特征变换（Scale Invariant<br>Feature Transform，SIFT）特征，在文本分类中去除停用词等．</li>
+<li>特征转换：对特征进行进一步的加工，比如降维和升维． 很多特征转换方法也都是机器学习方法．降维包括特征抽取（Feature Extraction）和特征选择（FeatureSelection）两种途径．常用的特征转换方法有主成分分析（Principal Components Analysis，PCA）、 线性判别分析（Linear Discriminant Analysis，LDA）等．</li>
+<li>预测：机器学习的核心部分，学习一个函数并进行预测．</li>
+</ol>
+<p><img src="https://img-blog.csdnimg.cn/f3d73fb28f1342f48a6ca08638b8da68.png#pic_center" alt="传统机器学习的数据处理流程"><br>注：很多的机器学习问题变成了特征工程（Feature Engineering）问题．开发一个机器学习系统的主要工作量都消耗在了预处理、特征提取以及特征转换上。</p>
+<h1 id="表示学习"><a href="#表示学习" class="headerlink" title="表示学习"></a>表示学习</h1><p>在表示学习中，有两个核心问题：</p>
+<ul>
+<li>一是“什么是一个好的表示”；即表示 需要包含更高层的语义信息</li>
+<li>二是“如何学习到好的表示”．</li>
+</ul>
+<p>传统的特征学习一般是通过<font color="red">人为地设计一些准则</font>，然后根据这些准则来选取有效的特征。 所以 特征的学习是和最终预测模型的学习分开进行的，<font color="red">因此学习到的特征不一定可以提升最终模型的性能．</font></p>
+<h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>将输入信息转换为有效的特征。<br>如果有一种算法可以自动地学习出有效的特征，并提高最终机器学习模型的性能，那么这种学习就可以叫作表示学习（Representation Learning）．</p>
+<h2 id="语义鸿沟"><a href="#语义鸿沟" class="headerlink" title="语义鸿沟"></a>语义鸿沟</h2><p>语义鸿沟问题是指输入数据的底层特征和高层语义信息之间的不一致性和差异性。</p>
+<blockquote>
+<p>比如车，图片中每辆车的颜色和形状等属性都不尽相同，因此不同图片在像素级别上的表示（即底层特征）差异性也会非常大．但是我们理解这些图片是建立在比较抽象的高层语义概念上的</p>
+</blockquote>
+<h2 id="表示特征的方式"><a href="#表示特征的方式" class="headerlink" title="表示特征的方式"></a>表示特征的方式</h2><ol>
+<li>局部表示：例如，one-hot向量 表示颜色。 缺点在于多个颜色就多个列或者行 </li>
+<li>分布式表示：RGB 表示颜色</li>
+</ol>
+<p><img src="https://img-blog.csdnimg.cn/aa86242673364da09f8245d248914cbd.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="局部表示和分布式表示示例"></p>
+<h2 id="嵌入"><a href="#嵌入" class="headerlink" title="嵌入"></a>嵌入</h2><p>嵌入通常指将一个度量空间中的一些对象映射到另一个低维的度量空间中，并尽可能保持不同对象之间的拓扑关系．<font color="blue">比如自然语言中词的分布式表示，也经常叫作词嵌入 </font></p>
+<p><font color="red"><strong>例如：3维one-hot向量空间和一个2维嵌入空间的对比</strong></font><br><img src="https://img-blog.csdnimg.cn/007e99163fd044348e7061ebebc1af33.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_14,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="one-hot向量空间与嵌入空间"><br>在低维的嵌入空间中，每个样本都不在坐标轴上，样本之间可以计算相似度．</p>
+<h1 id="深度学习"><a href="#深度学习" class="headerlink" title="深度学习"></a>深度学习</h1><h2 id="什么是深度"><a href="#什么是深度" class="headerlink" title="什么是深度"></a>什么是深度</h2><p>“深度”是指原始数据进行非线性特征转换的次数</p>
+<h2 id="深度学习的优点"><a href="#深度学习的优点" class="headerlink" title="深度学习的优点"></a>深度学习的优点</h2><p>深度学习，其主要目的是从数据中<font color="red">自动学习到有效的特征表示 </font><br>其抽象在 数据通过多层的特征转换，学习到的表示可以代替人工设计的特征，从而避免“特征工程”<br><img src="https://img-blog.csdnimg.cn/f678fb27e01c4d989d099cfa06afe038.png#pic_center" alt="深度学习的数据处理流程"><br>其是 一种 <font color="red"><strong>端到端的学习方式</strong></font>   在学习过程中<strong>不进行分模块或分阶段训练</strong>，直接优化任务的总体目标．在端到端学习中，一般不需要明确地给出不同模块或阶段的功能，中间过程不需要人为干预</p>
+<h2 id="深度学习的关键问题"><a href="#深度学习的关键问题" class="headerlink" title="深度学习的关键问题"></a>深度学习的关键问题</h2><p>深度学习需要解决的关键问题是 <strong>贡献度分配问题</strong>，即一个系统中不同的 <strong>组件</strong> 或其 <strong>参数</strong> 对最终系统输出结果的贡献或影响 </p>
+<p>目前，深度学习采用的模型主要是神经网络模型，其主要原因是神经网络模型可以使用 <strong>误差反向传播算法</strong> ，从而可以比较好地解决贡献度分配问题</p>
+<h1 id="深度学习相关的学术会议"><a href="#深度学习相关的学术会议" class="headerlink" title="深度学习相关的学术会议"></a>深度学习相关的学术会议</h1><ul>
+<li>国际表示学习会议  ICLR ：主要聚焦于深度学习</li>
+<li>神经信息处理系统年会 NeurIPS ：交叉学科会议，但偏重于机器学习</li>
+<li>国际机器学习会议 ICML：机器学习顶级会议</li>
+<li>国际人工智能联合会议 IJCAI ：人工智能领域最顶尖的综合性会议</li>
+<li>美国人工智能协会年会  AAAI ：人工智能领域的顶级会议</li>
+</ul>
+<h2 id="计算机视觉领域"><a href="#计算机视觉领域" class="headerlink" title="计算机视觉领域"></a>计算机视觉领域</h2><ul>
+<li>计算机视觉与模式识别大会  CVPR</li>
+<li>国际计算机视觉会议  ICCV</li>
+</ul>
+<h2 id="自然语言处理领域"><a href="#自然语言处理领域" class="headerlink" title="自然语言处理领域"></a>自然语言处理领域</h2><ul>
+<li>计算语言学年会 ACL</li>
+<li>自然语言处理实证方法大会  EMNLP</li>
+</ul>
+]]></content>
+      <categories>
+        <category>深度学习基础-邱锡鹏</category>
+      </categories>
+      <tags>
+        <tag>深度学习</tag>
+        <tag>邱锡鹏</tag>
+        <tag>神经网络</tag>
       </tags>
   </entry>
   <entry>
@@ -844,69 +1002,8 @@
         <category>深度学习基础-邱锡鹏</category>
       </categories>
       <tags>
+        <tag>深度学习</tag>
         <tag>机器学习</tag>
-        <tag>深度学习</tag>
-        <tag>邱锡鹏</tag>
-        <tag>神经网络</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>神经网络与深度学习 学习笔记（第一章）</title>
-    <url>/2021/09/10/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E7%AC%AC%E4%B8%80%E7%AB%A0%EF%BC%89/</url>
-    <content><![CDATA[<p>@<a href="神经网络与深度学习 邱锡鹏 学习笔记（第一章）">TOC</a></p>
-<h1 id="机器学习"><a href="#机器学习" class="headerlink" title="机器学习"></a>机器学习</h1><h2 id="浅层学习"><a href="#浅层学习" class="headerlink" title="浅层学习"></a>浅层学习</h2><blockquote>
-<p>学习一个预测模型．一般需要首先将数据表示为一组特征（Feature），特征的表示形式可以是连续的数值、离散的符号或其他形式．然后将这些特征输入到预测模型，并输出预测结果．这类机器学习可以看作浅层学习（Shallow  Learning）</p>
-</blockquote>
-<h2 id="机器学习的步骤"><a href="#机器学习的步骤" class="headerlink" title="机器学习的步骤"></a>机器学习的步骤</h2><ol>
-<li>数据预处理：对数据的原始形式进行初步的数据清理（比如去掉一些有缺失特征的样本，或去掉一些冗余的数据特征等）和加工（对数值特征进行缩放和归一化等），并构建成可用于训练机器学习模型的数据集．</li>
-<li>特征提取：从数据的原始特征中提取一些对特定机器学习任务有用的高质量特征．比如在图像分类中提取边缘、尺度不变特征变换（Scale Invariant<br>Feature Transform，SIFT）特征，在文本分类中去除停用词等．</li>
-<li>特征转换：对特征进行进一步的加工，比如降维和升维． 很多特征转换方法也都是机器学习方法．降维包括特征抽取（Feature Extraction）和特征选择（FeatureSelection）两种途径．常用的特征转换方法有主成分分析（Principal Components Analysis，PCA）、 线性判别分析（Linear Discriminant Analysis，LDA）等．</li>
-<li>预测：机器学习的核心部分，学习一个函数并进行预测．</li>
-</ol>
-<p><img src="https://img-blog.csdnimg.cn/f3d73fb28f1342f48a6ca08638b8da68.png#pic_center" alt="传统机器学习的数据处理流程"><br>注：很多的机器学习问题变成了特征工程（Feature Engineering）问题．开发一个机器学习系统的主要工作量都消耗在了预处理、特征提取以及特征转换上。</p>
-<h1 id="表示学习"><a href="#表示学习" class="headerlink" title="表示学习"></a>表示学习</h1><p>在表示学习中，有两个核心问题：</p>
-<ul>
-<li>一是“什么是一个好的表示”；即表示 需要包含更高层的语义信息</li>
-<li>二是“如何学习到好的表示”．</li>
-</ul>
-<p>传统的特征学习一般是通过<font color="red">人为地设计一些准则</font>，然后根据这些准则来选取有效的特征。 所以 特征的学习是和最终预测模型的学习分开进行的，<font color="red">因此学习到的特征不一定可以提升最终模型的性能．</font></p>
-<h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>将输入信息转换为有效的特征。<br>如果有一种算法可以自动地学习出有效的特征，并提高最终机器学习模型的性能，那么这种学习就可以叫作表示学习（Representation Learning）．</p>
-<h2 id="语义鸿沟"><a href="#语义鸿沟" class="headerlink" title="语义鸿沟"></a>语义鸿沟</h2><p>语义鸿沟问题是指输入数据的底层特征和高层语义信息之间的不一致性和差异性。</p>
-<blockquote>
-<p>比如车，图片中每辆车的颜色和形状等属性都不尽相同，因此不同图片在像素级别上的表示（即底层特征）差异性也会非常大．但是我们理解这些图片是建立在比较抽象的高层语义概念上的</p>
-</blockquote>
-<h2 id="表示特征的方式"><a href="#表示特征的方式" class="headerlink" title="表示特征的方式"></a>表示特征的方式</h2><ol>
-<li>局部表示：例如，one-hot向量 表示颜色。 缺点在于多个颜色就多个列或者行 </li>
-<li>分布式表示：RGB 表示颜色</li>
-</ol>
-<p><img src="https://img-blog.csdnimg.cn/aa86242673364da09f8245d248914cbd.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="局部表示和分布式表示示例"></p>
-<h2 id="嵌入"><a href="#嵌入" class="headerlink" title="嵌入"></a>嵌入</h2><p>嵌入通常指将一个度量空间中的一些对象映射到另一个低维的度量空间中，并尽可能保持不同对象之间的拓扑关系．<font color="blue">比如自然语言中词的分布式表示，也经常叫作词嵌入 </font></p>
-<p><font color="red"><strong>例如：3维one-hot向量空间和一个2维嵌入空间的对比</strong></font><br><img src="https://img-blog.csdnimg.cn/007e99163fd044348e7061ebebc1af33.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_14,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="one-hot向量空间与嵌入空间"><br>在低维的嵌入空间中，每个样本都不在坐标轴上，样本之间可以计算相似度．</p>
-<h1 id="深度学习"><a href="#深度学习" class="headerlink" title="深度学习"></a>深度学习</h1><h2 id="什么是深度"><a href="#什么是深度" class="headerlink" title="什么是深度"></a>什么是深度</h2><p>“深度”是指原始数据进行非线性特征转换的次数</p>
-<h2 id="深度学习的优点"><a href="#深度学习的优点" class="headerlink" title="深度学习的优点"></a>深度学习的优点</h2><p>深度学习，其主要目的是从数据中<font color="red">自动学习到有效的特征表示 </font><br>其抽象在 数据通过多层的特征转换，学习到的表示可以代替人工设计的特征，从而避免“特征工程”<br><img src="https://img-blog.csdnimg.cn/f678fb27e01c4d989d099cfa06afe038.png#pic_center" alt="深度学习的数据处理流程"><br>其是 一种 <font color="red"><strong>端到端的学习方式</strong></font>   在学习过程中<strong>不进行分模块或分阶段训练</strong>，直接优化任务的总体目标．在端到端学习中，一般不需要明确地给出不同模块或阶段的功能，中间过程不需要人为干预</p>
-<h2 id="深度学习的关键问题"><a href="#深度学习的关键问题" class="headerlink" title="深度学习的关键问题"></a>深度学习的关键问题</h2><p>深度学习需要解决的关键问题是 <strong>贡献度分配问题</strong>，即一个系统中不同的 <strong>组件</strong> 或其 <strong>参数</strong> 对最终系统输出结果的贡献或影响 </p>
-<p>目前，深度学习采用的模型主要是神经网络模型，其主要原因是神经网络模型可以使用 <strong>误差反向传播算法</strong> ，从而可以比较好地解决贡献度分配问题</p>
-<h1 id="深度学习相关的学术会议"><a href="#深度学习相关的学术会议" class="headerlink" title="深度学习相关的学术会议"></a>深度学习相关的学术会议</h1><ul>
-<li>国际表示学习会议  ICLR ：主要聚焦于深度学习</li>
-<li>神经信息处理系统年会 NeurIPS ：交叉学科会议，但偏重于机器学习</li>
-<li>国际机器学习会议 ICML：机器学习顶级会议</li>
-<li>国际人工智能联合会议 IJCAI ：人工智能领域最顶尖的综合性会议</li>
-<li>美国人工智能协会年会  AAAI ：人工智能领域的顶级会议</li>
-</ul>
-<h2 id="计算机视觉领域"><a href="#计算机视觉领域" class="headerlink" title="计算机视觉领域"></a>计算机视觉领域</h2><ul>
-<li>计算机视觉与模式识别大会  CVPR</li>
-<li>国际计算机视觉会议  ICCV</li>
-</ul>
-<h2 id="自然语言处理领域"><a href="#自然语言处理领域" class="headerlink" title="自然语言处理领域"></a>自然语言处理领域</h2><ul>
-<li>计算语言学年会 ACL</li>
-<li>自然语言处理实证方法大会  EMNLP</li>
-</ul>
-]]></content>
-      <categories>
-        <category>深度学习基础-邱锡鹏</category>
-      </categories>
-      <tags>
-        <tag>深度学习</tag>
         <tag>邱锡鹏</tag>
         <tag>神经网络</tag>
       </tags>
@@ -992,8 +1089,8 @@
         <category>机器学习基础-李宏毅</category>
       </categories>
       <tags>
-        <tag>机器学习</tag>
         <tag>李宏毅</tag>
+        <tag>机器学习</tag>
         <tag>线性回归</tag>
       </tags>
   </entry>
@@ -1091,106 +1188,9 @@
       </categories>
       <tags>
         <tag>逻辑回归</tag>
+        <tag>李宏毅</tag>
         <tag>机器学习</tag>
-        <tag>李宏毅</tag>
         <tag>分类问题</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>深度学习 Deep Learning 基础</title>
-    <url>/2021/08/07/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%20Deep%20Learning%20%E5%9F%BA%E7%A1%80/</url>
-    <content><![CDATA[<p>@<a href="深度学习 Deep Learning 基础">TOC</a></p>
-<p><strong>深度学习需要明白的几个问题？</strong><br>思路：</p>
-<ol>
-<li>什么是深度学习？为什么需要深度学习？深度学习和机器学习的关系？</li>
-<li>深度学习的步骤</li>
-<li>确定神经网络模型的损失函数，如何优化模型，即调参问题</li>
-<li>如何使用Back Propagation（反向传播） 方法 update DNN（深度神经网络）参数</li>
-</ol>
-<h1 id="深度学习的概念"><a href="#深度学习的概念" class="headerlink" title="深度学习的概念"></a>深度学习的概念</h1><h2 id="什么是深度学习？"><a href="#什么是深度学习？" class="headerlink" title="什么是深度学习？"></a>什么是深度学习？</h2><p>深度学习（Deep Learning，DL）是指多层的人工神经网络和训练它的方法。一层神经网络会把大量矩阵数字作为输入，通过<strong>非线性激活方法</strong>取权重，再产生另一个数据集合作为输出。这就像生物神经大脑的工作机理一样，通过合适的矩阵数量，多层组织链接一起，形成神经网络“大脑”进行精准复杂的处理，就像人们识别物体标注图片一样。</p>
-<ul>
-<li>深度学习的model是一个深度神经网络结构（neural structure）</li>
-<li>深度学习的“深度”是指神经网络的隐层（hidden layer）数量足够多</li>
-<li>深度学习是<strong>自动提取特征</strong>（Feature extractor），<strong>不需要像逻辑回归那样特征转换</strong>（Feature engineering）</li>
-</ul>
-<h2 id="为什么需要深度学习？-深度学习和机器学习的关系？"><a href="#为什么需要深度学习？-深度学习和机器学习的关系？" class="headerlink" title="为什么需要深度学习？ 深度学习和机器学习的关系？"></a>为什么需要深度学习？ 深度学习和机器学习的关系？</h2><ul>
-<li>传统机器学习的模型结构较简单，很依赖算法工程师做特征工程甚至子模型来提升模型效果。就像我们之前上节那个栗子一样，做多分类的问题，四个角对角是一个类的情况，没办法进行分类，所以只能使用特征工程来进行特征的变换。</li>
-<li>深度学习由于其层次化的结构，理论上可以拟合任意函数，整个复杂结构即可以用来对特征进行自动组合（如图像），也可以用来构建复杂的模型（如nlp领域里的LSTM，能够考虑上下文）。</li>
-</ul>
-<p><img src="https://img-blog.csdnimg.cn/b8b8df57f814494d8199e0e7b708e597.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h1 id="深度学习的步骤"><a href="#深度学习的步骤" class="headerlink" title="深度学习的步骤"></a>深度学习的步骤</h1><p>其实和机器学习一样分为三步。<img src="https://img-blog.csdnimg.cn/514f075664384cdcb62f6062fd5bd722.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h2 id="Step-1：定义一个神经网络结构（neural-structure）"><a href="#Step-1：定义一个神经网络结构（neural-structure）" class="headerlink" title="Step 1：定义一个神经网络结构（neural structure）"></a>Step 1：定义一个神经网络结构（neural structure）</h2><p>神经网络的创建包括3部分：</p>
-<ol>
-<li>神经网络有多少<strong>隐层（layer）</strong></li>
-<li>每一层有多少<strong>神经元（neuron）</strong></li>
-<li>每个神经元之间如何连接</li>
-</ol>
-<p>常见的出名神经网络<img src="https://img-blog.csdnimg.cn/5394cd49b44545c8ab4b8c1191d69239.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="神经元怎么定义？"><a href="#神经元怎么定义？" class="headerlink" title="神经元怎么定义？"></a>神经元怎么定义？</h3><p>每个神经元都有一个 bias 和一个 function ，每条输入的边都有一个 weight<img src="https://img-blog.csdnimg.cn/52bc001e984c4bdf980921c7f2458fdf.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="一个神经网络的栗子"><a href="#一个神经网络的栗子" class="headerlink" title="一个神经网络的栗子"></a>一个神经网络的栗子</h3><p>下面是一个 3个隐层（layer）、六个神经元（neuron）（每个球都是一个神经元）、全连接<strong>前馈</strong>网络（Fully Connection Feedforward Network）</p>
-<blockquote>
-<p>“<strong>前馈</strong>”是指整个网络中无反馈，信号从输入层向输出层单向传播，可用一个有向无环图表示<br>其实我们常用的网络，都是前馈神经网络，从输入到输出是一个有向图，中间不会有环或者反向传播。<br>当然，我们在训练前馈神经网络的时候，会用到反向传播进行参数调整。但仍不影响整个网络的有向和前馈性质。</p>
-</blockquote>
-<p><img src="https://img-blog.csdnimg.cn/748979f3a3c74e0ab0c19ea60bd13142.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="神经网络如何工作？"><a href="#神经网络如何工作？" class="headerlink" title="神经网络如何工作？"></a>神经网络如何工作？</h3><p><img src="https://img-blog.csdnimg.cn/d685eb4da45646df93096525226bb59f.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>其实 这就是矩阵运算（可以使用GPU加速计算）<img src="https://img-blog.csdnimg.cn/34294cf6a4254049b0f8bbc0aaf631a1.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>总体可以归纳为：<br><img src="https://img-blog.csdnimg.cn/9baa5b003ea04ff7ad3bc25076e2bb58.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="栗子：识别手写数字图像"><a href="#栗子：识别手写数字图像" class="headerlink" title="栗子：识别手写数字图像"></a>栗子：识别手写数字图像</h3><p>从图像中识别是数字几？<br><img src="https://img-blog.csdnimg.cn/5fb1bc809a444ff5bc19325453eb703d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="制作神经网络模型-的FAQ（最容易被问得问题）"><a href="#制作神经网络模型-的FAQ（最容易被问得问题）" class="headerlink" title="制作神经网络模型 的FAQ（最容易被问得问题）"></a>制作神经网络模型 的FAQ（最容易被问得问题）</h3><ul>
-<li>Q1： 神经网络需要几个隐层（layers）？每个层需要多少个神经元呢？<ul>
-<li>反复试验+ 直觉 （说白了就是要慢慢试= = 看经验呗）</li>
-</ul>
-</li>
-<li>Q2：神经网络可以自动确定结构吗？<ul>
-<li>理论上其实是可以的，不过这些方法我们还没学到。Evoluntionary Artifical Neural Networks</li>
-</ul>
-</li>
-<li>Q3：我们可以设计层次之间的结构么？<ul>
-<li>意思就是说例如Layer1 链接 Layer3 这样跳着的 等等。当然可以 CNN就是不按顺序来的，具体看下一节。<br><img src="https://img-blog.csdnimg.cn/6c74000cf96a4af0b33146e9dca6efc3.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
-</ul>
-</li>
-</ul>
-<h2 id="Step-2：确定神经网络模型的损失函数"><a href="#Step-2：确定神经网络模型的损失函数" class="headerlink" title="Step 2：确定神经网络模型的损失函数"></a>Step 2：确定神经网络模型的损失函数</h2><p>还是和逻辑回归一样，用<strong>交叉熵损失函数</strong>，调参使得交叉熵损失函数最小，如下图所示：<br><img src="https://img-blog.csdnimg.cn/29c36a171c584a36bead0693b41b9027.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>当然上面只是一个点的，把每个样本结合起来看。 <img src="https://img-blog.csdnimg.cn/ef62afa46f1248a09b17cea823c91513.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>不过这个地方有几个疑问？</p>
-<blockquote>
-<ul>
-<li>Q1：神经网络里面有很多层，所以有很多 <em>w</em> 和 <em>b</em> 调整。那是全体都一次性调整么？</li>
-<li>答：  <strong>现在不知道啊！</strong></li>
-<li>Q2：上面我是把所有的 交叉熵 都加在一起 然后对 整个大的损失函数进行调参是这样嘛？ 那我的训练样本应该是 各个数字都有是吗？</li>
-<li>答： <strong>现在不知道啊！</strong></li>
-</ul>
-</blockquote>
-<h2 id="Step-3：如何找到一个最好的函数（最佳参数），即调参"><a href="#Step-3：如何找到一个最好的函数（最佳参数），即调参" class="headerlink" title="Step 3：如何找到一个最好的函数（最佳参数），即调参"></a>Step 3：如何找到一个最好的函数（最佳参数），即调参</h2><p>用的还是 <strong>梯度下降法</strong>  </p>
-<ol>
-<li>随机选取一组参数</li>
-<li>输入所有的训练样本</li>
-<li>然后样本数据不变，参数不断变，用梯度下降法更新参数</li>
-</ol>
-<p><img src="https://img-blog.csdnimg.cn/72b790c9e1764d88bfef2b9f447c36c3.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><img src="https://img-blog.csdnimg.cn/24ebb0869baf46e899e8f509d26ba720.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h1 id="Backpropagation（反向传播）-来优化调参速度"><a href="#Backpropagation（反向传播）-来优化调参速度" class="headerlink" title="Backpropagation（反向传播） 来优化调参速度"></a>Backpropagation（反向传播） 来优化调参速度</h1><p>神经网络可能有很多个隐层，因此可能有百万数量级的参数，为了在<strong>梯度下降时有效地快速计算梯度</strong>，使用<strong>反向传播</strong>。<br>下图是 使用的损失函数为：交叉熵损失函数 ， 梯度下降法就是对每个参数求偏导，然后根据偏导大小进行左右移动，找到偏导为0的点，就是最佳参数值。</p>
-<h2 id="计算对参数偏导的表达式"><a href="#计算对参数偏导的表达式" class="headerlink" title="计算对参数偏导的表达式"></a>计算对参数偏导的表达式</h2><p><img src="https://img-blog.csdnimg.cn/52fb4c86e71843b3b44aec5e596d4324.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<blockquote>
-<p>交叉熵损失函数，为 正确值乘以 ln的带入x样本的线性模型 +<br>（1-正确值）乘以ln（1-带入x样本线性模型）<img src="https://img-blog.csdnimg.cn/cf25205ad5354582b0355f3aba098387.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p>只考虑刚输入阶段的神经元，可以得到用 <em>sigmoid</em>激活函数之前的量 <em>z</em>，而 <em>z</em> 是由线性模型（按权重分配向量 + 偏值 <em>b</em> 得到）。如下图所示，可以看到对参数 w 的偏导可以按照链式法则为  <script type="math/tex">∂C/∂w=∂z/∂w × ∂C/∂z</script>  前项为前项传递，后项为后向传递<br><img src="https://img-blog.csdnimg.cn/0438d1f3d1384270bf8a8abc93a6fe81.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-</blockquote>
-<ul>
-<li>前项传递非常好看出来，就是对应的输入值，比如 <code>∂C/∂w1=∂z/∂w1 × ∂C/∂z</code> 。其中<code>∂z/∂w1</code> 看图上所示，不就是对 <em>w1</em> 进行偏导么，那就是 <em>x1</em>。</li>
-<li>后项过程比较复杂，根据链式法则，<code>∂C/∂z=∂a/∂z × ∂C/∂a</code>，其中<code>∂a/∂z = σ&#39;(z)</code> 如下图所示<img src="https://img-blog.csdnimg.cn/636c2b53744d478ab268bf80073be7fa.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
-<li>归纳一下得到如下：<img src="https://img-blog.csdnimg.cn/c03a971beb4940cd93cb185b340bf470.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述">这个时候我们从另一观点看待上面的式子：有另外一个神经元（下图中的三角形，表示乘法/放大器），input是<code>∂C/∂z</code>‘与<code>∂C/∂z′&#39;</code>  ，权重分别是 <em>w3,w4</em>，求和经过神经元（乘以σ′(z)），得到 <code>∂C/∂z</code>。（相当于反向传播，先线性加权再乘以一个σ′(z) 和正向非常类似）<img src="https://img-blog.csdnimg.cn/6ec05d31b6ed4eb89ab2c5bcc39b6282.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
-</ul>
-<h2 id="后项传递-的两种情况"><a href="#后项传递-的两种情况" class="headerlink" title="后项传递 的两种情况"></a>后项传递 的两种情况</h2><p>如上图所示是我们最后得到的后项传递的式子，其中我们还有两个项不知道。那我们现在需要计算这两个部分，但分为两种情况</p>
-<h3 id="case-1：下一层是最终输出层"><a href="#case-1：下一层是最终输出层" class="headerlink" title="case 1：下一层是最终输出层"></a>case 1：下一层是最终输出层</h3><p>第一种情况，z′,z′′ 所接的neuron是output layer的neuron。<br>这个就比较简单，直接根据最后一层的输出反向写出即可。<img src="https://img-blog.csdnimg.cn/5683f53fae4b4b619a617d5513159510.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="case-2：下一层不是最终输出层"><a href="#case-2：下一层不是最终输出层" class="headerlink" title="case 2：下一层不是最终输出层"></a>case 2：下一层不是最终输出层</h3><p>第二种情况，z′,z′′ 所接的neuron不是output layer的neuron。<img src="https://img-blog.csdnimg.cn/935435dd3b0b435c9ab31388786acd78.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述">就上面那个图，我们可以推得类似后项传递的式子<img src="https://img-blog.csdnimg.cn/783ca76c842846efa9b6d89de1a874d9.png#pic_center" alt="在这里插入图片描述">就这样反复迭代(递归)，直到遇到case1的情况，就可以算出整个后项传递。然后结合之前的前项传递，就是我们要得到的对这个参数的偏微分值。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><img src="https://img-blog.csdnimg.cn/9796822a131546fabd92e1a1bac1a2d1.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>梯度下降时需要计算损失函数对每个参数偏微分<code>∂C/∂w</code>，<em>w</em> 代表相邻隐层之间的一条连线（即权值），每个 <em>w</em> 只有一个所指的神经元。</p>
-<ul>
-<li>链式法则将计算 <code>∂C/∂w</code> 拆成前向过程与后向过程。</li>
-<li>前向过程计算的是<code>∂z/∂w</code> ，这里 <em>z</em> 是 <em>w</em> 所指neuron的input，<strong>计算结果是与 <em>w</em> 相连的值。</strong><br>后向过程计算的是<code>∂C/∂z</code>，这里 <em>z</em> 仍是 <em>w</em> 所指neuron的input，计算结果通过从后至前递归得到。</li>
-</ul>
-]]></content>
-      <categories>
-        <category>机器学习基础-李宏毅</category>
-      </categories>
-      <tags>
-        <tag>李宏毅</tag>
-        <tag>深度学习</tag>
-        <tag>反向传播</tag>
       </tags>
   </entry>
   <entry>
@@ -1335,8 +1335,8 @@
         <category>机器学习基础-李宏毅</category>
       </categories>
       <tags>
-        <tag>李宏毅</tag>
         <tag>深度学习</tag>
+        <tag>李宏毅</tag>
         <tag>半监督学习</tag>
       </tags>
   </entry>
@@ -1461,8 +1461,8 @@
       </categories>
       <tags>
         <tag>CNN</tag>
-        <tag>李宏毅</tag>
         <tag>深度学习</tag>
+        <tag>李宏毅</tag>
         <tag>卷积核</tag>
         <tag>过滤器</tag>
         <tag>Maxpooling</tag>
@@ -1662,8 +1662,8 @@ PCA后选择4个主成分，每个主成分是一个6维向量（因为原来每
         <category>机器学习基础-李宏毅</category>
       </categories>
       <tags>
-        <tag>李宏毅</tag>
         <tag>深度学习</tag>
+        <tag>李宏毅</tag>
         <tag>无监督学习</tag>
         <tag>聚类</tag>
         <tag>降维</tag>
@@ -1799,8 +1799,8 @@ L2 learn的结果：参数值平均来讲比较小。
         <category>机器学习基础-李宏毅</category>
       </categories>
       <tags>
-        <tag>李宏毅</tag>
         <tag>深度学习</tag>
+        <tag>李宏毅</tag>
         <tag>模型优化</tag>
       </tags>
   </entry>
