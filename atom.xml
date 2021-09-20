@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2021-09-17T12:25:41.234Z</updated>
+  <updated>2021-09-20T11:51:35.309Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>梯度消失和梯度爆炸的理解</title>
+    <link href="http://example.com/2021/09/20/%E6%A2%AF%E5%BA%A6%E6%B6%88%E5%A4%B1%E5%92%8C%E6%A2%AF%E5%BA%A6%E7%88%86%E7%82%B8%E7%9A%84%E7%90%86%E8%A7%A3/"/>
+    <id>http://example.com/2021/09/20/%E6%A2%AF%E5%BA%A6%E6%B6%88%E5%A4%B1%E5%92%8C%E6%A2%AF%E5%BA%A6%E7%88%86%E7%82%B8%E7%9A%84%E7%90%86%E8%A7%A3/</id>
+    <published>2021-09-20T11:31:01.000Z</published>
+    <updated>2021-09-20T11:51:35.309Z</updated>
+    
+    <content type="html"><![CDATA[<p>@<a href="梯度消失和梯度爆炸的理解">TOC</a></p><h1 id="根本原因"><a href="#根本原因" class="headerlink" title="根本原因"></a>根本原因</h1><p>梯度消失和梯度爆炸的根本原因是由于深度神经网络过长的链，在反向传播通过链式法则求导过程中产生的。 换句话说，就是<strong>反向传播先天就有一定的毛病</strong>。</p><h1 id="根本原因的理解"><a href="#根本原因的理解" class="headerlink" title="根本原因的理解"></a>根本原因的理解</h1><p><img src="https://img-blog.csdnimg.cn/beb6cdfcd994483c9133ee88c0763034.jpg?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="前馈和反向传播过程"><br>左上角为 正向反馈的步骤（σ 表示 激活函数 $sigmoid$ ）。 Loss 使用的是 MSE损失函数。 根据反向传播，我们可以看到最后 loss 对 b1 参数的梯度。 可以看到 连乘的情况。</p><ul><li>看这个式子里的 $w<em>{i}$，一般我们初始化权重参数 $w</em>{i}$ 时，通常都小于1。</li><li>激活函数 $sigmoid$  的求导如下所示 <img src="https://img-blog.csdnimg.cn/9f175038b5e74cfda605e8906a194416.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_11,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="求导sigmoid函数"></li><li>激活函数的导数 图像如下图所示：<img src="https://img-blog.csdnimg.cn/fe08669e4f3648ea89dec0b560ba422b.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_16,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="sigmoid函数求导"></li><li>所以$|σ’(z) × w| ≤ 0.25$，多个小于1的数连乘之后，那将会越来越小，导致靠近输入层的层的权重的偏导几乎为0，也就是说梯度几乎为0，导致参数基本不更新，这就是梯度消失的根本原因。<br>梯度爆炸的原因，也就是说如果$|σ’(z) × w| ≥ 1$，连乘下来就会导致梯度过大，导致梯度更新幅度特别大，可能会溢出，导致模型无法收敛。但 sigmoid的函数是不可能大于1了，上图看的很清楚，那只能是参数 $w<em>{i}$了，故只有当 $abs(w)&gt;4$ 时才可能出现梯度爆炸，<strong>这也就是经常看到别人博客里的一句话，初始权重过大</strong>。<br>但梯度爆炸的情况一般不会发生，对于$sigmoid$ 函数来说，$σ’(z)$的大小也与$w</em>{i}$有关。<br><strong>其实梯度爆炸和梯度消失问题都是因为网络太深，网络权值更新不稳定造成的，本质上是因为梯度反向传播中的连乘效应。</strong></li></ul><h1 id="如何解决梯度消失的问题（待补充）"><a href="#如何解决梯度消失的问题（待补充）" class="headerlink" title="如何解决梯度消失的问题（待补充）"></a>如何解决梯度消失的问题（待补充）</h1><ol><li>用 $ReLU、LeakyRelu、Elu$ 等激活函数激活函数取代 $sigmoid$ 激活函数。<br>将输出不要固定在0-1之间。$sigmoid$函数的梯度随着 $x$ 的增大或减小和消失，而 $ReLU$ 不会。<br><img src="https://img-blog.csdnimg.cn/3dc7f13adf6c402a94e53d27765e8e92.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_14,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="sigmoid与relu"></li><li>Batch Normalization 就是通过对每一层的输出规范为均值和方差一致的方法，消除了$w$带来的放大缩小的影响，进而解决梯度消失和爆炸的问题。</li><li>ResNet残差结构<br>具体待补充完善，查看 ResNet</li><li>LSTM结构<br>LSTM不太容易发生梯度消失，主要原因在于LSTM内部复杂的“门（gates）”，具体看LSTM基本原理解析</li><li>预训练加finetunning<br>此方法来自Hinton在06年发表的论文上，其基本思想是每次训练一层隐藏层节点，将上一层隐藏层的输出作为输入，而本层的输出作为下一层的输入，这就是逐层预训练。<br>训练完成后，再对整个网络进行“微调（fine-tunning）”。<br>此方法相当于是找全局最优，然后整合起来寻找全局最优，但是现在基本都是直接拿imagenet的预训练模型直接进行finetunning。</li><li>梯度剪切、正则<br>这个方案主要是针对梯度爆炸提出的，其思想是设值一个剪切阈值，如果更新梯度时，梯度超过了这个阈值，那么就将其强制限制在这个范围之内。这样可以防止梯度爆炸。<br>另一种防止梯度爆炸的手段是采用权重正则化，正则化主要是通过对网络权重做正则来限制过拟合，但是根据正则项在损失函数中的形式：<br>可以看出，如果发生梯度爆炸，那么权值的范数就会变的非常大，反过来，通过限制正则化项的大小，也可以在一定程度上限制梯度爆炸的发生。</li></ol><h1 id="参考博客"><a href="#参考博客" class="headerlink" title="参考博客"></a>参考博客</h1><ul><li><a href="https://zhuanlan.zhihu.com/p/25631496">神经网络训练中的梯度消失与梯度爆炸</a></li><li><a href="https://www.jianshu.com/p/3f35e555d5ba">梯度消失和梯度爆炸问题详解</a></li></ul>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;@&lt;a href=&quot;梯度消失和梯度爆炸的理解&quot;&gt;TOC&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id=&quot;根本原因&quot;&gt;&lt;a href=&quot;#根本原因&quot; class=&quot;headerlink&quot; title=&quot;根本原因&quot;&gt;&lt;/a&gt;根本原因&lt;/h1&gt;&lt;p&gt;梯度消失和梯度爆炸的根本原因是由于深度神经网络</summary>
+      
+    
+    
+    
+    <category term="深度学习基础" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80/"/>
+    
+    
+    <category term="深度学习" scheme="http://example.com/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
   
   <entry>
     <title>Keras 实现 Kaggle 数据集 Titanic 预测</title>
@@ -568,31 +593,6 @@
       
     <summary type="html">&lt;p&gt;@&lt;a href=&quot;各类 激活函数 详解与选择&quot;&gt;TOC&lt;/a&gt;&lt;/p&gt;
 &lt;h1 id=&quot;Relu&quot;&gt;&lt;a href=&quot;#Relu&quot; class=&quot;headerlink&quot; title=&quot;Relu&quot;&gt;&lt;/a&gt;Relu&lt;/h1&gt;&lt;h1 id=&quot;tanh&quot;&gt;&lt;a href=&quot;#t</summary>
-      
-    
-    
-    
-    <category term="损失函数与激活函数" scheme="http://example.com/categories/%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%E4%B8%8E%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/"/>
-    
-    
-    <category term="激活函数" scheme="http://example.com/tags/%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>各类 损失函数 详解与选择</title>
-    <link href="http://example.com/2021/08/23/%E5%90%84%E7%B1%BB%20%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%20%E8%AF%A6%E8%A7%A3%E4%B8%8E%E9%80%89%E6%8B%A9/"/>
-    <id>http://example.com/2021/08/23/%E5%90%84%E7%B1%BB%20%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%20%E8%AF%A6%E8%A7%A3%E4%B8%8E%E9%80%89%E6%8B%A9/</id>
-    <published>2021-08-23T09:22:01.000Z</published>
-    <updated>2021-08-24T09:28:21.357Z</updated>
-    
-    <content type="html"><![CDATA[<p>@<a href="各类 损失函数 详解与选择">TOC</a></p><h1 id="mean-squared-error-均方误差"><a href="#mean-squared-error-均方误差" class="headerlink" title="mean_squared_error 均方误差"></a>mean_squared_error 均方误差</h1><p><img src="https://img-blog.csdnimg.cn/a55e390e62dd4e0b8bd1c9ff5cfb7826.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;p&gt;@&lt;a href=&quot;各类 损失函数 详解与选择&quot;&gt;TOC&lt;/a&gt;&lt;/p&gt;
-&lt;h1 id=&quot;mean-squared-error-均方误差&quot;&gt;&lt;a href=&quot;#mean-squared-error-均方误差&quot; class=&quot;headerlink&quot; title=&quot;mean_s</summary>
       
     
     
