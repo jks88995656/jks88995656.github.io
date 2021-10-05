@@ -1,0 +1,225 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>深度学习基础 - Batch Normalization | 一只柴犬</title><meta name="keywords" content="深度学习"><meta name="author" content="凯凯超人"><meta name="copyright" content="凯凯超人"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="@TOC 在计算机的眼光里，对具有统一规格的数据，更能学习到其数据之间的规律特征。也就是下图所看的的这样，将杂乱的数据标准归一化。 首先我们之前有Normalization（普通数据标准化），一般用作输入数据的样本归一化操作。那Batch Normalization 则可用在 每个层上包括隐藏层。 机器学习中的Feature Scaling如果特征大小差的比较远的话，loss function会很">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深度学习基础 - Batch Normalization">
+<meta property="og:url" content="http://example.com/2021/10/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80%20-%20Batch%20Normalization/index.html">
+<meta property="og:site_name" content="一只柴犬">
+<meta property="og:description" content="@TOC 在计算机的眼光里，对具有统一规格的数据，更能学习到其数据之间的规律特征。也就是下图所看的的这样，将杂乱的数据标准归一化。 首先我们之前有Normalization（普通数据标准化），一般用作输入数据的样本归一化操作。那Batch Normalization 则可用在 每个层上包括隐藏层。 机器学习中的Feature Scaling如果特征大小差的比较远的话，loss function会很">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/105_5.png">
+<meta property="article:published_time" content="2021-10-05T07:29:01.000Z">
+<meta property="article:modified_time" content="2021-10-05T15:20:45.177Z">
+<meta property="article:author" content="凯凯超人">
+<meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/105_5.png"><link rel="shortcut icon" href="/img/favicon2.png"><link rel="canonical" href="http://example.com/2021/10/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80%20-%20Batch%20Normalization/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '深度学习基础 - Batch Normalization',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-10-05 23:20:45'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/mycss.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/StaticFile_HEXO@latest/butterfly/css/pool.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/StaticFile_HEXO@latest/butterfly/css/iconfont.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/css/flink.min.css"><meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="一只柴犬" type="application/atom+xml">
+</head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/admin.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">40</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">12</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 清单</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/%E9%9F%B3%E4%B9%90"><i class="fa-fw /music/"></i><span> 0</span></a></li><li><a class="site-page child" href="/%E7%94%B5%E5%BD%B1"><i class="fa-fw /movies/"></i><span> 1</span></a></li><li><a class="site-page child" href="/%E7%85%A7%E7%89%87"><i class="fa-fw /Gallery/"></i><span> 2</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/105_5.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">一只柴犬</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 清单</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/%E9%9F%B3%E4%B9%90"><i class="fa-fw /music/"></i><span> 0</span></a></li><li><a class="site-page child" href="/%E7%94%B5%E5%BD%B1"><i class="fa-fw /movies/"></i><span> 1</span></a></li><li><a class="site-page child" href="/%E7%85%A7%E7%89%87"><i class="fa-fw /Gallery/"></i><span> 2</span></a></li></ul></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">深度学习基础 - Batch Normalization</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-10-05T07:29:01.000Z" title="发表于 2021-10-05 15:29:01">2021-10-05</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-10-05T15:20:45.177Z" title="更新于 2021-10-05 23:20:45">2021-10-05</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80/">深度学习基础</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="深度学习基础 - Batch Normalization"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>@<a href="深度学习基础 - Batch Normalization">TOC</a></p>
+<p>在计算机的眼光里，对具有统一规格的数据，更能学习到其数据之间的规律特征。也就是下图所看的的这样，将杂乱的数据标准归一化。<br><img src="https://img-blog.csdnimg.cn/img_convert/7c0360d9080d48dce15371c941baea9b.png#pic_center" alt="数据标准归一化"></p>
+<p>首先我们之前有Normalization（普通数据标准化），一般用作<strong>输入数据</strong>的样本归一化操作。那Batch Normalization 则可用在 每个层上包括隐藏层。</p>
+<h1 id="机器学习中的Feature-Scaling"><a href="#机器学习中的Feature-Scaling" class="headerlink" title="机器学习中的Feature Scaling"></a>机器学习中的Feature Scaling</h1><p>如果特征大小差的比较远的话，loss function会很扁平，数值更大的feature的参数会对结果的影响更大，这样在训练过程中，不同的方向需要设定不同的学习率，这样子会不太方便，这不是我们想看到的，所以我们通常会去做feature scaling。</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/196be414d2c05a542644613ab56c6213.png#pic_center" alt="使用Feature Scaling后"><br>具体的操作很简单，对每一维特征，我们对每一个数据减去这维特征的均值，再除以这位特征的标准差，得到缩放后的新的特征值，此时它的均值为0，方差为1。一般经过feature scaling之后，<strong>收敛速度会变快</strong>。</p>
+<p><strong>那么在神经网络中又是什么情况呢？</strong></p>
+<p>我们可以看到，其实在深度网络中，后一层的输入其实是前一层的输出。那么我们在做feature scaling的时候，应该对每一层的输入都去做一个feature scaling, 但是又不像传统的机器学习，由于神经网络每一层的参数都在不断变化，直接使用前面的feature scaling是不太合适的。所以我们需要一个新的技术，就是Batch Normalization了</p>
+<h1 id="Batch-Normalization-放在神经网络的哪个部位？"><a href="#Batch-Normalization-放在神经网络的哪个部位？" class="headerlink" title="Batch Normalization 放在神经网络的哪个部位？"></a>Batch Normalization 放在神经网络的哪个部位？</h1><p>Batch Normalization 放在 线性层的后面，激活函数的前面。如下图所示：<br><img src="https://img-blog.csdnimg.cn/img_convert/be42f4f33882e58d12258995609ccb06.png#pic_center" alt="Batch Normalization 放在 线性层的后面，激活函数的前面"></p>
+<h2 id="Batch-Normalization-基本原理"><a href="#Batch-Normalization-基本原理" class="headerlink" title="Batch Normalization 基本原理"></a>Batch Normalization 基本原理</h2><p>现在一般采用批梯度下降方法对深度学习进行优化，这种方法把数据分为若干组，按组来更新参数，一组中的数据共同决定了本次梯度的方向，下降时减少了随机性。另一方面因为批的样本数与整个数据集相比小了很多，计算量也下降了很多。</p>
+<p>Batch Normalization(简称BN)中的batch就是批量数据，即每一次优化时的样本数目，通常BN网络层用在卷积层后，用于重新调整数据分布。假设神经网络某层一个batch的输入为X=[x1,x2,…,xn]，其中xi代表一个样本，n为batch size。</p>
+<ol>
+<li>首先，我们需要求得mini-batch里元素的均值：<script type="math/tex; mode=display">μ_{B}=\frac{1}{n}\sum_{i=1}^{n}x_{i}</script></li>
+<li>接下来，求取mini-batch的方差：<script type="math/tex; mode=display">\sigma _{B}^{2} = \frac{1}{n}\sum_{i=1}^{n}(x_{i}-μ_{B})^{2}</script></li>
+<li>这样我们就可以对每个元素进行归一化<script type="math/tex; mode=display">\hat{x_{i}}=\frac{x_{i}-μ_{B}}{\sqrt{\sigma _{B}^{2}+\varepsilon}}</script>这里的分母本来应该是 $\sigma$,但为了防止它为0，我们加上一个$\varepsilon$。</li>
+<li>最后进行尺度缩放和偏移操作，这样可以变换回原始的分布，实现恒等变换，这样的目的是为了补偿网络的非线性表达能力，因为经过标准化之后，偏移量丢失。具体的表达如下，$y_{i}$就是网络的最终输出。$γ$与$β$是神经网络的参数，是网络自己学习的。<script type="math/tex; mode=display">y_{i}=γ\hat{x_{i}}+β</script></li>
+</ol>
+<p>从某种意义上来说，方差和均值代表的其实是输入数据分布的方差和偏移。对于没有BN的网络，这两个值与前一层网络带来的非线性性质有关，而经过变换后，就跟前面一层无关，变成了当前层的一个学习参数，这更加有利于优化并且不会降低网络的能力。</p>
+<h1 id="举个-Batch-Normaliztion-计算栗子"><a href="#举个-Batch-Normaliztion-计算栗子" class="headerlink" title="举个 Batch Normaliztion 计算栗子"></a>举个 Batch Normaliztion 计算栗子</h1><p>他分为训练（训练 $γ$与$β$）和测试阶段（使用训练后得到的参数）。<br><img src="https://img-blog.csdnimg.cn/img_convert/ae36898be0aa225a92aaf50123680551.png#pic_center" alt="同济子豪兄的理解"><br>如下图 这个的 batch_size=8，也就是说输入的图像有8张，即8个输入；看第一个0.9 表示的是 第一张神经元对第4张图片的响应；后面的1.7就是 第一张神经元对第5张图片的响应；26.7 也就是最后一个神经元对 第4张图片的响应。</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/a5c5dfbc5e9f3d93b52b31b12dec84c7.png#pic_center" alt=""><br>就是先算出 平均值 再计算 均方差，按公式得到标准化的结果。</p>
+<h1 id="Batch-Normaliztion-的效果"><a href="#Batch-Normaliztion-的效果" class="headerlink" title="Batch Normaliztion 的效果"></a>Batch Normaliztion 的效果</h1><ol>
+<li>因为BN可以把输入都规整化在非饱和区内，所以他可以加快收敛（因为梯度变化的大，不缓慢）比如 sigmoid 和 tanh 函数 非饱和区和饱和区。</li>
+<li>减少了训练时间，而且可以进行深层网络的训练，同时可以使用更大的学习率。</li>
+<li>减轻了对参数初始化的依赖，这是利于调参的</li>
+<li>可以起到正则化的作用 可以防止过拟合</li>
+<li>BN一定程度上增加了泛化能力，dropout等技术可以去掉。</li>
+</ol>
+<p><strong>注意：BN与Dropout不能一起使用。</strong> 为什么有待于补充。</p>
+<h2 id="可以看一下-效果"><a href="#可以看一下-效果" class="headerlink" title="可以看一下 效果"></a>可以看一下 效果</h2><p><img src="https://img-blog.csdnimg.cn/img_convert/275bcf4be1343343b2e006268bed2b95.png#pic_center" alt="用了Batch Normalization 的效果"></p>
+<h1 id="参考论文与博客"><a href="#参考论文与博客" class="headerlink" title="参考论文与博客"></a>参考论文与博客</h1><p>Batch Normalization论文：<a target="_blank" rel="noopener" href="http://proceedings.mlr.press/v37/ioffe15.pdf">Batch Normalization论文</a><br>参考的博客：<br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/24810318">什么是批标准化？</a><br><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/38102762/answer/607815171">知乎第一个留言 深度学习中 Batch Normalization为什么效果好？</a><br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/54073204">精选 写的很好  Batch Normalization的通俗解释 </a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">凯凯超人</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2021/10/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80%20-%20Batch%20Normalization/">http://example.com/2021/10/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80%20-%20Batch%20Normalization/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">一只柴犬</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">深度学习</a></div><div class="post_share"><div class="social-share" data-image="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/105_5.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2021/10/04/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B%E7%9A%84%E4%B8%AD%E7%9A%84%E6%8C%87%E6%A0%87%E7%9A%84%E5%90%AB%E4%B9%89%E5%8F%8A%E5%85%B6%E5%AE%9E%E7%8E%B0/"><img class="next-cover" src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/shakhasdk.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">目标检测的中的指标的含义及其实现</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2021/08/10/为什么要Deep？深而不是宽/" title="为什么要Deep？深而不是宽"><img class="cover" src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/4.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-08-10</div><div class="title">为什么要Deep？深而不是宽</div></div></a></div><div><a href="/2021/09/26/同济子豪兄 之 yolov1 详解/" title="同济子豪兄 之 yolov1 详解"><img class="cover" src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/223234.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-09-26</div><div class="title">同济子豪兄 之 yolov1 详解</div></div></a></div><div><a href="/2021/09/20/梯度消失和梯度爆炸的理解/" title="梯度消失和梯度爆炸的理解"><img class="cover" src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/20151107191711_H5LwP.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-09-20</div><div class="title">梯度消失和梯度爆炸的理解</div></div></a></div><div><a href="/2021/08/07/深度学习 Deep Learning 基础/" title="深度学习 Deep Learning 基础"><img class="cover" src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/1.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-08-07</div><div class="title">深度学习 Deep Learning 基础</div></div></a></div><div><a href="/2021/09/10/神经网络与深度学习 学习笔记（第一章）/" title="神经网络与深度学习 学习笔记（第一章）"><img class="cover" src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/23244.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-09-10</div><div class="title">神经网络与深度学习 学习笔记（第一章）</div></div></a></div><div><a href="/2021/10/04/目标检测的中的指标的含义及其实现/" title="目标检测的中的指标的含义及其实现"><img class="cover" src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/shakhasdk.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-10-04</div><div class="title">目标检测的中的指标的含义及其实现</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/admin.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">凯凯超人</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">40</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">41</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">12</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/xxxxx" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:xxxxxx@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://gitee.com/×××" target="_blank" title="Gitee"><i class="iconfont gitee"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84Feature-Scaling"><span class="toc-number">1.</span> <span class="toc-text">机器学习中的Feature Scaling</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Batch-Normalization-%E6%94%BE%E5%9C%A8%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E5%93%AA%E4%B8%AA%E9%83%A8%E4%BD%8D%EF%BC%9F"><span class="toc-number">2.</span> <span class="toc-text">Batch Normalization 放在神经网络的哪个部位？</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Batch-Normalization-%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86"><span class="toc-number">2.1.</span> <span class="toc-text">Batch Normalization 基本原理</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%BE%E4%B8%AA-Batch-Normaliztion-%E8%AE%A1%E7%AE%97%E6%A0%97%E5%AD%90"><span class="toc-number">3.</span> <span class="toc-text">举个 Batch Normaliztion 计算栗子</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Batch-Normaliztion-%E7%9A%84%E6%95%88%E6%9E%9C"><span class="toc-number">4.</span> <span class="toc-text">Batch Normaliztion 的效果</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%AF%E4%BB%A5%E7%9C%8B%E4%B8%80%E4%B8%8B-%E6%95%88%E6%9E%9C"><span class="toc-number">4.1.</span> <span class="toc-text">可以看一下 效果</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E8%AE%BA%E6%96%87%E4%B8%8E%E5%8D%9A%E5%AE%A2"><span class="toc-number">5.</span> <span class="toc-text">参考论文与博客</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/10/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80%20-%20Batch%20Normalization/" title="深度学习基础 - Batch Normalization"><img src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/105_5.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="深度学习基础 - Batch Normalization"/></a><div class="content"><a class="title" href="/2021/10/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80%20-%20Batch%20Normalization/" title="深度学习基础 - Batch Normalization">深度学习基础 - Batch Normalization</a><time datetime="2021-10-05T07:29:01.000Z" title="发表于 2021-10-05 15:29:01">2021-10-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/10/04/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B%E7%9A%84%E4%B8%AD%E7%9A%84%E6%8C%87%E6%A0%87%E7%9A%84%E5%90%AB%E4%B9%89%E5%8F%8A%E5%85%B6%E5%AE%9E%E7%8E%B0/" title="目标检测的中的指标的含义及其实现"><img src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/shakhasdk.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="目标检测的中的指标的含义及其实现"/></a><div class="content"><a class="title" href="/2021/10/04/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B%E7%9A%84%E4%B8%AD%E7%9A%84%E6%8C%87%E6%A0%87%E7%9A%84%E5%90%AB%E4%B9%89%E5%8F%8A%E5%85%B6%E5%AE%9E%E7%8E%B0/" title="目标检测的中的指标的含义及其实现">目标检测的中的指标的含义及其实现</a><time datetime="2021-10-04T14:01:01.000Z" title="发表于 2021-10-04 22:01:01">2021-10-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/09/26/%E5%90%8C%E6%B5%8E%E5%AD%90%E8%B1%AA%E5%85%84%20%E4%B9%8B%20yolov1%20%E8%AF%A6%E8%A7%A3/" title="同济子豪兄 之 yolov1 详解"><img src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/223234.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="同济子豪兄 之 yolov1 详解"/></a><div class="content"><a class="title" href="/2021/09/26/%E5%90%8C%E6%B5%8E%E5%AD%90%E8%B1%AA%E5%85%84%20%E4%B9%8B%20yolov1%20%E8%AF%A6%E8%A7%A3/" title="同济子豪兄 之 yolov1 详解">同济子豪兄 之 yolov1 详解</a><time datetime="2021-09-26T14:01:01.000Z" title="发表于 2021-09-26 22:01:01">2021-09-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/09/25/%E5%90%B4%E6%81%A9%E8%BE%BEdeeplearning.ai%E5%AD%A6%E4%B9%A0%20%20%E4%B9%8B%20%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/" title="吴恩达deeplearning.ai学习  之 目标检测"><img src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/cat1.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="吴恩达deeplearning.ai学习  之 目标检测"/></a><div class="content"><a class="title" href="/2021/09/25/%E5%90%B4%E6%81%A9%E8%BE%BEdeeplearning.ai%E5%AD%A6%E4%B9%A0%20%20%E4%B9%8B%20%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/" title="吴恩达deeplearning.ai学习  之 目标检测">吴恩达deeplearning.ai学习  之 目标检测</a><time datetime="2021-09-25T08:37:01.000Z" title="发表于 2021-09-25 16:37:01">2021-09-25</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/09/22/argparse%E6%A8%A1%E5%9D%97%E7%94%A8%E6%B3%95%E5%AE%9E%E4%BE%8B%E8%AF%A6%E8%A7%A3/" title="argparse模块用法实例详解"><img src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/20151107191711_H5LwP.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="argparse模块用法实例详解"/></a><div class="content"><a class="title" href="/2021/09/22/argparse%E6%A8%A1%E5%9D%97%E7%94%A8%E6%B3%95%E5%AE%9E%E4%BE%8B%E8%AF%A6%E8%A7%A3/" title="argparse模块用法实例详解">argparse模块用法实例详解</a><time datetime="2021-09-22T15:31:01.000Z" title="发表于 2021-09-22 23:31:01">2021-09-22</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 凯凯超人</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.2
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        insertScript: [200, () => {
+          document.querySelectorAll('mjx-container:not\([display]\)').forEach(node => {
+            const target = node.parentNode
+            if (target.nodeName.toLowerCase() === 'li') {
+              target.parentNode.classList.add('has-jax')
+            } else {
+              target.classList.add('has-jax')
+            }
+          });
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/StaticFile_HEXO@latest/butterfly/js/pool.min.js"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/js/mouse_snow.min.js"><script src="https://cdn.jsdelivr.net/gh/sviptzk/StaticFile_HEXO@latest/butterfly/js/pool.min.js"></script><script src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/js/mouse_snow.min.js"></script><script src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/js/hideMobileSidebar.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
