@@ -1,0 +1,274 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>yolov3 详解 | 一只柴犬</title><meta name="keywords" content="深度学习,yolo"><meta name="author" content="凯凯超人"><meta name="copyright" content="凯凯超人"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="@TOC yolov1v2v3系列的区别 yolov3 存在的问题 与 改进 如何评判目标检测的效果好坏，以及AP如何计算？ 请看另一文章评判目标检测性能以及如何计算AP等  yolov3 在 IoU 阈值为0.5的情况下，AP值较好（也就是框框并不需要和 Ground Truth 贴合的很准，条件比较宽松）。但 IoU 阈值在0.5-0.95，以0.05作为步长的1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="yolov3 详解">
+<meta property="og:url" content="http://example.com/2021/10/23/yolov3%20%E8%AF%A6%E8%A7%A3/index.html">
+<meta property="og:site_name" content="一只柴犬">
+<meta property="og:description" content="@TOC yolov1v2v3系列的区别 yolov3 存在的问题 与 改进 如何评判目标检测的效果好坏，以及AP如何计算？ 请看另一文章评判目标检测性能以及如何计算AP等  yolov3 在 IoU 阈值为0.5的情况下，AP值较好（也就是框框并不需要和 Ground Truth 贴合的很准，条件比较宽松）。但 IoU 阈值在0.5-0.95，以0.05作为步长的1">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/sayit.jpg">
+<meta property="article:published_time" content="2021-10-23T14:52:01.000Z">
+<meta property="article:modified_time" content="2021-10-26T14:40:04.375Z">
+<meta property="article:author" content="凯凯超人">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="yolo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/sayit.jpg"><link rel="shortcut icon" href="/img/favicon2.png"><link rel="canonical" href="http://example.com/2021/10/23/yolov3%20%E8%AF%A6%E8%A7%A3/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'yolov3 详解',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-10-26 22:40:04'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/mycss.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/StaticFile_HEXO@latest/butterfly/css/pool.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/StaticFile_HEXO@latest/butterfly/css/iconfont.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/css/flink.min.css"><meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="一只柴犬" type="application/atom+xml">
+</head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/admin.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">44</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">43</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 清单</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/%E9%9F%B3%E4%B9%90"><i class="fa-fw /music/"></i><span> 0</span></a></li><li><a class="site-page child" href="/%E7%94%B5%E5%BD%B1"><i class="fa-fw /movies/"></i><span> 1</span></a></li><li><a class="site-page child" href="/%E7%85%A7%E7%89%87"><i class="fa-fw /Gallery/"></i><span> 2</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/sayit.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">一只柴犬</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 清单</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/%E9%9F%B3%E4%B9%90"><i class="fa-fw /music/"></i><span> 0</span></a></li><li><a class="site-page child" href="/%E7%94%B5%E5%BD%B1"><i class="fa-fw /movies/"></i><span> 1</span></a></li><li><a class="site-page child" href="/%E7%85%A7%E7%89%87"><i class="fa-fw /Gallery/"></i><span> 2</span></a></li></ul></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">yolov3 详解</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-10-23T14:52:01.000Z" title="发表于 2021-10-23 22:52:01">2021-10-23</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-10-26T14:40:04.375Z" title="更新于 2021-10-26 22:40:04">2021-10-26</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Yolo/">Yolo</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="yolov3 详解"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>@<a href="同济子豪兄 之 yolov3 详解">TOC</a></p>
+<h1 id="yolov1v2v3系列的区别"><a href="#yolov1v2v3系列的区别" class="headerlink" title="yolov1v2v3系列的区别"></a>yolov1v2v3系列的区别</h1><p><img src="https://img-blog.csdnimg.cn/img_convert/cb7dfe949c1c73e61470de1db33d3156.png#pic_center" alt="yolov1v2v3系列的区别"></p>
+<h1 id="yolov3-存在的问题-与-改进"><a href="#yolov3-存在的问题-与-改进" class="headerlink" title="yolov3 存在的问题 与 改进"></a>yolov3 存在的问题 与 改进</h1><blockquote>
+<p>如何评判目标检测的效果好坏，以及AP如何计算？ 请看另一文章<br><a target="_blank" rel="noopener" href="http://www.baidu.com">评判目标检测性能以及如何计算AP等</a></p>
+</blockquote>
+<p>yolov3 在 IoU 阈值为0.5的情况下，AP值较好（也就是框框并不需要和 Ground Truth 贴合的很准，条件比较宽松）。<br>但 IoU 阈值在0.5-0.95，以0.05作为步长的1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       0个阶段，得到的 AP平均值 就不佳， 也就是说明 yolov3在<strong>精准定位对象的性能上仍然是比较差的</strong>，但是换来的FPS是比较不错的。</p>
+<p>在检测 小目标或密集目标 能力上有所改进。</p>
+<ol>
+<li>grid cell 个数增加（v2 和 v3 都可以兼容任意图片大小的输入） 能检测对象的预测框多了。v2和v3 你输入的图像越大，那能用于检测对象的 预测框也就越多</li>
+<li>Anchor   预先设置了一些比较小的anchor。 v1中直接生成小目标的预测框是比较难的，但在小anchor的基础上计算预测框容易的多</li>
+<li>多尺度预测（FPN） 例如 52×52这个大尺度的，感受野就对应于小目标。FPN 既提取了深层网络中特化语义信息，并结合了浅层细粒度像素结构信息（边缘轮廓转角等）。对于小目标而言，边缘和轮廓等细粒度信息是很重要的。</li>
+<li>损失函数 含有 惩罚小框项</li>
+<li>网络结构（骨干网络 跨层链接 残差链接）</li>
+</ol>
+<h1 id="yolov3-相较于-v2-的改进-（即细节）"><a href="#yolov3-相较于-v2-的改进-（即细节）" class="headerlink" title="yolov3 相较于 v2 的改进 （即细节）"></a>yolov3 相较于 v2 的改进 （即细节）</h1><p>yolov2 存在的问题是,对小物体的检测精度还是不高。<br>毕竟，一张图片经过卷积层（特征提取）到最后的特征图，包含小物体的信息是会有损失的。</p>
+<h2 id="多尺度输出"><a href="#多尺度输出" class="headerlink" title="多尺度输出"></a>多尺度输出</h2><p>在 yolov3 中，共设置9个宽高不同的anchor（同样是通过 K-means 聚类获取得到），每个 grid cell 的 anchor 的数量为 9/3=3 个，因为 yolov3 有3个feature_map，不同feature_map的size和感受野是不一样的，<strong>较小size的feature_map具有较大的感受野</strong>，所以负责检测较大的物体，同理，<strong>较大size的feature_map有较小的感受野</strong>，负责检测较小的物体。如下图举个例子：</p>
+<blockquote>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/c87f61996eac9a9575d77e7adb179aef.png#pic_center" alt="yolov3 的整个网络模型"><br>上面的就是 yolov3 的整个网络模型，输出的一共有3种尺度（255 = 3×(5+80) 因为用的COCO数据集）。对于第一个 13×13×255 的输出来说，416（输入尺寸）÷ 13(输出尺寸) = 32（也就是 下采样 32），<strong>换句话说就是 对于13×13的特征图，单元网格1×1×255的特征向量 对应 输入原图 32×32×3 的信息</strong> （感受野最大，所以负责检测较大的物体）<br><img src="https://img-blog.csdnimg.cn/img_convert/cb17483efe5e14f32454f709268f27bf.png#pic_center" alt="在这里插入图片描述"><br>用如上图的例子可以看出，<strong>小特征图有大的anchor box，适合检测大物体</strong>（你可以这么理解，对于大物体我们其实只要很粗糙的像素内容就可以认出来，比如我们把一张小马图片用切片机去掉几行几列，我们还是认得出来这是匹马；而对于小物体，我们确实需要更大的特征图，因为其更能保留细度的特征，你也可以这么理解就是我裁剪的太过分了，小物体主体都快被我裁完了怎么可能认得出来）</p>
+</blockquote>
+<h2 id="输入图片-等比例变化"><a href="#输入图片-等比例变化" class="headerlink" title="输入图片 等比例变化"></a>输入图片 等比例变化</h2><p>v2的时候采取了多尺度训练的方式，并且使用了一个GAP层来帮助解决输入图片尺寸不一样的情况。<br>v3对输入图片本身做了一定的处理。<br>一般对图形的处理有两种方式：</p>
+<ul>
+<li>第一种就是把图片不管比例直接变成这边的 416×416 分辨率；</li>
+<li>第二种就是先设定一个 416×416 的黑框，然后将图片等比例变化后放入黑框中，在训练和预测的时候黑色的部分会被当做成背景，不会对结果有什么影响。</li>
+</ul>
+<p>在实际操作中这两种方法都是可行的。</p>
+<h2 id="yolov3的-预测框计算机制-未变"><a href="#yolov3的-预测框计算机制-未变" class="headerlink" title="yolov3的 预测框计算机制 未变"></a>yolov3的 预测框计算机制 未变</h2><p>yolov3的预测框，预测出来的方法与yolov2是<strong>一致的</strong>。</p>
+<p><font color="red">训练过程中，都是看实际框中心点落在哪个grid cell，拿出这个grid cell 的所有anchor box 看实际框与哪个anchor box 的IoU最大<font color="green">（注意：是两个框中心点对其后的IoU）</font>，就选择这个anchor box 作为模板。&lt;/font&gt; <font color="blue">然后根据这个anchor box 进行校准</font>。 <font color="green">注意：$t<em>{x}$ 这些才是我们网络的输出，也就是这边的 $b</em>{x}$我们是命令一个新的函数对其操作得到的。所以ground truth 也要将 长宽中心点这些 $b<em>{i}$调整成 $t</em>{i}$ 来进行计算损失</font><br>如下图所示： 其中 $c<em>{x}$ 和 $c</em>{y}$ 表示单元格长度（分别为 +2 和 +1）<br>注意：在实际运算中，为了运算方便，$b<em>{x}$ 与 $b</em>{x}^{‘}$ 都指的是<font color="red">预测框中心点到图像边界的距离</font>，而不是相对于到单元格的距离。<br>另外 因为 $c<em>{x}$和$c</em>{y}$都是以1为单位的（也就是下采样过），所以我们计算得到的 $b<em>{x}$ 与 $b</em>{y}$ 其实都是<strong>相对量</strong>，（$b<em>{h}$与$b</em>{w}$是正确尺寸的值）所以我们在最后将框还原到原图尺寸的时候，中心点需乘以grid cell 的下采样倍数，得到原始图像输入图像上预测框 中心点 的坐标。<br><img src="https://img-blog.csdnimg.cn/img_convert/9e6dfd393abd6cb189a7cbf246524bd2.png#pic_center" alt="预测框位置计算方法"></p>
+<h2 id="yolov3-Anchor-box对应机制"><a href="#yolov3-Anchor-box对应机制" class="headerlink" title="yolov3 Anchor box对应机制"></a>yolov3 Anchor box对应机制</h2><p>注： yolov3 中使用的 anchor box 的数量是3个<br>如下图所示，每个 grid cell 都可以有3个 anchor box，那样就可以达到如下满满当当的效果，也就是可以检测出更多的物体对象。<br><img src="https://img-blog.csdnimg.cn/img_convert/cdd82c32539d5b3a137afa3f7abad3d2.png#pic_center" alt="每个grid cell 可以有 3个 anchor box"></p>
+<h2 id="yolov3-在置信度上与yolov1和v2的区别"><a href="#yolov3-在置信度上与yolov1和v2的区别" class="headerlink" title="yolov3 在置信度上与yolov1和v2的区别"></a>yolov3 在置信度上与yolov1和v2的区别</h2><blockquote>
+<p><strong>在 yolov1和v2中使用IoU作为置信度标签</strong>有何不好的地方？<br> <font color="blue">v1和v2中  $P(object)* IoU$ 来计算置信度标签 </font>，对于ground truth $P{object}=1$ 所以 就是使用 IoU最为置信度标签。这样的坏处在：<br>1.很多预测框与 ground truth 的IoU最高只有0.7（最好的只有70分）也就是置信度最高只有0.7. 换句话就是我最高就0.7了，我网络怎么学也很难超过0.7.<br>2.COCO中的小目标，IoU对像素偏移很敏感，无法有效学习</p>
+</blockquote>
+<p>yolov3 中使用逻辑回归来计算每个预测框的置信度，每个预测框标签的置信度均为1 （告诉网络我这个就是正样本，你得给我好好学。）<strong>正样本(也就是和GT IoU最大的那个anchor 校准得到的预测框)的置信度规定为1，负样本的置信度规定为0</strong>。下面可以参考一下什么是正负样本：<br><img src="https://img-blog.csdnimg.cn/img_convert/c7b5415b0d72118add3de4035995175a.png#pic_center" alt="正样本、不参与 与 负样本"><br>正样本：与ground truth IoU最大的anchor 校准的预测框<br>不参与（不负责预测）：anchor与ground truth IoU大于阈值（论文是0.5）但是 不是最大的  就什么也不是 。 其实本来就没考虑它，你也不是最大的。<br>负样本：anchor 与ground truth IoU 小于阈值（论文是0.5） 的  或者完全就不重叠的anchor。 其实本来也就没考虑它。</p>
+<h2 id="具体-如何预测-预测框"><a href="#具体-如何预测-预测框" class="headerlink" title="具体 如何预测 预测框"></a>具体 如何预测 预测框</h2><p>yolov3的预测框，预测出来的方法与yolov2是<strong>一致的</strong>。 <strong>每个GT仅仅分配一个anchor（也就是一个预测框）负责预测</strong>，这个是相对于</p>
+<p><font color="red">训练过程中，都是看实际框中心点落在哪个grid cell，拿出这个grid cell 的所有anchor box 看实际框与哪个anchor box 的IoU最大<font color="green">（注意：是两个框中心点对其后的IoU）</font>，就选择这个anchor box 作为模板。&lt;/font&gt; 然后对其进行训练修正（上面讲的计算偏移机制），<font color="green">注意：$t<em>{x}$ 这些才是我们网络的输出，也就是这边的 $b</em>{x}$我们是命令一个新的函数对其操作得到的。所以ground truth 也要将 长宽中心点这些 $b<em>{i}$调整成 $t</em>{i}$ 来进行计算损失</font>，调整模型参数后 得到最佳的预测框。</p>
+<h2 id="yolov3的网络结构-变化"><a href="#yolov3的网络结构-变化" class="headerlink" title="yolov3的网络结构 变化"></a>yolov3的网络结构 变化</h2><p>最后 应该是 255维度（用的COCO） 注意<br><img src="https://img-blog.csdnimg.cn/img_convert/9e22e1993729ae01cbe5f304f4aff4b0.png#pic_center" alt="yolov3网络结构"></p>
+<h3 id="Backbone-Darknet-53"><a href="#Backbone-Darknet-53" class="headerlink" title="Backbone  Darknet-53"></a>Backbone  Darknet-53</h3><blockquote>
+<p><strong>53的由来</strong><br>步长为2的卷积层有5个  图中<font color="turquoise">蓝色的部分 </font><br>步长为1的卷积层有47个  （47=1+1×2+2×2+8×2+8×2+4×2 ）图中<font color="green">绿色的部分</font><br>最后 的全连接网络层 为1层 含有参数<br>所以一共53层</p>
+<p><font color="red">红色的部分</font> 是残差层 和全连接层之前的下采样层一样都是没有参数的  所以不参与网络层的统计</p>
+</blockquote>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/08afccd5b374fc0bd1119467928a74ed.png#pic_center" alt="Darknet-53分类网络模型"><br>作者构建了darknet-53，在<strong>ImageNet数据集上，进行分类测试</strong>。发现精度和Resnet-101和Resnet-152 精度都差不多，但计算速度比这两者快很多，而且网络层数少很多。</p>
+<p>其中里面的每一个 Convolution 都是由 卷积层+BN层+Leakyrelu激活函数层。 这边统一叫做 CBL<br><img src="https://img-blog.csdnimg.cn/img_convert/652afb5491146ca97dbed44900e85413.png#pic_center" alt="CBL层"></p>
+<h4 id="换句话说的-Darknet-53分类模型结构"><a href="#换句话说的-Darknet-53分类模型结构" class="headerlink" title="换句话说的 Darknet-53分类模型结构"></a>换句话说的 Darknet-53分类模型结构</h4><p><img src="https://img-blog.csdnimg.cn/img_convert/33b1068d6caaf8a31fe6bb30db83901a.png#pic_center" alt="Darknet-53 分类模型结构"><br>包括之前说的各种结构部分 Res4也就是上上图中框出来的那部分。</p>
+<h3 id="Neck-层"><a href="#Neck-层" class="headerlink" title="Neck 层"></a>Neck 层</h3><p>注意 这里的 21 其实是 255 （这个作者 定义的是两种类别 实际是 80种即COCO （1+4+80）×3）<br><img src="https://img-blog.csdnimg.cn/img_convert/9e22e1993729ae01cbe5f304f4aff4b0.png#pic_center" alt="看各层的维度"><br>在主干网络提取出图像特征之后，为了能更好的融合提取的特征，还是用了Neck结构。不过因为最后的输出层有3种特征图（13×13，26×26以及52×52），而主干网络输出的矩阵尺寸为 13×13。所以要经过Neck结构中的 <font color="blue">FPN结构</font> 和前面的 26×26，52×52 特征图进行多尺度融合。</p>
+<p>这里我们对上图种框出的 <font color="violet">上采样结构</font> 做分析：</p>
+<ul>
+<li>上面那条支路 为 骨干网络 最后的输出维度 13×13  通过CBL 再 <strong>上采样</strong>一下 变为了 26×26</li>
+<li>下面那条支路 为 骨干网络种 中途输出的维度 26×26</li>
+<li>所以整合Concat操作  得到还是 26×26的维度  <font color="red">注意他是通道相叠</font><br><img src="https://img-blog.csdnimg.cn/img_convert/245e8edc104a69ed5d3588936d7de912.png#pic_center" alt="在这里插入图片描述"></li>
+</ul>
+<p>同理后面几次操作：<br><img src="https://img-blog.csdnimg.cn/img_convert/334d06804ca1bae824c16ef34334ae28.png#pic_center" alt="后续操作"></p>
+<h2 id="最后输出的-类别的条件概率-理解"><a href="#最后输出的-类别的条件概率-理解" class="headerlink" title="最后输出的 类别的条件概率 理解"></a>最后输出的 类别的条件概率 理解</h2><p>yolov3与v1和v2在 输出的类别条件概率的想法是一致的，都采用的是 各类别独立的逻辑回归（即多分类标签），每个类别的最大概率都为1，不互相干扰都互相独立。 也就是不适用softmax，因为softmax的话，输出的结果就是每个类别条件概率之和为1。</p>
+<p>对于yolov3 每个预测框的每个类别逐一用逻辑回归输出概率，可有多个类别输出高概率。</p>
+<p>拿分类误差，使用的损失函数，那肯定也是 二分类交叉熵损失函数（因为我每个类是分开单独考虑的 逻辑回归）</p>
+<h1 id="yolov3的训练过程"><a href="#yolov3的训练过程" class="headerlink" title="yolov3的训练过程"></a>yolov3的训练过程</h1><p><img src="https://img-blog.csdnimg.cn/img_convert/0432e7404ad9328cd5878ca4cf4b9999.png#pic_center" alt="yolov3 训练过程"></p>
+<p>输入416×416大小的图像，在经过主干网络darknet-53的卷积网络以及Neck中的FPN结构。可以得到输出层(P0、P1、P2)三种特征图，P0的尺寸最大为52×52，P1是中间尺寸为26×26，P2尺寸最小为13×13。</p>
+<p>特征图上每个单元格的特征向量都可以对应416×416图像上的一块感受野区域，而每个区域都会生成三个初始anchor box，因此网络输出的 $t<em>{x} 、t</em>{y}、t<em>{h}、t</em>{w}$ 可以利用anchor，计算得到预测框。再加上前景背景的概率obj以及类别概率cls，就可以汇总得到，目标检测网络输出的预测信息。</p>
+<p>但从监督学习的角度，我们会对训练的样本进行标注，因此我们可以知道，图片上每一个物体，它实际框的位置和类别。所以可以根据，前面讲的anchor的对应机制，分别对应到各自anchor上，并打上类别的标签。这样，就可以将预测框和 ground truth 的信息，对应关联起来。</p>
+<p>从P0、P1、P2，三个特征图的角度，对前景和背景的概率以及Location位置信息，和class类别信息。从这三个方面，来计算预测框和ground truth 之间的偏差即损失函数，而总体的损失函数，等于三个特征图的损失函数之和。<br><img src="https://img-blog.csdnimg.cn/img_convert/086ebe71480140b2b7d74addd16dfec2.png#pic_center" alt="yolov3 损失函数"></p>
+<p>当有了损失函数，就可以利用网络的梯度更新方式，来进行反向传播了，从而不断迭代，更新网络中的参数。使得损失函数的值，越来越小，从而越来越准确。</p>
+<h2 id="详细-损失函数-介绍"><a href="#详细-损失函数-介绍" class="headerlink" title="详细 损失函数 介绍"></a>详细 损失函数 介绍</h2><p><img src="https://img-blog.csdnimg.cn/img_convert/086ebe71480140b2b7d74addd16dfec2.png#pic_center" alt="yolov3 损失函数"><br>yolov3的损失函数主要分为3部分： 分类误差，定位误差，置信度误差</p>
+<ul>
+<li>正样本对 分类误差、定位误差、置信度误差 学习产生贡献</li>
+<li>对不负责预测的框（其实本来就不考虑） 置信度为0 所以 它啥也不算</li>
+<li><font color="blue">负样本只对置信度误差 学习产生贡献 </font> <font color="violet">为什么呢？ 负样本的置信度不是 规定为0了么？ 为什么会对置信度误差产生贡献呢？？？</font>  <h1 id="yolov3的测试过程"><a href="#yolov3的测试过程" class="headerlink" title="yolov3的测试过程"></a>yolov3的测试过程</h1></li>
+</ul>
+<p>yolov3的测试过程主要分为两步。<br><img src="https://img-blog.csdnimg.cn/img_convert/89a8c6292269e80936b9a1415dd918de.png#pic_center" alt="yolov3 的测试过程"></p>
+<ul>
+<li>第一步，先通过网络的$t<em>{x}、t</em>{y}、t_{h}、t{w}$等输出向量，计算处预测框的位置和所属的类别信息。注意预测框的得分应该为  <strong>前景和背景的概率 × class 类别的得分</strong>。<ul>
+<li>并设置阈值分数 例如为0.3。将预测框分数，大于0.3的都保留下来。而分数比较低的都过滤掉，这样的好处是保留的框既是前景即目标的框，同时也是类别分数，比较大的目标。</li>
+<li>第一步如上，得到了三个特征图预测框的信息<ul>
+<li>但现在的框，还是太多了。因此我们需要在一定的标准下去评判这些目标框信息。所以第二步 我们需要将三个特征图上的结果，全部映射回416×416输入图像上。这时，在416×416的图片上，就有多种类别很多的框了。</li>
+<li>这时需要针对每个类别，做一个NMS，即非极大值抑制处理，消除重叠度很高的框。这样到了最后，我们就可以得到最终的预测框的信息，以及得分，从而完成目标的检测和定位。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">凯凯超人</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2021/10/23/yolov3%20%E8%AF%A6%E8%A7%A3/">http://example.com/2021/10/23/yolov3%20%E8%AF%A6%E8%A7%A3/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">一只柴犬</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">深度学习</a><a class="post-meta__tags" href="/tags/yolo/">yolo</a></div><div class="post_share"><div class="social-share" data-image="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/sayit.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2021/10/25/cv2%20%E5%90%84%E7%B1%BB%E5%87%BD%E6%95%B0%20%E8%AF%A6%E8%A7%A3/"><img class="prev-cover" src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/1025_2.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">cv2 各类函数 详解</div></div></a></div><div class="next-post pull-right"><a href="/2021/10/08/%E5%90%8C%E6%B5%8E%E5%AD%90%E8%B1%AA%E5%85%84%20%E4%B9%8B%20yolov2%20%E8%AF%A6%E8%A7%A3/"><img class="next-cover" src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/106_16.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">同济子豪兄 之 yolov2 详解</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2021/09/26/同济子豪兄 之 yolov1 详解/" title="同济子豪兄 之 yolov1 详解"><img class="cover" src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/223234.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-09-26</div><div class="title">同济子豪兄 之 yolov1 详解</div></div></a></div><div><a href="/2021/10/08/同济子豪兄 之 yolov2 详解/" title="同济子豪兄 之 yolov2 详解"><img class="cover" src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/106_16.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-10-08</div><div class="title">同济子豪兄 之 yolov2 详解</div></div></a></div><div><a href="/2021/10/25/cv2 各类函数 详解/" title="cv2 各类函数 详解"><img class="cover" src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/1025_2.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-10-25</div><div class="title">cv2 各类函数 详解</div></div></a></div><div><a href="/2021/08/10/为什么要Deep？深而不是宽/" title="为什么要Deep？深而不是宽"><img class="cover" src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/4.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-08-10</div><div class="title">为什么要Deep？深而不是宽</div></div></a></div><div><a href="/2021/10/26/如何评价目标检测的性能 MAP如何计算等/" title="如何评价目标检测的性能 MAP如何计算等"><img class="cover" src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/image.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-10-26</div><div class="title">如何评价目标检测的性能 MAP如何计算等</div></div></a></div><div><a href="/2021/09/20/梯度消失和梯度爆炸的理解/" title="梯度消失和梯度爆炸的理解"><img class="cover" src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/20151107191711_H5LwP.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-09-20</div><div class="title">梯度消失和梯度爆炸的理解</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/admin.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">凯凯超人</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">44</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">43</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">13</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/xxxxx" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:xxxxxx@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://gitee.com/×××" target="_blank" title="Gitee"><i class="iconfont gitee"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#yolov1v2v3%E7%B3%BB%E5%88%97%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">1.</span> <span class="toc-text">yolov1v2v3系列的区别</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#yolov3-%E5%AD%98%E5%9C%A8%E7%9A%84%E9%97%AE%E9%A2%98-%E4%B8%8E-%E6%94%B9%E8%BF%9B"><span class="toc-number">2.</span> <span class="toc-text">yolov3 存在的问题 与 改进</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#yolov3-%E7%9B%B8%E8%BE%83%E4%BA%8E-v2-%E7%9A%84%E6%94%B9%E8%BF%9B-%EF%BC%88%E5%8D%B3%E7%BB%86%E8%8A%82%EF%BC%89"><span class="toc-number">3.</span> <span class="toc-text">yolov3 相较于 v2 的改进 （即细节）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%9A%E5%B0%BA%E5%BA%A6%E8%BE%93%E5%87%BA"><span class="toc-number">3.1.</span> <span class="toc-text">多尺度输出</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BE%93%E5%85%A5%E5%9B%BE%E7%89%87-%E7%AD%89%E6%AF%94%E4%BE%8B%E5%8F%98%E5%8C%96"><span class="toc-number">3.2.</span> <span class="toc-text">输入图片 等比例变化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#yolov3%E7%9A%84-%E9%A2%84%E6%B5%8B%E6%A1%86%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%88%B6-%E6%9C%AA%E5%8F%98"><span class="toc-number">3.3.</span> <span class="toc-text">yolov3的 预测框计算机制 未变</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#yolov3-Anchor-box%E5%AF%B9%E5%BA%94%E6%9C%BA%E5%88%B6"><span class="toc-number">3.4.</span> <span class="toc-text">yolov3 Anchor box对应机制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#yolov3-%E5%9C%A8%E7%BD%AE%E4%BF%A1%E5%BA%A6%E4%B8%8A%E4%B8%8Eyolov1%E5%92%8Cv2%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">3.5.</span> <span class="toc-text">yolov3 在置信度上与yolov1和v2的区别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B7%E4%BD%93-%E5%A6%82%E4%BD%95%E9%A2%84%E6%B5%8B-%E9%A2%84%E6%B5%8B%E6%A1%86"><span class="toc-number">3.6.</span> <span class="toc-text">具体 如何预测 预测框</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#yolov3%E7%9A%84%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84-%E5%8F%98%E5%8C%96"><span class="toc-number">3.7.</span> <span class="toc-text">yolov3的网络结构 变化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Backbone-Darknet-53"><span class="toc-number">3.7.1.</span> <span class="toc-text">Backbone  Darknet-53</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8D%A2%E5%8F%A5%E8%AF%9D%E8%AF%B4%E7%9A%84-Darknet-53%E5%88%86%E7%B1%BB%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84"><span class="toc-number">3.7.1.1.</span> <span class="toc-text">换句话说的 Darknet-53分类模型结构</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Neck-%E5%B1%82"><span class="toc-number">3.7.2.</span> <span class="toc-text">Neck 层</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%80%E5%90%8E%E8%BE%93%E5%87%BA%E7%9A%84-%E7%B1%BB%E5%88%AB%E7%9A%84%E6%9D%A1%E4%BB%B6%E6%A6%82%E7%8E%87-%E7%90%86%E8%A7%A3"><span class="toc-number">3.8.</span> <span class="toc-text">最后输出的 类别的条件概率 理解</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#yolov3%E7%9A%84%E8%AE%AD%E7%BB%83%E8%BF%87%E7%A8%8B"><span class="toc-number">4.</span> <span class="toc-text">yolov3的训练过程</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%A6%E7%BB%86-%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0-%E4%BB%8B%E7%BB%8D"><span class="toc-number">4.1.</span> <span class="toc-text">详细 损失函数 介绍</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#yolov3%E7%9A%84%E6%B5%8B%E8%AF%95%E8%BF%87%E7%A8%8B"><span class="toc-number">5.</span> <span class="toc-text">yolov3的测试过程</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/10/26/%E5%A6%82%E4%BD%95%E8%AF%84%E4%BB%B7%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B%E7%9A%84%E6%80%A7%E8%83%BD%20MAP%E5%A6%82%E4%BD%95%E8%AE%A1%E7%AE%97%E7%AD%89/" title="如何评价目标检测的性能 MAP如何计算等"><img src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/image.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="如何评价目标检测的性能 MAP如何计算等"/></a><div class="content"><a class="title" href="/2021/10/26/%E5%A6%82%E4%BD%95%E8%AF%84%E4%BB%B7%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B%E7%9A%84%E6%80%A7%E8%83%BD%20MAP%E5%A6%82%E4%BD%95%E8%AE%A1%E7%AE%97%E7%AD%89/" title="如何评价目标检测的性能 MAP如何计算等">如何评价目标检测的性能 MAP如何计算等</a><time datetime="2021-10-26T14:35:01.000Z" title="发表于 2021-10-26 22:35:01">2021-10-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/10/25/cv2%20%E5%90%84%E7%B1%BB%E5%87%BD%E6%95%B0%20%E8%AF%A6%E8%A7%A3/" title="cv2 各类函数 详解"><img src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/1025_2.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="cv2 各类函数 详解"/></a><div class="content"><a class="title" href="/2021/10/25/cv2%20%E5%90%84%E7%B1%BB%E5%87%BD%E6%95%B0%20%E8%AF%A6%E8%A7%A3/" title="cv2 各类函数 详解">cv2 各类函数 详解</a><time datetime="2021-10-25T14:09:01.000Z" title="发表于 2021-10-25 22:09:01">2021-10-25</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/10/23/yolov3%20%E8%AF%A6%E8%A7%A3/" title="yolov3 详解"><img src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/sayit.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="yolov3 详解"/></a><div class="content"><a class="title" href="/2021/10/23/yolov3%20%E8%AF%A6%E8%A7%A3/" title="yolov3 详解">yolov3 详解</a><time datetime="2021-10-23T14:52:01.000Z" title="发表于 2021-10-23 22:52:01">2021-10-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/10/08/%E5%90%8C%E6%B5%8E%E5%AD%90%E8%B1%AA%E5%85%84%20%E4%B9%8B%20yolov2%20%E8%AF%A6%E8%A7%A3/" title="同济子豪兄 之 yolov2 详解"><img src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/106_16.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="同济子豪兄 之 yolov2 详解"/></a><div class="content"><a class="title" href="/2021/10/08/%E5%90%8C%E6%B5%8E%E5%AD%90%E8%B1%AA%E5%85%84%20%E4%B9%8B%20yolov2%20%E8%AF%A6%E8%A7%A3/" title="同济子豪兄 之 yolov2 详解">同济子豪兄 之 yolov2 详解</a><time datetime="2021-10-08T07:09:01.000Z" title="发表于 2021-10-08 15:09:01">2021-10-08</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/10/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80%20-%20Batch%20Normalization/" title="深度学习基础 - Batch Normalization"><img src="http://kyle-pic.oss-cn-hangzhou.aliyuncs.com/img/105_5.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="深度学习基础 - Batch Normalization"/></a><div class="content"><a class="title" href="/2021/10/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80%20-%20Batch%20Normalization/" title="深度学习基础 - Batch Normalization">深度学习基础 - Batch Normalization</a><time datetime="2021-10-05T07:29:01.000Z" title="发表于 2021-10-05 15:29:01">2021-10-05</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 凯凯超人</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.2
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        insertScript: [200, () => {
+          document.querySelectorAll('mjx-container:not\([display]\)').forEach(node => {
+            const target = node.parentNode
+            if (target.nodeName.toLowerCase() === 'li') {
+              target.parentNode.classList.add('has-jax')
+            } else {
+              target.classList.add('has-jax')
+            }
+          });
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/StaticFile_HEXO@latest/butterfly/js/pool.min.js"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/js/mouse_snow.min.js"><script src="https://cdn.jsdelivr.net/gh/sviptzk/StaticFile_HEXO@latest/butterfly/js/pool.min.js"></script><script src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/js/mouse_snow.min.js"></script><script src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/js/hideMobileSidebar.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
