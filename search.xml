@@ -92,43 +92,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Keras 实现 Kaggle 数据集 Titanic 预测</title>
-    <url>/2021/09/17/Keras%20%E5%AE%9E%E7%8E%B0%20Kaggle%20%E6%95%B0%E6%8D%AE%E9%9B%86%20Titanic%20%E9%A2%84%E6%B5%8B/</url>
-    <content><![CDATA[<p>@<a href="Keras 实现 Kaggle 数据集 Titanic 预测">TOC</a></p>
-<h1 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h1><blockquote>
-<p>使用乘客数据(如姓名、年龄、性别、社会经济阶层等)，建立一个模型预测泰坦尼克号沉船上哪些乘客能够幸存。<br>数据被分成训练集和测试集两组，它们分别在train.csv和test.csv文档中。我们的模型将基于训练集的乘客的性别和阶级等特征建立。在测试集中每个乘客是否幸存的信息是缺省的，其将由我们模型预测出来作为答案提交。</p>
-</blockquote>
-<h1 id="加载本地下载的-Titanic-数据集"><a href="#加载本地下载的-Titanic-数据集" class="headerlink" title="加载本地下载的 Titanic 数据集"></a>加载本地下载的 Titanic 数据集</h1><p>这里使用的 是 pandas 的 read_csv() 方法。 读取的格式为 DataFrame。<br><img src="https://img-blog.csdnimg.cn/0c79c9053cc34cd39d609475f2ac37f3.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># xlsx训练数据导入</span></span><br><span class="line">train_filepath = <span class="string">r&quot;../dataset/Titanic/train.csv&quot;</span></span><br><span class="line">train_data = pd.read_csv(train_filepath)</span><br><span class="line">test_filepath = <span class="string">r&quot;../dataset/Titanic/test.csv&quot;</span></span><br><span class="line">test_data = pd.read_csv(test_filepath)</span><br></pre></td></tr></table></figure><br>同样可以用 shape函数查看 </p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#(891,12)</span></span><br><span class="line"><span class="built_in">print</span>(train_data.shape)</span><br></pre></td></tr></table></figure>
-<h1 id="数据分析与预处理"><a href="#数据分析与预处理" class="headerlink" title="数据分析与预处理"></a>数据分析与预处理</h1><p>在预处理数据前，首先整体分析各项数据对预测模型的重要性</p>
-<p>（1）PassengerID：乘客的ID<br>（2）Survived：乘客是否幸存，取值为0或1，是我们预测/分类的目标。<br>（3）Pclass：客舱等级，可能蕴含着乘客的阶层、乘客客舱的位置等信息，比较重要。<br>（4）Name： 姓名，是无关信息。<br>（5）Sex：性别。灾难来临时常让妇女儿童先走，而同等条件女性体力普遍弱于男性，这些因素都会影响到一名乘客幸存的可能性，因此比较重要。<br>（6）Age：年龄，较为重要，理由同上。<br>（7）Parch：直系亲友数目，比较重要。<br>（8）SibSp：旁系亲友数目，比较重要。<br>（9）Ticket：票编号，是无关信息。<br>（10）Fare：票价，可能会反映乘客的社会阶层等。<br>（11）Cabin：客舱编号，可能会反映客舱位置等，但由于缺省太多，数据量很小不具有代表性，可以视为噪音剔除。<br>（12）Embarked：上船的港口编号。</p>
-<p>在剔除了一些数据后，是否会因信息损失而降低模型的准确度？例如乘客的姓名可能暗含船上乘客之间家庭的关系。实际上我们的模型本来就是建立在不完全观测上（比如我们不知道船上的一对男女乘客有没有发生像Jack和Rose那样的故事），不确定性是必然存在的。把握主要矛盾，舍弃噪音信息是建立模型的一个好思路。</p>
-<h2 id="训练数据预处理方法"><a href="#训练数据预处理方法" class="headerlink" title="训练数据预处理方法"></a>训练数据预处理方法</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 数据预处理</span></span><br><span class="line"><span class="comment"># 训练数据预处理</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">PreprocessTrainData</span>(<span class="params">train_data</span>):</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 预处理1：筛除无关特征</span></span><br><span class="line">    <span class="comment"># 无关的有 乘客的ID 姓名 票编号客舱编号（数据量太少，当噪声剔除）</span></span><br><span class="line">    <span class="comment"># 是否幸存 客舱等级 性别 年龄 旁系亲友数目  直系亲友数目 票价  上船港口编号</span></span><br><span class="line">    cols=[<span class="string">&#x27;Survived&#x27;</span>, <span class="string">&#x27;Pclass&#x27;</span>, <span class="string">&#x27;Sex&#x27;</span>, <span class="string">&#x27;Age&#x27;</span>, <span class="string">&#x27;SibSp&#x27;</span>, <span class="string">&#x27;Parch&#x27;</span>, <span class="string">&#x27;Fare&#x27;</span>, <span class="string">&#x27;Embarked&#x27;</span>]</span><br><span class="line">    <span class="comment"># colums表示列名  index 表示行名</span></span><br><span class="line">    train_data = pd.DataFrame(train_data, columns=cols)</span><br><span class="line">    <span class="comment">#(891,8)</span></span><br><span class="line">    <span class="built_in">print</span>(train_data.shape)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 预处理2：填充缺失特征并标准化特征</span></span><br><span class="line">    age_mean = train_data[<span class="string">&#x27;Age&#x27;</span>].mean()</span><br><span class="line">    <span class="comment"># fillna 为 无值的数据填充</span></span><br><span class="line">    train_data[<span class="string">&#x27;Age&#x27;</span>] = train_data[<span class="string">&#x27;Age&#x27;</span>].fillna(age_mean)</span><br><span class="line"></span><br><span class="line">    fare_mean = train_data[<span class="string">&#x27;Fare&#x27;</span>].mean()</span><br><span class="line">    train_data[<span class="string">&#x27;Fare&#x27;</span>] = train_data[<span class="string">&#x27;Fare&#x27;</span>].fillna(fare_mean)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 预处理3：性别编码0-1  将&#123;&#x27;female&#x27;: 0, &#x27;male&#x27;: 1&#125;</span></span><br><span class="line">    train_data[<span class="string">&#x27;Sex&#x27;</span>]= train_data[<span class="string">&#x27;Sex&#x27;</span>].<span class="built_in">map</span>(&#123;<span class="string">&#x27;female&#x27;</span>: <span class="number">0</span>, <span class="string">&#x27;male&#x27;</span>: <span class="number">1</span>&#125;).astype(<span class="built_in">int</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 预处理4：登港地点转换为one-hot编码</span></span><br><span class="line">    <span class="comment"># 这是将 Embarked这一列 分成 one-hot形式 共有三个港口 所以分成了3列</span></span><br><span class="line">    x_OneHot_df = pd.get_dummies(data=train_data,columns=[<span class="string">&quot;Embarked&quot;</span>])</span><br><span class="line">    ndarray = x_OneHot_df.values</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;ndarray&#x27;</span>,ndarray)</span><br><span class="line">    <span class="comment">#(891,10)</span></span><br><span class="line">    <span class="built_in">print</span>(ndarray.shape)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 预处理5：全体特征标准化，标签向量化</span></span><br><span class="line">    <span class="comment"># &#x27;Survived&#x27;</span></span><br><span class="line">    label = ndarray[:,:<span class="number">1</span>]</span><br><span class="line">    <span class="comment"># label的shape： (891,1)</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;label的shape：&quot;</span>,label.shape)</span><br><span class="line">    <span class="comment"># 除了&#x27;Survived&#x27; 其他全部特征</span></span><br><span class="line">    features = ndarray[:,<span class="number">1</span>:]</span><br><span class="line">    <span class="comment"># features的shape： (891, 9)</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;features的shape：&quot;</span>, features.shape)</span><br><span class="line">    <span class="comment"># 求一个所有列的平均值</span></span><br><span class="line">    mean = features.mean(axis=<span class="number">0</span>)</span><br><span class="line">    features -= mean</span><br><span class="line">    <span class="comment"># 求一个所有列的方差</span></span><br><span class="line">    std = features.std(axis=<span class="number">0</span>)</span><br><span class="line">    features /= std</span><br><span class="line">    <span class="keyword">return</span> features,label</span><br></pre></td></tr></table></figure>
-<h2 id="测试数据预处理方法"><a href="#测试数据预处理方法" class="headerlink" title="测试数据预处理方法"></a>测试数据预处理方法</h2><p>本质上与训练数据相同，只是少了一列 标签</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 测试数据预处理</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">PreprocessTestData</span>(<span class="params">test_data</span>):</span></span><br><span class="line">    <span class="comment"># 预处理1：筛除无关特征</span></span><br><span class="line">    <span class="comment"># 客舱等级 性别 年龄 旁系亲友数目 直系亲友数目 票价  上船港口编号</span></span><br><span class="line">    cols=[ <span class="string">&#x27;Pclass&#x27;</span>, <span class="string">&#x27;Sex&#x27;</span>, <span class="string">&#x27;Age&#x27;</span>, <span class="string">&#x27;SibSp&#x27;</span>, <span class="string">&#x27;Parch&#x27;</span>, <span class="string">&#x27;Fare&#x27;</span>, <span class="string">&#x27;Embarked&#x27;</span>]</span><br><span class="line">    test_data = test_data[cols]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 预处理2：填充缺失特征并标准化特征</span></span><br><span class="line">    age_mean = test_data[<span class="string">&#x27;Age&#x27;</span>].mean()</span><br><span class="line">    test_data[<span class="string">&#x27;Age&#x27;</span>] = test_data[<span class="string">&#x27;Age&#x27;</span>].fillna(age_mean)</span><br><span class="line"></span><br><span class="line">    fare_mean = test_data[<span class="string">&#x27;Fare&#x27;</span>].mean()</span><br><span class="line">    test_data[<span class="string">&#x27;Fare&#x27;</span>] = test_data[<span class="string">&#x27;Fare&#x27;</span>].fillna(fare_mean)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 预处理3：性别编码0-1</span></span><br><span class="line">    test_data[<span class="string">&#x27;Sex&#x27;</span>]= test_data[<span class="string">&#x27;Sex&#x27;</span>].<span class="built_in">map</span>(&#123;<span class="string">&#x27;female&#x27;</span>: <span class="number">0</span>, <span class="string">&#x27;male&#x27;</span>: <span class="number">1</span>&#125;).astype(<span class="built_in">int</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 预处理4：登港地点转换为one-hot编码</span></span><br><span class="line">    x_OneHot_df = pd.get_dummies(data=test_data,columns=[<span class="string">&quot;Embarked&quot;</span>])</span><br><span class="line">    ndarray = x_OneHot_df.values</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 预处理5：全体特征标准化，标签向量化</span></span><br><span class="line">    features = ndarray</span><br><span class="line">    mean = features.mean(axis=<span class="number">0</span>)</span><br><span class="line">    features -= mean</span><br><span class="line">    std = features.std(axis=<span class="number">0</span>)</span><br><span class="line">    features /= std</span><br><span class="line">    <span class="keyword">return</span> features</span><br></pre></td></tr></table></figure>
-<h2 id="拿到处理后的数据"><a href="#拿到处理后的数据" class="headerlink" title="拿到处理后的数据"></a>拿到处理后的数据</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">x_train, y_train = PreprocessTrainData(train_data)</span><br><span class="line">x_test = PreprocessTestData(test_data)</span><br></pre></td></tr></table></figure>
-<h1 id="构建网络模型"><a href="#构建网络模型" class="headerlink" title="构建网络模型"></a>构建网络模型</h1><p>构建网络时需要注意控制网络的大小。模型中容量（模型可学习的参数）不足可能导致欠拟合；但模型也不是越大越好，因为模型过大可能导致过拟合，泛化能力下降。其他降低过拟合的方法包括添加dropout正则化、权重正则化等。此外还需要在评估模型（将在下文阐述）的过程中尝试不同的超参数（学习率等）以找到最佳配置。<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 第三步 构建网络</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">TitanicModel</span>():</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 构建网络-模型定义</span></span><br><span class="line">    model = models.Sequential()</span><br><span class="line">    model.add(layers.Dense(input_dim=<span class="number">9</span>,units=<span class="number">64</span>, kernel_regularizer=regularizers.l1_l2(l1=<span class="number">0.001</span>,l2=<span class="number">0.001</span>), activation=<span class="string">&#x27;relu&#x27;</span>))</span><br><span class="line">    model.add(layers.Dropout(<span class="number">0.5</span>))</span><br><span class="line">    model.add(layers.Dense(units=<span class="number">64</span>, kernel_regularizer=regularizers.l1_l2(l1=<span class="number">0.001</span>,l2=<span class="number">0.001</span>), activation=<span class="string">&#x27;relu&#x27;</span>))</span><br><span class="line">    model.add(layers.Dropout(<span class="number">0.5</span>))</span><br><span class="line">    model.add(layers.Dense(units=<span class="number">1</span>, activation=<span class="string">&#x27;sigmoid&#x27;</span>))</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 构建网络-编译模型</span></span><br><span class="line">    model.<span class="built_in">compile</span>(optimizer=<span class="string">&#x27;rmsprop&#x27;</span>, loss=<span class="string">&#x27;binary_crossentropy&#x27;</span>, metrics=[<span class="string">&#x27;accuracy&#x27;</span>])</span><br><span class="line">    <span class="keyword">return</span> model</span><br><span class="line"></span><br></pre></td></tr></table></figure></p>
-<h1 id="训练模型（带验证集）"><a href="#训练模型（带验证集）" class="headerlink" title="训练模型（带验证集）"></a>训练模型（带验证集）</h1><h2 id="划分测试集和验证集"><a href="#划分测试集和验证集" class="headerlink" title="划分测试集和验证集"></a>划分测试集和验证集</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 留出验证集</span></span><br><span class="line">num_val = <span class="number">300</span></span><br><span class="line"><span class="comment"># 将训练集样本顺序 随机打乱</span></span><br><span class="line">np.random.shuffle([x_train,y_train])</span><br><span class="line"><span class="comment"># 取出 前300个 训练样本作为 验证集</span></span><br><span class="line">x_val = x_train[:num_val]</span><br><span class="line"><span class="comment"># 其他的部分作为 真实的训练集</span></span><br><span class="line">partial_x_train = x_train[num_val:]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 取出前三百个的标签 作为 验证集</span></span><br><span class="line">y_val = y_train[:num_val]</span><br><span class="line"><span class="comment"># 其他的 作为真实的训练集</span></span><br><span class="line">partial_y_train = y_train[num_val:]</span><br></pre></td></tr></table></figure>
-<h2 id="训练模型"><a href="#训练模型" class="headerlink" title="训练模型"></a>训练模型</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 训练模型</span></span><br><span class="line">model = TitanicModel()</span><br><span class="line">model.fit(partial_x_train, partial_y_train, epochs = <span class="number">150</span>, batch_size=<span class="number">16</span>, validation_data=(x_val, y_val))</span><br></pre></td></tr></table></figure>
-<h1 id="预测测试样本并评估"><a href="#预测测试样本并评估" class="headerlink" title="预测测试样本并评估"></a>预测测试样本并评估</h1><h2 id="预测测试样本"><a href="#预测测试样本" class="headerlink" title="预测测试样本"></a>预测测试样本</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">y_test2 = model.predict_classes(x_test)</span><br><span class="line"><span class="built_in">print</span>(y_test2)</span><br></pre></td></tr></table></figure>
-<h2 id="读取正确答案"><a href="#读取正确答案" class="headerlink" title="读取正确答案"></a>读取正确答案</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">real_label_filepath = <span class="string">r&quot;../dataset/Titanic/gender_submission.csv&quot;</span></span><br><span class="line">real_label = pd.read_csv(real_label_filepath)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 读取正确数值一列</span></span><br><span class="line">onehot = pd.get_dummies(data=real_label)</span><br><span class="line">xarray = onehot.values</span><br><span class="line">real = xarray[:,<span class="number">1</span>:]</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(real.shape,y_test2.shape)</span><br></pre></td></tr></table></figure>
-<h2 id="输出正确率与保存预测答案"><a href="#输出正确率与保存预测答案" class="headerlink" title="输出正确率与保存预测答案"></a>输出正确率与保存预测答案</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">count = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> (y_pre,y_rel) <span class="keyword">in</span> <span class="built_in">zip</span>(y_test2,real):</span><br><span class="line">    <span class="keyword">if</span> y_pre == y_rel:</span><br><span class="line">        count = count+<span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;count:&quot;</span>,count)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;这个模型的正确率是：&quot;</span> ,count/y_test2.shape[<span class="number">0</span>])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">r&quot;../dataset/Titanic/gender_submission_predict.csv&quot;</span>,<span class="string">&#x27;w+&#x27;</span>,newline=<span class="string">&#x27;&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">    csv_file = csv.writer(f)</span><br><span class="line">    csv_file.writerows(y_test2)</span><br></pre></td></tr></table></figure>
-<h1 id="这个模型的优点"><a href="#这个模型的优点" class="headerlink" title="这个模型的优点"></a>这个模型的优点</h1><p>这个模型 来自 [<a href="https://zhuanlan.zhihu.com/p/278057962?utm_source=wechat_session&amp;ivk_sa=1024320u">https://zhuanlan.zhihu.com/p/278057962?utm_source=wechat_session&amp;ivk_sa=1024320u</a>]<br>此模型在kaggle上排名前12%。总结其优点如下：</p>
-<p>（1）几乎完全没有人工干预。我们并不需要深入理解和分析每种因素对乘客幸存可能性的影响，而只需将数据几乎交由机器自己来学习便能得到准确度极高的预测结果。</p>
-<p>（2）几乎没有引入数据集以外的新信息。引入新信息的行为包括将已知的乘客生存信息填入预测结果（kaggle上实现100%准确率的来源）等。此模型仅在数据处理阶段，引入部分常识判断的信息。</p>
-<p>（3）<strong>模型泛化能力强</strong>。这里的“泛化”是指在模型建立过程中没有对该问题“过拟合”。实质上一味追求此问题的预测准确率是没有意义的。过度分析并设计复杂的特征工程也许可以提高测试集的准确率，但实质上很可能是对该问题的过拟合，不能在其他类似问题上泛化。</p>
-]]></content>
-      <categories>
-        <category>机器学习基础</category>
-      </categories>
-      <tags>
-        <tag>python</tag>
-        <tag>Keras</tag>
-        <tag>刘二</tag>
-        <tag>Kaggle</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Keras  RNN 实现 MNIST 手写数字识别</title>
     <url>/2021/09/04/Keras%20%20RNN%20%E5%AE%9E%E7%8E%B0%20MNIST%20%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E8%AF%86%E5%88%AB/</url>
     <content><![CDATA[<p>@<a href="Keras  RNN 实现 MNIST 手写数字识别">TOC</a></p>
@@ -209,24 +172,40 @@
       </tags>
   </entry>
   <entry>
-    <title>Python数据处理篇之Matplotlib系列</title>
-    <url>/2021/10/30/Python%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E7%AF%87%E4%B9%8BMatplotlib%E7%B3%BB%E5%88%97/</url>
-    <content><![CDATA[<p>@<a href="Python数据处理篇之Matplotlib系列">TOC</a></p>
-<h1 id="创建画布与显示"><a href="#创建画布与显示" class="headerlink" title="创建画布与显示"></a>创建画布与显示</h1><p><a href="https://www.cnblogs.com/zyg123/p/10504622.html">Python数据处理篇之Matplotlib系列(一)—-初识Matplotlib</a></p>
-<h1 id="plt-scatter-散点图"><a href="#plt-scatter-散点图" class="headerlink" title="plt.scatter()散点图"></a>plt.scatter()散点图</h1><p><a href="https://www.cnblogs.com/zyg123/p/10504628.html">Python数据处理篇之Matplotlib系列(二)—-plt.scatter()散点图</a></p>
-<h1 id="plt-plot-折线图"><a href="#plt-plot-折线图" class="headerlink" title="plt.plot()折线图"></a>plt.plot()折线图</h1><p><a href="https://www.cnblogs.com/zyg123/p/10504633.html">Python数据处理篇之Matplotlib系列(三)—-plt.plot()折线图</a></p>
-<h1 id="plt-bar-与plt-barh条形图"><a href="#plt-bar-与plt-barh条形图" class="headerlink" title="plt.bar()与plt.barh条形图"></a>plt.bar()与plt.barh条形图</h1><p><a href="https://www.cnblogs.com/zyg123/p/10504637.html">Python数据处理篇之Matplotlib系列(四)—-plt.bar()与plt.barh条形图</a></p>
-<h1 id="plt-pie-饼状图"><a href="#plt-pie-饼状图" class="headerlink" title="plt.pie()饼状图"></a>plt.pie()饼状图</h1><p><a href="https://www.cnblogs.com/zyg123/p/10504640.html">Python数据处理篇之Matplotlib系列(五)—-plt.pie()饼状图</a></p>
-<h1 id="plt-hist-与plt-hist2d-直方图"><a href="#plt-hist-与plt-hist2d-直方图" class="headerlink" title="plt.hist()与plt.hist2d()直方图"></a>plt.hist()与plt.hist2d()直方图</h1><p><a href="https://www.cnblogs.com/zyg123/p/10504645.html">Python数据处理篇之Matplotlib系列(六)—-plt.hist()与plt.hist2d()直方图</a></p>
-<h1 id="matplotlib原理分析"><a href="#matplotlib原理分析" class="headerlink" title="matplotlib原理分析"></a>matplotlib原理分析</h1><p><a href="https://www.cnblogs.com/zyg123/p/10512513.html">Python数据处理篇之Matplotlib系列(七)—-matplotlib原理分析</a></p>
+    <title>Keras 实现 Kaggle 数据集 Titanic 预测</title>
+    <url>/2021/09/17/Keras%20%E5%AE%9E%E7%8E%B0%20Kaggle%20%E6%95%B0%E6%8D%AE%E9%9B%86%20Titanic%20%E9%A2%84%E6%B5%8B/</url>
+    <content><![CDATA[<p>@<a href="Keras 实现 Kaggle 数据集 Titanic 预测">TOC</a></p>
+<h1 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h1><blockquote>
+<p>使用乘客数据(如姓名、年龄、性别、社会经济阶层等)，建立一个模型预测泰坦尼克号沉船上哪些乘客能够幸存。<br>数据被分成训练集和测试集两组，它们分别在train.csv和test.csv文档中。我们的模型将基于训练集的乘客的性别和阶级等特征建立。在测试集中每个乘客是否幸存的信息是缺省的，其将由我们模型预测出来作为答案提交。</p>
+</blockquote>
+<h1 id="加载本地下载的-Titanic-数据集"><a href="#加载本地下载的-Titanic-数据集" class="headerlink" title="加载本地下载的 Titanic 数据集"></a>加载本地下载的 Titanic 数据集</h1><p>这里使用的 是 pandas 的 read_csv() 方法。 读取的格式为 DataFrame。<br><img src="https://img-blog.csdnimg.cn/0c79c9053cc34cd39d609475f2ac37f3.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="在这里插入图片描述"><br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># xlsx训练数据导入</span></span><br><span class="line">train_filepath = <span class="string">r&quot;../dataset/Titanic/train.csv&quot;</span></span><br><span class="line">train_data = pd.read_csv(train_filepath)</span><br><span class="line">test_filepath = <span class="string">r&quot;../dataset/Titanic/test.csv&quot;</span></span><br><span class="line">test_data = pd.read_csv(test_filepath)</span><br></pre></td></tr></table></figure><br>同样可以用 shape函数查看 </p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#(891,12)</span></span><br><span class="line"><span class="built_in">print</span>(train_data.shape)</span><br></pre></td></tr></table></figure>
+<h1 id="数据分析与预处理"><a href="#数据分析与预处理" class="headerlink" title="数据分析与预处理"></a>数据分析与预处理</h1><p>在预处理数据前，首先整体分析各项数据对预测模型的重要性</p>
+<p>（1）PassengerID：乘客的ID<br>（2）Survived：乘客是否幸存，取值为0或1，是我们预测/分类的目标。<br>（3）Pclass：客舱等级，可能蕴含着乘客的阶层、乘客客舱的位置等信息，比较重要。<br>（4）Name： 姓名，是无关信息。<br>（5）Sex：性别。灾难来临时常让妇女儿童先走，而同等条件女性体力普遍弱于男性，这些因素都会影响到一名乘客幸存的可能性，因此比较重要。<br>（6）Age：年龄，较为重要，理由同上。<br>（7）Parch：直系亲友数目，比较重要。<br>（8）SibSp：旁系亲友数目，比较重要。<br>（9）Ticket：票编号，是无关信息。<br>（10）Fare：票价，可能会反映乘客的社会阶层等。<br>（11）Cabin：客舱编号，可能会反映客舱位置等，但由于缺省太多，数据量很小不具有代表性，可以视为噪音剔除。<br>（12）Embarked：上船的港口编号。</p>
+<p>在剔除了一些数据后，是否会因信息损失而降低模型的准确度？例如乘客的姓名可能暗含船上乘客之间家庭的关系。实际上我们的模型本来就是建立在不完全观测上（比如我们不知道船上的一对男女乘客有没有发生像Jack和Rose那样的故事），不确定性是必然存在的。把握主要矛盾，舍弃噪音信息是建立模型的一个好思路。</p>
+<h2 id="训练数据预处理方法"><a href="#训练数据预处理方法" class="headerlink" title="训练数据预处理方法"></a>训练数据预处理方法</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 数据预处理</span></span><br><span class="line"><span class="comment"># 训练数据预处理</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">PreprocessTrainData</span>(<span class="params">train_data</span>):</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 预处理1：筛除无关特征</span></span><br><span class="line">    <span class="comment"># 无关的有 乘客的ID 姓名 票编号客舱编号（数据量太少，当噪声剔除）</span></span><br><span class="line">    <span class="comment"># 是否幸存 客舱等级 性别 年龄 旁系亲友数目  直系亲友数目 票价  上船港口编号</span></span><br><span class="line">    cols=[<span class="string">&#x27;Survived&#x27;</span>, <span class="string">&#x27;Pclass&#x27;</span>, <span class="string">&#x27;Sex&#x27;</span>, <span class="string">&#x27;Age&#x27;</span>, <span class="string">&#x27;SibSp&#x27;</span>, <span class="string">&#x27;Parch&#x27;</span>, <span class="string">&#x27;Fare&#x27;</span>, <span class="string">&#x27;Embarked&#x27;</span>]</span><br><span class="line">    <span class="comment"># colums表示列名  index 表示行名</span></span><br><span class="line">    train_data = pd.DataFrame(train_data, columns=cols)</span><br><span class="line">    <span class="comment">#(891,8)</span></span><br><span class="line">    <span class="built_in">print</span>(train_data.shape)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 预处理2：填充缺失特征并标准化特征</span></span><br><span class="line">    age_mean = train_data[<span class="string">&#x27;Age&#x27;</span>].mean()</span><br><span class="line">    <span class="comment"># fillna 为 无值的数据填充</span></span><br><span class="line">    train_data[<span class="string">&#x27;Age&#x27;</span>] = train_data[<span class="string">&#x27;Age&#x27;</span>].fillna(age_mean)</span><br><span class="line"></span><br><span class="line">    fare_mean = train_data[<span class="string">&#x27;Fare&#x27;</span>].mean()</span><br><span class="line">    train_data[<span class="string">&#x27;Fare&#x27;</span>] = train_data[<span class="string">&#x27;Fare&#x27;</span>].fillna(fare_mean)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 预处理3：性别编码0-1  将&#123;&#x27;female&#x27;: 0, &#x27;male&#x27;: 1&#125;</span></span><br><span class="line">    train_data[<span class="string">&#x27;Sex&#x27;</span>]= train_data[<span class="string">&#x27;Sex&#x27;</span>].<span class="built_in">map</span>(&#123;<span class="string">&#x27;female&#x27;</span>: <span class="number">0</span>, <span class="string">&#x27;male&#x27;</span>: <span class="number">1</span>&#125;).astype(<span class="built_in">int</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 预处理4：登港地点转换为one-hot编码</span></span><br><span class="line">    <span class="comment"># 这是将 Embarked这一列 分成 one-hot形式 共有三个港口 所以分成了3列</span></span><br><span class="line">    x_OneHot_df = pd.get_dummies(data=train_data,columns=[<span class="string">&quot;Embarked&quot;</span>])</span><br><span class="line">    ndarray = x_OneHot_df.values</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;ndarray&#x27;</span>,ndarray)</span><br><span class="line">    <span class="comment">#(891,10)</span></span><br><span class="line">    <span class="built_in">print</span>(ndarray.shape)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 预处理5：全体特征标准化，标签向量化</span></span><br><span class="line">    <span class="comment"># &#x27;Survived&#x27;</span></span><br><span class="line">    label = ndarray[:,:<span class="number">1</span>]</span><br><span class="line">    <span class="comment"># label的shape： (891,1)</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;label的shape：&quot;</span>,label.shape)</span><br><span class="line">    <span class="comment"># 除了&#x27;Survived&#x27; 其他全部特征</span></span><br><span class="line">    features = ndarray[:,<span class="number">1</span>:]</span><br><span class="line">    <span class="comment"># features的shape： (891, 9)</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;features的shape：&quot;</span>, features.shape)</span><br><span class="line">    <span class="comment"># 求一个所有列的平均值</span></span><br><span class="line">    mean = features.mean(axis=<span class="number">0</span>)</span><br><span class="line">    features -= mean</span><br><span class="line">    <span class="comment"># 求一个所有列的方差</span></span><br><span class="line">    std = features.std(axis=<span class="number">0</span>)</span><br><span class="line">    features /= std</span><br><span class="line">    <span class="keyword">return</span> features,label</span><br></pre></td></tr></table></figure>
+<h2 id="测试数据预处理方法"><a href="#测试数据预处理方法" class="headerlink" title="测试数据预处理方法"></a>测试数据预处理方法</h2><p>本质上与训练数据相同，只是少了一列 标签</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 测试数据预处理</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">PreprocessTestData</span>(<span class="params">test_data</span>):</span></span><br><span class="line">    <span class="comment"># 预处理1：筛除无关特征</span></span><br><span class="line">    <span class="comment"># 客舱等级 性别 年龄 旁系亲友数目 直系亲友数目 票价  上船港口编号</span></span><br><span class="line">    cols=[ <span class="string">&#x27;Pclass&#x27;</span>, <span class="string">&#x27;Sex&#x27;</span>, <span class="string">&#x27;Age&#x27;</span>, <span class="string">&#x27;SibSp&#x27;</span>, <span class="string">&#x27;Parch&#x27;</span>, <span class="string">&#x27;Fare&#x27;</span>, <span class="string">&#x27;Embarked&#x27;</span>]</span><br><span class="line">    test_data = test_data[cols]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 预处理2：填充缺失特征并标准化特征</span></span><br><span class="line">    age_mean = test_data[<span class="string">&#x27;Age&#x27;</span>].mean()</span><br><span class="line">    test_data[<span class="string">&#x27;Age&#x27;</span>] = test_data[<span class="string">&#x27;Age&#x27;</span>].fillna(age_mean)</span><br><span class="line"></span><br><span class="line">    fare_mean = test_data[<span class="string">&#x27;Fare&#x27;</span>].mean()</span><br><span class="line">    test_data[<span class="string">&#x27;Fare&#x27;</span>] = test_data[<span class="string">&#x27;Fare&#x27;</span>].fillna(fare_mean)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 预处理3：性别编码0-1</span></span><br><span class="line">    test_data[<span class="string">&#x27;Sex&#x27;</span>]= test_data[<span class="string">&#x27;Sex&#x27;</span>].<span class="built_in">map</span>(&#123;<span class="string">&#x27;female&#x27;</span>: <span class="number">0</span>, <span class="string">&#x27;male&#x27;</span>: <span class="number">1</span>&#125;).astype(<span class="built_in">int</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 预处理4：登港地点转换为one-hot编码</span></span><br><span class="line">    x_OneHot_df = pd.get_dummies(data=test_data,columns=[<span class="string">&quot;Embarked&quot;</span>])</span><br><span class="line">    ndarray = x_OneHot_df.values</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 预处理5：全体特征标准化，标签向量化</span></span><br><span class="line">    features = ndarray</span><br><span class="line">    mean = features.mean(axis=<span class="number">0</span>)</span><br><span class="line">    features -= mean</span><br><span class="line">    std = features.std(axis=<span class="number">0</span>)</span><br><span class="line">    features /= std</span><br><span class="line">    <span class="keyword">return</span> features</span><br></pre></td></tr></table></figure>
+<h2 id="拿到处理后的数据"><a href="#拿到处理后的数据" class="headerlink" title="拿到处理后的数据"></a>拿到处理后的数据</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">x_train, y_train = PreprocessTrainData(train_data)</span><br><span class="line">x_test = PreprocessTestData(test_data)</span><br></pre></td></tr></table></figure>
+<h1 id="构建网络模型"><a href="#构建网络模型" class="headerlink" title="构建网络模型"></a>构建网络模型</h1><p>构建网络时需要注意控制网络的大小。模型中容量（模型可学习的参数）不足可能导致欠拟合；但模型也不是越大越好，因为模型过大可能导致过拟合，泛化能力下降。其他降低过拟合的方法包括添加dropout正则化、权重正则化等。此外还需要在评估模型（将在下文阐述）的过程中尝试不同的超参数（学习率等）以找到最佳配置。<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 第三步 构建网络</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">TitanicModel</span>():</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 构建网络-模型定义</span></span><br><span class="line">    model = models.Sequential()</span><br><span class="line">    model.add(layers.Dense(input_dim=<span class="number">9</span>,units=<span class="number">64</span>, kernel_regularizer=regularizers.l1_l2(l1=<span class="number">0.001</span>,l2=<span class="number">0.001</span>), activation=<span class="string">&#x27;relu&#x27;</span>))</span><br><span class="line">    model.add(layers.Dropout(<span class="number">0.5</span>))</span><br><span class="line">    model.add(layers.Dense(units=<span class="number">64</span>, kernel_regularizer=regularizers.l1_l2(l1=<span class="number">0.001</span>,l2=<span class="number">0.001</span>), activation=<span class="string">&#x27;relu&#x27;</span>))</span><br><span class="line">    model.add(layers.Dropout(<span class="number">0.5</span>))</span><br><span class="line">    model.add(layers.Dense(units=<span class="number">1</span>, activation=<span class="string">&#x27;sigmoid&#x27;</span>))</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 构建网络-编译模型</span></span><br><span class="line">    model.<span class="built_in">compile</span>(optimizer=<span class="string">&#x27;rmsprop&#x27;</span>, loss=<span class="string">&#x27;binary_crossentropy&#x27;</span>, metrics=[<span class="string">&#x27;accuracy&#x27;</span>])</span><br><span class="line">    <span class="keyword">return</span> model</span><br><span class="line"></span><br></pre></td></tr></table></figure></p>
+<h1 id="训练模型（带验证集）"><a href="#训练模型（带验证集）" class="headerlink" title="训练模型（带验证集）"></a>训练模型（带验证集）</h1><h2 id="划分测试集和验证集"><a href="#划分测试集和验证集" class="headerlink" title="划分测试集和验证集"></a>划分测试集和验证集</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 留出验证集</span></span><br><span class="line">num_val = <span class="number">300</span></span><br><span class="line"><span class="comment"># 将训练集样本顺序 随机打乱</span></span><br><span class="line">np.random.shuffle([x_train,y_train])</span><br><span class="line"><span class="comment"># 取出 前300个 训练样本作为 验证集</span></span><br><span class="line">x_val = x_train[:num_val]</span><br><span class="line"><span class="comment"># 其他的部分作为 真实的训练集</span></span><br><span class="line">partial_x_train = x_train[num_val:]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 取出前三百个的标签 作为 验证集</span></span><br><span class="line">y_val = y_train[:num_val]</span><br><span class="line"><span class="comment"># 其他的 作为真实的训练集</span></span><br><span class="line">partial_y_train = y_train[num_val:]</span><br></pre></td></tr></table></figure>
+<h2 id="训练模型"><a href="#训练模型" class="headerlink" title="训练模型"></a>训练模型</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 训练模型</span></span><br><span class="line">model = TitanicModel()</span><br><span class="line">model.fit(partial_x_train, partial_y_train, epochs = <span class="number">150</span>, batch_size=<span class="number">16</span>, validation_data=(x_val, y_val))</span><br></pre></td></tr></table></figure>
+<h1 id="预测测试样本并评估"><a href="#预测测试样本并评估" class="headerlink" title="预测测试样本并评估"></a>预测测试样本并评估</h1><h2 id="预测测试样本"><a href="#预测测试样本" class="headerlink" title="预测测试样本"></a>预测测试样本</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">y_test2 = model.predict_classes(x_test)</span><br><span class="line"><span class="built_in">print</span>(y_test2)</span><br></pre></td></tr></table></figure>
+<h2 id="读取正确答案"><a href="#读取正确答案" class="headerlink" title="读取正确答案"></a>读取正确答案</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">real_label_filepath = <span class="string">r&quot;../dataset/Titanic/gender_submission.csv&quot;</span></span><br><span class="line">real_label = pd.read_csv(real_label_filepath)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 读取正确数值一列</span></span><br><span class="line">onehot = pd.get_dummies(data=real_label)</span><br><span class="line">xarray = onehot.values</span><br><span class="line">real = xarray[:,<span class="number">1</span>:]</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(real.shape,y_test2.shape)</span><br></pre></td></tr></table></figure>
+<h2 id="输出正确率与保存预测答案"><a href="#输出正确率与保存预测答案" class="headerlink" title="输出正确率与保存预测答案"></a>输出正确率与保存预测答案</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">count = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> (y_pre,y_rel) <span class="keyword">in</span> <span class="built_in">zip</span>(y_test2,real):</span><br><span class="line">    <span class="keyword">if</span> y_pre == y_rel:</span><br><span class="line">        count = count+<span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;count:&quot;</span>,count)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;这个模型的正确率是：&quot;</span> ,count/y_test2.shape[<span class="number">0</span>])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">r&quot;../dataset/Titanic/gender_submission_predict.csv&quot;</span>,<span class="string">&#x27;w+&#x27;</span>,newline=<span class="string">&#x27;&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">    csv_file = csv.writer(f)</span><br><span class="line">    csv_file.writerows(y_test2)</span><br></pre></td></tr></table></figure>
+<h1 id="这个模型的优点"><a href="#这个模型的优点" class="headerlink" title="这个模型的优点"></a>这个模型的优点</h1><p>这个模型 来自 [<a href="https://zhuanlan.zhihu.com/p/278057962?utm_source=wechat_session&amp;ivk_sa=1024320u">https://zhuanlan.zhihu.com/p/278057962?utm_source=wechat_session&amp;ivk_sa=1024320u</a>]<br>此模型在kaggle上排名前12%。总结其优点如下：</p>
+<p>（1）几乎完全没有人工干预。我们并不需要深入理解和分析每种因素对乘客幸存可能性的影响，而只需将数据几乎交由机器自己来学习便能得到准确度极高的预测结果。</p>
+<p>（2）几乎没有引入数据集以外的新信息。引入新信息的行为包括将已知的乘客生存信息填入预测结果（kaggle上实现100%准确率的来源）等。此模型仅在数据处理阶段，引入部分常识判断的信息。</p>
+<p>（3）<strong>模型泛化能力强</strong>。这里的“泛化”是指在模型建立过程中没有对该问题“过拟合”。实质上一味追求此问题的预测准确率是没有意义的。过度分析并设计复杂的特征工程也许可以提高测试集的准确率，但实质上很可能是对该问题的过拟合，不能在其他类似问题上泛化。</p>
 ]]></content>
       <categories>
-        <category>python工具包类</category>
+        <category>机器学习基础</category>
       </categories>
       <tags>
-        <tag>深度学习</tag>
         <tag>python</tag>
-        <tag>Matplotlib</tag>
+        <tag>Keras</tag>
+        <tag>刘二</tag>
+        <tag>Kaggle</tag>
       </tags>
   </entry>
   <entry>
@@ -319,9 +298,9 @@
       </categories>
       <tags>
         <tag>python</tag>
-        <tag>Matplotlib</tag>
         <tag>Numpy</tag>
         <tag>Pandas</tag>
+        <tag>Matplotlib</tag>
       </tags>
   </entry>
   <entry>
@@ -431,6 +410,27 @@
       </tags>
   </entry>
   <entry>
+    <title>Python数据处理篇之Matplotlib系列</title>
+    <url>/2021/10/30/Python%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E7%AF%87%E4%B9%8BMatplotlib%E7%B3%BB%E5%88%97/</url>
+    <content><![CDATA[<p>@<a href="Python数据处理篇之Matplotlib系列">TOC</a></p>
+<h1 id="创建画布与显示"><a href="#创建画布与显示" class="headerlink" title="创建画布与显示"></a>创建画布与显示</h1><p><a href="https://www.cnblogs.com/zyg123/p/10504622.html">Python数据处理篇之Matplotlib系列(一)—-初识Matplotlib</a></p>
+<h1 id="plt-scatter-散点图"><a href="#plt-scatter-散点图" class="headerlink" title="plt.scatter()散点图"></a>plt.scatter()散点图</h1><p><a href="https://www.cnblogs.com/zyg123/p/10504628.html">Python数据处理篇之Matplotlib系列(二)—-plt.scatter()散点图</a></p>
+<h1 id="plt-plot-折线图"><a href="#plt-plot-折线图" class="headerlink" title="plt.plot()折线图"></a>plt.plot()折线图</h1><p><a href="https://www.cnblogs.com/zyg123/p/10504633.html">Python数据处理篇之Matplotlib系列(三)—-plt.plot()折线图</a></p>
+<h1 id="plt-bar-与plt-barh条形图"><a href="#plt-bar-与plt-barh条形图" class="headerlink" title="plt.bar()与plt.barh条形图"></a>plt.bar()与plt.barh条形图</h1><p><a href="https://www.cnblogs.com/zyg123/p/10504637.html">Python数据处理篇之Matplotlib系列(四)—-plt.bar()与plt.barh条形图</a></p>
+<h1 id="plt-pie-饼状图"><a href="#plt-pie-饼状图" class="headerlink" title="plt.pie()饼状图"></a>plt.pie()饼状图</h1><p><a href="https://www.cnblogs.com/zyg123/p/10504640.html">Python数据处理篇之Matplotlib系列(五)—-plt.pie()饼状图</a></p>
+<h1 id="plt-hist-与plt-hist2d-直方图"><a href="#plt-hist-与plt-hist2d-直方图" class="headerlink" title="plt.hist()与plt.hist2d()直方图"></a>plt.hist()与plt.hist2d()直方图</h1><p><a href="https://www.cnblogs.com/zyg123/p/10504645.html">Python数据处理篇之Matplotlib系列(六)—-plt.hist()与plt.hist2d()直方图</a></p>
+<h1 id="matplotlib原理分析"><a href="#matplotlib原理分析" class="headerlink" title="matplotlib原理分析"></a>matplotlib原理分析</h1><p><a href="https://www.cnblogs.com/zyg123/p/10512513.html">Python数据处理篇之Matplotlib系列(七)—-matplotlib原理分析</a></p>
+]]></content>
+      <categories>
+        <category>python工具包类</category>
+      </categories>
+      <tags>
+        <tag>深度学习</tag>
+        <tag>python</tag>
+        <tag>Matplotlib</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Pytorch 实现 多维特征的输入——糖尿病预测</title>
     <url>/2021/09/13/Pytorch%20%E5%AE%9E%E7%8E%B0%20%E5%A4%9A%E7%BB%B4%E7%89%B9%E5%BE%81%E7%9A%84%E8%BE%93%E5%85%A5%E2%80%94%E2%80%94%E7%B3%96%E5%B0%BF%E7%97%85%E9%A2%84%E6%B5%8B/</url>
     <content><![CDATA[<p>@<a href="Pytorch 实现 多维特征的输入——糖尿病预测">TOC</a></p>
@@ -510,22 +510,6 @@
         <tag>刘二</tag>
         <tag>Pytorch</tag>
         <tag>逻辑回归</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Pytorch 封装函数</title>
-    <url>/2021/09/17/Pytorch%20%E5%B0%81%E8%A3%85%E5%87%BD%E6%95%B0/</url>
-    <content><![CDATA[<p>@<a href="Pytorch 封装函数">TOC</a></p>
-<h1 id="torch-tensor-view"><a href="#torch-tensor-view" class="headerlink" title="torch.tensor.view"></a>torch.tensor.view</h1><p>Tensor.view(*shape) → Tensor<br> view()的作用相当于numpy中的reshape，重新定义矩阵的形状。<br> <img src="https://img-blog.csdnimg.cn/95e47412ecb142e1b2f5dfcb469d9762.png#pic_center" alt="在这里插入图片描述"><br>示例：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">a = torch.<span class="built_in">range</span>(<span class="number">1</span>,<span class="number">30</span>)</span><br><span class="line"><span class="built_in">print</span>(a)</span><br><span class="line">&gt;&gt;a:tensor([ <span class="number">1.</span>,  <span class="number">2.</span>,  <span class="number">3.</span>,  <span class="number">4.</span>,  <span class="number">5.</span>,  <span class="number">6.</span>,  <span class="number">7.</span>,  <span class="number">8.</span>,  <span class="number">9.</span>, <span class="number">10.</span>, <span class="number">11.</span>, <span class="number">12.</span>, <span class="number">13.</span>, <span class="number">14.</span>,</span><br><span class="line">        <span class="number">15.</span>, <span class="number">16.</span>, <span class="number">17.</span>, <span class="number">18.</span>, <span class="number">19.</span>, <span class="number">20.</span>, <span class="number">21.</span>, <span class="number">22.</span>, <span class="number">23.</span>, <span class="number">24.</span>, <span class="number">25.</span>, <span class="number">26.</span>, <span class="number">27.</span>, <span class="number">28.</span>,</span><br><span class="line">        <span class="number">29.</span>, <span class="number">30.</span>])</span><br><span class="line"></span><br><span class="line">b = a.view(<span class="number">2</span>,<span class="number">3</span>,<span class="number">5</span>)</span><br><span class="line"><span class="built_in">print</span>(b)</span><br><span class="line">&gt;&gt;b:tensor([[[ <span class="number">1.</span>,  <span class="number">2.</span>,  <span class="number">3.</span>,  <span class="number">4.</span>,  <span class="number">5.</span>],</span><br><span class="line">         [ <span class="number">6.</span>,  <span class="number">7.</span>,  <span class="number">8.</span>,  <span class="number">9.</span>, <span class="number">10.</span>],</span><br><span class="line">         [<span class="number">11.</span>, <span class="number">12.</span>, <span class="number">13.</span>, <span class="number">14.</span>, <span class="number">15.</span>]],</span><br><span class="line"></span><br><span class="line">        [[<span class="number">16.</span>, <span class="number">17.</span>, <span class="number">18.</span>, <span class="number">19.</span>, <span class="number">20.</span>],</span><br><span class="line">         [<span class="number">21.</span>, <span class="number">22.</span>, <span class="number">23.</span>, <span class="number">24.</span>, <span class="number">25.</span>],</span><br><span class="line">         [<span class="number">26.</span>, <span class="number">27.</span>, <span class="number">28.</span>, <span class="number">29.</span>, <span class="number">30.</span>]]])</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(b.view(b.size(<span class="number">0</span>),-<span class="number">1</span>))</span><br><span class="line"><span class="built_in">print</span>(b.view(b.size(<span class="number">1</span>),-<span class="number">1</span>))</span><br><span class="line"><span class="built_in">print</span>(b.view(b.size(<span class="number">2</span>),-<span class="number">1</span>))</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>b是一个2组3行5列，<br>b.size(0)就是留下2组，后面3行5列拉直成15个数，行成2行15列；<br>b.size(1)就是留下3行，2组5列拉成10个数，行成3行10列；<br>b.size(2)就是留下5列，2组3行拉成6个数，行成5行6列</p>
-]]></content>
-      <categories>
-        <category>机器学习基础</category>
-      </categories>
-      <tags>
-        <tag>python</tag>
-        <tag>Pytorch</tag>
       </tags>
   </entry>
   <entry>
@@ -622,6 +606,22 @@
         <tag>刘二</tag>
         <tag>Pytorch</tag>
         <tag>DataLoader</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Pytorch 封装函数</title>
+    <url>/2021/09/17/Pytorch%20%E5%B0%81%E8%A3%85%E5%87%BD%E6%95%B0/</url>
+    <content><![CDATA[<p>@<a href="Pytorch 封装函数">TOC</a></p>
+<h1 id="torch-tensor-view"><a href="#torch-tensor-view" class="headerlink" title="torch.tensor.view"></a>torch.tensor.view</h1><p>Tensor.view(*shape) → Tensor<br> view()的作用相当于numpy中的reshape，重新定义矩阵的形状。<br> <img src="https://img-blog.csdnimg.cn/95e47412ecb142e1b2f5dfcb469d9762.png#pic_center" alt="在这里插入图片描述"><br>示例：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">a = torch.<span class="built_in">range</span>(<span class="number">1</span>,<span class="number">30</span>)</span><br><span class="line"><span class="built_in">print</span>(a)</span><br><span class="line">&gt;&gt;a:tensor([ <span class="number">1.</span>,  <span class="number">2.</span>,  <span class="number">3.</span>,  <span class="number">4.</span>,  <span class="number">5.</span>,  <span class="number">6.</span>,  <span class="number">7.</span>,  <span class="number">8.</span>,  <span class="number">9.</span>, <span class="number">10.</span>, <span class="number">11.</span>, <span class="number">12.</span>, <span class="number">13.</span>, <span class="number">14.</span>,</span><br><span class="line">        <span class="number">15.</span>, <span class="number">16.</span>, <span class="number">17.</span>, <span class="number">18.</span>, <span class="number">19.</span>, <span class="number">20.</span>, <span class="number">21.</span>, <span class="number">22.</span>, <span class="number">23.</span>, <span class="number">24.</span>, <span class="number">25.</span>, <span class="number">26.</span>, <span class="number">27.</span>, <span class="number">28.</span>,</span><br><span class="line">        <span class="number">29.</span>, <span class="number">30.</span>])</span><br><span class="line"></span><br><span class="line">b = a.view(<span class="number">2</span>,<span class="number">3</span>,<span class="number">5</span>)</span><br><span class="line"><span class="built_in">print</span>(b)</span><br><span class="line">&gt;&gt;b:tensor([[[ <span class="number">1.</span>,  <span class="number">2.</span>,  <span class="number">3.</span>,  <span class="number">4.</span>,  <span class="number">5.</span>],</span><br><span class="line">         [ <span class="number">6.</span>,  <span class="number">7.</span>,  <span class="number">8.</span>,  <span class="number">9.</span>, <span class="number">10.</span>],</span><br><span class="line">         [<span class="number">11.</span>, <span class="number">12.</span>, <span class="number">13.</span>, <span class="number">14.</span>, <span class="number">15.</span>]],</span><br><span class="line"></span><br><span class="line">        [[<span class="number">16.</span>, <span class="number">17.</span>, <span class="number">18.</span>, <span class="number">19.</span>, <span class="number">20.</span>],</span><br><span class="line">         [<span class="number">21.</span>, <span class="number">22.</span>, <span class="number">23.</span>, <span class="number">24.</span>, <span class="number">25.</span>],</span><br><span class="line">         [<span class="number">26.</span>, <span class="number">27.</span>, <span class="number">28.</span>, <span class="number">29.</span>, <span class="number">30.</span>]]])</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(b.view(b.size(<span class="number">0</span>),-<span class="number">1</span>))</span><br><span class="line"><span class="built_in">print</span>(b.view(b.size(<span class="number">1</span>),-<span class="number">1</span>))</span><br><span class="line"><span class="built_in">print</span>(b.view(b.size(<span class="number">2</span>),-<span class="number">1</span>))</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>b是一个2组3行5列，<br>b.size(0)就是留下2组，后面3行5列拉直成15个数，行成2行15列；<br>b.size(1)就是留下3行，2组5列拉成10个数，行成3行10列；<br>b.size(2)就是留下5列，2组3行拉成6个数，行成5行6列</p>
+]]></content>
+      <categories>
+        <category>机器学习基础</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+        <tag>Pytorch</tag>
       </tags>
   </entry>
   <entry>
@@ -838,6 +838,91 @@
       <tags>
         <tag>深度学习</tag>
         <tag>李宏毅</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>事件脉络第一次2.25</title>
+    <url>/2022/02/25/%E4%BA%8B%E4%BB%B6%E8%84%89%E7%BB%9C%E7%AC%AC%E4%B8%80%E6%AC%A12.25/</url>
+    <content><![CDATA[<h2 id="事件脉络介绍"><a href="#事件脉络介绍" class="headerlink" title="事件脉络介绍"></a>事件脉络介绍</h2><p>来源：</p>
+<p>当今时代可以说是信息爆炸的时代，大大小小的事情都会引发人们的关注，而百度是我们获取新闻的第一途径，但各个事件往往展现出的信息都非常杂乱，因此就衍生出了百度事件脉络这一板块</p>
+<p>实际：</p>
+<p>通过对特定事件名称的检索，得到该事件的脉络，自动追溯事件的发展过程，根据时间线对热点事件的来龙去脉进行全面了解。</p>
+<p>输入：</p>
+<p>关于某一事件的相关新闻集合，应该是利用文本聚类(搜索等)得到的新闻簇。</p>
+<p>输出：</p>
+<p>事件的脉络信息，换句话说就是：给出一个重要新闻的列表，这些重要的新闻涵盖了该事件的各个重要阶段的重要信息。</p>
+<p>如右边的图 就可以清晰的看到俄乌局势昨天的发展阶段，也就是这个方向应该做到的基本效果。</p>
+<p>如果用于开发的话，真实的接口应该返回如图类似的json数据，包括新闻的时间、标题和链接。</p>
+<h2 id="时间片聚类算法"><a href="#时间片聚类算法" class="headerlink" title="时间片聚类算法"></a>时间片聚类算法</h2><p>其主要的办法是 从<font color="red">新闻的外部属性（主要是分布事件和转载情况）</font>进行分析。</p>
+<p>其前提<font color="blue">假设</font>为：在事件有重要进展的时候，一定会有一些高质量新闻的跟进报道，而且越是重要的进展情况，其报道也会越多越集中。</p>
+<h6 id="如何寻找事件发展的主要阶段？"><a href="#如何寻找事件发展的主要阶段？" class="headerlink" title="如何寻找事件发展的主要阶段？"></a>如何寻找事件发展的主要阶段？</h6><font color="red">使用时间片聚类的方法</font> ，来发现事件发展的主要阶段
+
++ 对每一篇新闻，抽取新闻的发布时间，按照新闻的发布时间将一个新闻事件集合内的新闻进行排列并投影到时间轴上。（根据之前的<font color="blue">假设</font>，时间轴上一定会有一段新闻密集的地方）
+
++ 利用凝聚层次聚类方法，将时间轴分成若干个片段。将新闻聚类而分，这样我们才能明确时间的发展过程。提取每个过程的 确切新闻内容。
+
+  + 凝聚层次聚类的基本做法：其不需要指定划分的个数（因为我也不知道到底有几次发展阶段），把每篇新闻看成一个时间片段（其实是一个点），然后**每次合并距离最近的两个片段**，直到任意两个片段之间的距离都大于一个预先设定的阈值。  
+  + 获取到时间发展过程后，则要在每个进展的新闻集合中，抽取一篇代表新闻
+
+  + 其具体的策略，可以根据具体的产品需求来定。<font color="blue">一般考虑例如：新闻来源站点是否权威，新闻的发布时间（在同一个聚类内），该新闻是否有更多的转载等等。</font>
+  + 如果要求更多媒体化，还可以从新闻集合中，抽取出相应的图片，视频等相关资源。
+
+#### 存在的问题一：自然时间距离问题？
+
+对于新闻来说，由于新闻发布并不是在24小时内均匀分布的，所以我们认为：在新闻发布高峰期间隔1个小时，要比在新闻发布的低谷期间隔一个小时，造成的时间跨度更长。
+
+**改进为：按照每半小时为一个小时间片，统计每个时间段内的新闻发布数，求出各个时间段新闻数占所有时间片新闻总数的比值，这个比值可以用来重新分配24小时的时间长度，计算“新闻时间距离”。**
+
+这样的效果得到了：在0点至6点之间的1个小时，在“新闻时间距离”中只有半个小时，甚至更少，而在9：00~11：00期间的一个小时，相当于2~3个小时。
+
+#### 存在的问题二：新闻集合的去噪
+
+各媒体对事件跟进报道的时效性不一，比如同样的新闻内容，新华网的报道更具时效性，在当前20:00就发布了，而一些小的新闻站点，则可能要等到第二天的9:00才发布，这样就导致描述同一阶段的新闻，往往会被分到不同的阶段中去，这样就影响了时间片聚类的效果。
+
+<font color="red">所以我们在进行时间片聚类之前，还进行了相似新闻的去重。</font>
+
+<h6 id="去噪的方法"><a href="#去噪的方法" class="headerlink" title="去噪的方法"></a>去噪的方法</h6><p>对新闻集合内的新闻，进行一次相似度，如果碰到文本相似度很高的新闻，则归档在一起，以最早的那篇新闻为代表新闻，参加时间片聚类。具体的做法是：按照新闻的发布时间由远及近的顺序，计算每篇新闻与之前的新闻的文本相似度，如果相似度太高，则认为可能是重复的内容，则把这篇新闻标记为更早的新闻的转载或者相近报道。</p>
+<h4 id="该方法总结"><a href="#该方法总结" class="headerlink" title="该方法总结"></a>该方法总结</h4><p>本方法利用了新闻媒体对新闻事件的报道行为，来挖掘出新闻事件的发展阶段以及代表新闻，从而给用户提供简单明了的新闻事件脉络。主要利用了时间片聚类算法来自动将事件划分成若干个进展阶段，然后从各个进展阶段中，抽取出代表新闻。为了改善算法，还提出了一种“新闻时间距离”的度量方法；同时，还结合了文本内容分析的手段，来对新闻集合进行精简，去噪，改善脉络抽取的效果。</p>
+<h2 id="基于图结构方法"><a href="#基于图结构方法" class="headerlink" title="基于图结构方法"></a>基于图结构方法</h2><p>通过构建图的方法，将子事件之间的关系转换为图中结点的关系，寻找关键结点，连接关键结点得到最终的事件脉络。</p>
+<h3 id="事件感知"><a href="#事件感知" class="headerlink" title="事件感知"></a>事件感知</h3><p>对微博数据过滤分析后，根据热点事件的关键字搜索数据库，筛选包含该关键字的微博。</p>
+<p>首先对其进行文本预处理，根据中英文使用不同的工具或方法。预处理过程大致可包括，分词，去除停用词。</p>
+<p>而后计算每条微博的 中每个关键词 的 TF-IDF 得分，将所有关键词的 TF-IDF 得分之和作为这条微博的 TF-IDF 得分。 然后进行排序，得分越高的与事件的相关度也就越高，从得到最后处理的库。</p>
+<h3 id="事件脉络呈现"><a href="#事件脉络呈现" class="headerlink" title="事件脉络呈现"></a>事件脉络呈现</h3><p>分为3个子模块，构建图，寻找关键微博，连接关键微博。</p>
+<p>整体思路是，在无向图中寻找关键结点，即关键微博。再在有向图中连接关键结点，最终得到事件脉络。</p>
+<h4 id="如何构建图结构"><a href="#如何构建图结构" class="headerlink" title="如何构建图结构"></a>如何构建图结构</h4><p>需要构建两个图，一个有向图和一个无向图。每个结点的权值，为该结点微博与事件关键字集合Q的余弦相似度。无向图用来表示微博之间文本内容的关系，计算边时，2条微博文本之间的余弦相似度大于 一个阈值时。就用一条无向边将对应的2个结点连接起来。</p>
+<p>有向图用来表示微博之间的时间关系，按时间顺序连接微博结点。</p>
+<h4 id="如何选择关键结点"><a href="#如何选择关键结点" class="headerlink" title="如何选择关键结点"></a>如何选择关键结点</h4><p>如何选择关键结点 就是 如何寻找关键微博</p>
+<p>其采用 加权相似度的方法来寻找 无向图中的关键结点。当 加权相似度越大时，表明这个结点对应的微博更具代表性，能够表示其领接结点对应微博的内容，即这个结点就是 图中的一个关键结点。</p>
+<p>计算无向图中所有结点的加权相似度，选取其中加权相似度最大的结点作为一个关键结点。</p>
+<p>之后采用迭代的过程，找到关键结点集合。</p>
+<h4 id="如何链接关键结点"><a href="#如何链接关键结点" class="headerlink" title="如何链接关键结点"></a>如何链接关键结点</h4><p>在有向图中，对于任意2个关键结点，如果本来就是邻接结点，则直接连接。</p>
+<p>如果不是的话，就需要添加过渡结点。其应该满足添加的过渡结点的加权相似度之和达到最小，</p>
+<p>如右边的公式，</p>
+<p>最后得到连接关键结点的边集合，即关键结点的连接结果。</p>
+<p>给定一个过渡结点，可以体现事件一定程度的多样化，使得内容看起来更加的连贯。</p>
+<h3 id="实验数据结果"><a href="#实验数据结果" class="headerlink" title="实验数据结果"></a>实验数据结果</h3><p>该论文爬取的数据集是 2014年 巴西世界杯的 推特数据，事件为7月14日 阿根廷与德国的实时球赛事件推特记录。大致能说清楚事件发展情况，并且存在一定的趣味事件。</p>
+<p>但这里的趣味事件和整个事件发展，关系不大。  </p>
+<p>并且这个数据由于本身太过于口语化，所以用户情感比较明显，对整体的事件脉络是有干扰的。</p>
+<h3 id="方法总结"><a href="#方法总结" class="headerlink" title="方法总结"></a>方法总结</h3><p>这个方法在事件感知，对微博的处理方法过于单一，仅仅依靠微博中是否出现关键字来判断，过于片面。可能会漏掉一些有潜在关系的数据。</p>
+<p>另外图求解关键结点和连接结点的复杂度理论上非常的高，实时性应该是比较差的。</p>
+<p>另外这里只考虑到了文本属性，其他一些值的参考的评论、微博博主的权威值等其实都可以引入。</p>
+<p>甚至是多模态的多媒体也值的参考。</p>
+<h3 id="后续的一些问题"><a href="#后续的一些问题" class="headerlink" title="后续的一些问题"></a>后续的一些问题</h3><p>第一 如何评价事件脉络实验结果好坏？</p>
+<p>之前看的有一篇中文文档，他是采用召回率和准确率来定量的描述。 他根据正确人工拟定的事件脉络，统计他的时间日期个数和 算法命中的日期个数 比值为召回率；同理也可以计算出准确率。</p>
+<p>另外也有采用人调查评价是否能明白事件经过的打分情况，主观成分较大。</p>
+<p>第二 就是这个方向的整体思路不够清晰</p>
+<p>有之前提到的 时间片聚类的算法，构造图算法</p>
+<p>也有后续的多模考虑的 基于关键字，基于概率，基于主题的方法。</p>
+<p>主体上是偏向于机器学习，图论，数据挖掘。</p>
+<p>第三就是 新闻数据集的获取问题。</p>
+<p>做新闻类的话，可能需要爬取一些权威性较高的平台。</p>
+<p>另外 存在多媒体，新浪微博、百度新闻等 的所谓的数据流特征不太类似，不确定使用同种方法是不是都试用。</p>
+]]></content>
+      <categories>
+        <category>研究课题-事件脉络</category>
+      </categories>
+      <tags>
+        <tag>事件脉络</tag>
       </tags>
   </entry>
   <entry>
@@ -1166,70 +1251,6 @@
       </tags>
   </entry>
   <entry>
-    <title>浅谈 VGG</title>
-    <url>/2021/11/01/%E6%B5%85%E8%B0%88%20VGG/</url>
-    <content><![CDATA[<p>@<a href="浅谈 VGG">TOC</a><br>《Very Deep Convolutional Networks for Large-Scale Image Recognition》</p>
-<p>arXiv：<a href="https://arxiv.org/abs/1409.1556">[1409.1556] Very Deep Convolutional Networks for Large-Scale Image Recognition<br>intro：ICLR 2015</a><br>homepage：<a href="https://www.robots.ox.ac.uk/~vgg/research/very_deep/">Visual Geometry Group Home Page</a></p>
-<h1 id="VGG-特点"><a href="#VGG-特点" class="headerlink" title="VGG 特点"></a>VGG 特点</h1><p>VGG 网络是在ILSVRC 2014上的相关工作，主要工作是证明了增加网络的深度能够在一定程度上影响网络最终的性能。<br>VGG有两种结构，分别是VGG16和VGG19，两者并没有本质上的区别，只是网络深度不一样。</p>
-<ul>
-<li>VGG16包含了16个隐藏层（13个卷积层和3个全连接层） 其特点为 卷积块的卷积层个数为  2 2 3 3 3<br><img src="https://img-blog.csdnimg.cn/img_convert/22de401629c305540a9f2ccaef96ba63.png#pic_center" alt="VGG16"><br><img src="https://img-blog.csdnimg.cn/img_convert/786fc264427f593ff33f5dede514a990.png#pic_center" alt="VGG16"></li>
-</ul>
-<ul>
-<li>VGG19包含了19个隐藏层（16个卷积层和3个全连接层） 的特点为 卷积块的卷积层个数为  2 2 4 4 4</li>
-</ul>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/27f07e7317617a43f88350a560c371a6.png#pic_center" alt="VGG网络架构"><br>全连接转卷积（测试阶段）<br>这也是VGG的一个特点，在网络测试阶段将训练阶段的三个全连接替换为三个卷积，使得测试得到的全卷积网络因为没有全连接的限制，因而可以接收任意宽或高为的输入，这在测试阶段很重要。<br>例如，输入图像是224x224x3，如果后面三个层都是全连接，那么在测试阶段就只能将测试的图像全部都要缩放大小到224x224x3，才能符合后面全连接层的输入数量要求，这样就不便于测试工作的开展。</p>
-<h1 id="VGG-原理"><a href="#VGG-原理" class="headerlink" title="VGG 原理"></a>VGG 原理</h1><p>VGG16相比AlexNet的一个改进是采用连续的几个3x3的卷积核代替AlexNet中的较大卷积核（如11x11，7x7，5x5）。对于给定的感受野（与输出有关的输入图片的局部大小），采用堆积的小卷积核是优于采用大的卷积核，因为多层非线性层可以增加网络深度来保证学习更复杂的模式，而且代价还比较小（参数更少）。</p>
-<p>为什么2个3×3的卷积核 可以 代替 1个5×5的卷积核？<br><img src="https://img-blog.csdnimg.cn/img_convert/5c12d10dd0738e23846584801c3a686f.png#pic_center" alt="两个3×3代替5×5"><br>因为我们知道   例如输入图片大小为C 卷积核大小为k  步长为d 那输出图片大小就是 $\lfloor \frac{C+2 * padding-k}{d} \rfloor +1$<br>那pad=0 d=1 对于2个3×3的而言 计算得到的 输出图片大小为 C-4<br>同理 一个5×5的 也为 C-4</p>
-<p>总结的来说优势有3点：</p>
-<ol>
-<li>分成多个层的小卷积核来代替大卷积核，可以增加网络深度。而每一层都会引入非线性的激活函数，所以其非线性表达的能力会更好，模型的分类性能更好。</li>
-<li>计算参数减少了。举个例子比如输入维度是C(也就是卷积核通道维度)，输出维度是C(也就是卷积核个数)，如果使用2层3×3的卷积层来代替一层5×5的，3×3的参数总量为 3×3×C×C×2 = $18C^{2}$；对应的  5×5的 为 5×5×C×C×1 = $25C^{2}$</li>
-<li>使用多个层的小卷积核，相当于将一个大的感受野分成多个小感受野来学习，是一种正则化的思想。注意：正则化是一种思想方式，其目的为防止过拟合。其具体方法有：BN、dropout、L1和L2正则化项等。</li>
-</ol>
-<h1 id="VGG优缺点"><a href="#VGG优缺点" class="headerlink" title="VGG优缺点"></a>VGG优缺点</h1><h2 id="VGG优点"><a href="#VGG优点" class="headerlink" title="VGG优点"></a>VGG优点</h2><ul>
-<li>VGG16和VGG19 的结构非常简洁，整个网络都使用了同样大小的卷积核尺寸（3x3）和最大池化尺寸（2x2）。</li>
-<li>几个小滤波器（3x3）卷积层的组合比一个大滤波器（5x5或7x7）卷积层好：</li>
-<li>验证了通过不断加深网络结构可以提升性能。</li>
-<li><p>VGG 是传统的串行结构，输出的内容例如左上角提取的就是原图像左上角的特征。<br><img src="https://img-blog.csdnimg.cn/img_convert/afe80f4458553cf142cd9a8f6b7cfc40.png#pic_center" alt="FeatureMap的提取情况"></p>
-</li>
-<li><p>VGG 的迁移学习能力很强，一般都用来做基础模型。我们只需要修改最后1层的输出结构，冻结前面所有在ImageNet上训练VGG后的参数，再拿自己的数据集来训练最后4096神经元和最后一层输出的参数即可。</p>
-</li>
-<li>采用多尺度训练方式，训练的数据可以有 224、256、384、[256，512]</li>
-<li>作者提出的 在test上改进的方法，将最后的全连接层改为全卷积层，但是作者训练的时候并没有这么用。这个方法可以实现多尺度输入，原始的 全神经网络的话 他层次的神经元是定死的 所以我没办法换个尺度的图片输入。<br><img src="https://img-blog.csdnimg.cn/img_convert/d2092e465499fab47e8e6587f744e396.png#pic_center" alt="test"></li>
-</ul>
-<h2 id="VGG缺点"><a href="#VGG缺点" class="headerlink" title="VGG缺点"></a>VGG缺点</h2><p>参数非常庞大。庞大在卷积层输出压平后与第一层全神经网络之间的参数。<br><img src="https://img-blog.csdnimg.cn/img_convert/5a91f370bba686cfa4003affe2a9eefc.png#pic_center" alt="参数计算"><br>首先看第二行，所谓的内存就是输出图片大小  而参数就是卷积核×通道数×卷积核个数64个。<br>注意这里是没有算上偏置量的，算的话就是每个卷积核一个偏置项，会增广成矩阵加上去的。</p>
-<h1 id="VGG的训练和测试"><a href="#VGG的训练和测试" class="headerlink" title="VGG的训练和测试"></a>VGG的训练和测试</h1><p> 论文首先将训练图像缩放到最小边长度的方形，设缩放后的训练图像的尺寸为S×S。网络训练时对训练图像进行随机裁剪，裁剪尺寸为网络的输入尺寸224×224。如果S=224，则输入网络的图像就是整个训练图像；如果S&gt;224，则随机裁剪训练图像包含目标的部分。</p>
-<p>对于训练集图像的尺寸设置，论文中使用了两种方法：</p>
-<p>固定尺寸训练，设置 <strong>S=256</strong> 和 <strong>S=384</strong><br>多尺度训练，每个训练图像从一定范围内 <strong>[Smin,Smax],(Smin=256,Smax=512)</strong> 进行随机采样。由于图像中的目标可能具有不同的大小，因此在训练期间考虑到这一点是有益的。这也可以看作是通过尺度抖动进行训练集增强，其中单个模型被训练在一定尺度范围内识别对象。</p>
-<h2 id="网络性能评估"><a href="#网络性能评估" class="headerlink" title="网络性能评估"></a>网络性能评估</h2><ul>
-<li><strong>单尺度评估，测试图像固定尺度。结果如下表</strong><br><img src="https://img-blog.csdnimg.cn/img_convert/c06443bd58d1867902a59902e0a5b2c7.png#pic_center" alt="单一尺度评估"><br>通过评估结果，可以看出：<ul>
-<li>局部归一化（A-LRN）网络，对网络A的结果并没有很大的提升。</li>
-<li>网络的性能随着网络的加深而提高。应该注意到B，C，D这个网络的性能。C网络好于B网络，说明额外添加的非线性激活函数，确实是有好处的；但是，D网络好于C网络，这说明也可以使用非平凡的感受野来捕获更多的信息更有用。</li>
-<li>当网络层数达到19层时，使用VGG架构的错误率就不再随着层数加深而提高了。更深的网络应该需要更多的数据集。</li>
-<li>论文还将网络B与具有5×5卷积层的浅层网络进行了比较，浅层网络可以通过用单个5×5卷积层替换B中每对3×3卷积层得到。测量的浅层网络top-1错误率比网络B的top-1错误率（在中心裁剪图像上）高7％，<strong>这证实了具有小滤波器的深层网络优于具有较大滤波器的浅层网络</strong>。</li>
-<li>训练时的尺寸抖动（训练图像大小S∈[256,512])得到的结果好于固定尺寸，这证实了通过尺度抖动进行的训练集增强确实有助于捕获多尺度图像统计。</li>
-</ul>
-</li>
-</ul>
-<ul>
-<li><p><strong>多尺度评估，测试图像的尺度抖动对性能的影响</strong><br>  对同一张测试图像，将其缩放到不同的尺寸进行测试，然后取这几个测试结果的平均值，作为最终的结果（有点像集成学习，所不同的是，这里是测试图像的尺寸不同）。使用了三种尺寸的测试图像：Q表示测试图像，S表示训练是图像尺寸：Q=S−32，Q=S+32，前面两种是针对训练图像是固定大小的，对于训练时图像尺寸在一定范围内抖动的，则可以使用更大的测试图像尺寸。   Q={Smin,0.5(Smin+Smax),Smax}.<br>评估结果如下：<br><img src="https://img-blog.csdnimg.cn/img_convert/339fb07aaff8cf5e01ac2dab96205f39.png#pic_center" alt="多尺度评估，测试图像的尺度抖动对性能的影响"><br>评估结果表明，训练图像尺度抖动优于使用固定最小边S。</p>
-</li>
-<li><p><strong>稠密和多裁剪图像评估</strong><br>Dense（密集评估），即指全连接层替换为卷积层（第一FC层转换到7×7卷积层，最后两个FC层转换到1×1卷积层），最后得出一个预测的score map，再对结果求平均。<br>multi-crop，即对图像进行多样本的随机裁剪，将得到多张裁剪得到的图像输入到网络中，最终对所有结果平均.<br><img src="https://img-blog.csdnimg.cn/img_convert/925e5742f42b654fabe4bf03cf56f1b8.png#pic_center" alt="多裁剪与密度估计"><br>从上图可以看出，<strong>多裁剪的结果是好于密集估计的</strong>。而且这两种方法确实是互补的，因为它们的组合优于其中的每一种。<br>由于不同的卷积边界条件，多裁剪图像评估是密集评估的补充：当将ConvNet应用于裁剪图像时，卷积特征图用零填充，而在密集评估的情况下，相同裁剪图像的填充自然会来自于图像的相邻部分（由于卷积和空间池化），这大大增加了整个网络的感受野，因此捕获了更多的图像内容信息。</p>
-</li>
-</ul>
-<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><ul>
-<li>在训练时，可以使用多尺度抖动的训练图像，其精度好于固定尺寸的训练集。</li>
-<li>测试时，使用多裁剪和密集评估（卷积层替换全连接层）像结合的方法<img src="https://img-blog.csdnimg.cn/img_convert/d2092e465499fab47e8e6587f744e396.png#pic_center" alt="卷积层替换全连接层"></li>
-</ul>
-]]></content>
-      <categories>
-        <category>深度学习基础</category>
-      </categories>
-      <tags>
-        <tag>深度学习</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>模型误差的来源分析</title>
     <url>/2021/08/02/%E6%A8%A1%E5%9E%8B%E8%AF%AF%E5%B7%AE%E7%9A%84%E6%9D%A5%E6%BA%90%E5%88%86%E6%9E%90/</url>
     <content><![CDATA[<p>@<a href="模型误差的来源分析">TOC</a></p>
@@ -1378,6 +1399,70 @@
       </tags>
   </entry>
   <entry>
+    <title>浅谈 VGG</title>
+    <url>/2021/11/01/%E6%B5%85%E8%B0%88%20VGG/</url>
+    <content><![CDATA[<p>@<a href="浅谈 VGG">TOC</a><br>《Very Deep Convolutional Networks for Large-Scale Image Recognition》</p>
+<p>arXiv：<a href="https://arxiv.org/abs/1409.1556">[1409.1556] Very Deep Convolutional Networks for Large-Scale Image Recognition<br>intro：ICLR 2015</a><br>homepage：<a href="https://www.robots.ox.ac.uk/~vgg/research/very_deep/">Visual Geometry Group Home Page</a></p>
+<h1 id="VGG-特点"><a href="#VGG-特点" class="headerlink" title="VGG 特点"></a>VGG 特点</h1><p>VGG 网络是在ILSVRC 2014上的相关工作，主要工作是证明了增加网络的深度能够在一定程度上影响网络最终的性能。<br>VGG有两种结构，分别是VGG16和VGG19，两者并没有本质上的区别，只是网络深度不一样。</p>
+<ul>
+<li>VGG16包含了16个隐藏层（13个卷积层和3个全连接层） 其特点为 卷积块的卷积层个数为  2 2 3 3 3<br><img src="https://img-blog.csdnimg.cn/img_convert/22de401629c305540a9f2ccaef96ba63.png#pic_center" alt="VGG16"><br><img src="https://img-blog.csdnimg.cn/img_convert/786fc264427f593ff33f5dede514a990.png#pic_center" alt="VGG16"></li>
+</ul>
+<ul>
+<li>VGG19包含了19个隐藏层（16个卷积层和3个全连接层） 的特点为 卷积块的卷积层个数为  2 2 4 4 4</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/27f07e7317617a43f88350a560c371a6.png#pic_center" alt="VGG网络架构"><br>全连接转卷积（测试阶段）<br>这也是VGG的一个特点，在网络测试阶段将训练阶段的三个全连接替换为三个卷积，使得测试得到的全卷积网络因为没有全连接的限制，因而可以接收任意宽或高为的输入，这在测试阶段很重要。<br>例如，输入图像是224x224x3，如果后面三个层都是全连接，那么在测试阶段就只能将测试的图像全部都要缩放大小到224x224x3，才能符合后面全连接层的输入数量要求，这样就不便于测试工作的开展。</p>
+<h1 id="VGG-原理"><a href="#VGG-原理" class="headerlink" title="VGG 原理"></a>VGG 原理</h1><p>VGG16相比AlexNet的一个改进是采用连续的几个3x3的卷积核代替AlexNet中的较大卷积核（如11x11，7x7，5x5）。对于给定的感受野（与输出有关的输入图片的局部大小），采用堆积的小卷积核是优于采用大的卷积核，因为多层非线性层可以增加网络深度来保证学习更复杂的模式，而且代价还比较小（参数更少）。</p>
+<p>为什么2个3×3的卷积核 可以 代替 1个5×5的卷积核？<br><img src="https://img-blog.csdnimg.cn/img_convert/5c12d10dd0738e23846584801c3a686f.png#pic_center" alt="两个3×3代替5×5"><br>因为我们知道   例如输入图片大小为C 卷积核大小为k  步长为d 那输出图片大小就是 $\lfloor \frac{C+2 * padding-k}{d} \rfloor +1$<br>那pad=0 d=1 对于2个3×3的而言 计算得到的 输出图片大小为 C-4<br>同理 一个5×5的 也为 C-4</p>
+<p>总结的来说优势有3点：</p>
+<ol>
+<li>分成多个层的小卷积核来代替大卷积核，可以增加网络深度。而每一层都会引入非线性的激活函数，所以其非线性表达的能力会更好，模型的分类性能更好。</li>
+<li>计算参数减少了。举个例子比如输入维度是C(也就是卷积核通道维度)，输出维度是C(也就是卷积核个数)，如果使用2层3×3的卷积层来代替一层5×5的，3×3的参数总量为 3×3×C×C×2 = $18C^{2}$；对应的  5×5的 为 5×5×C×C×1 = $25C^{2}$</li>
+<li>使用多个层的小卷积核，相当于将一个大的感受野分成多个小感受野来学习，是一种正则化的思想。注意：正则化是一种思想方式，其目的为防止过拟合。其具体方法有：BN、dropout、L1和L2正则化项等。</li>
+</ol>
+<h1 id="VGG优缺点"><a href="#VGG优缺点" class="headerlink" title="VGG优缺点"></a>VGG优缺点</h1><h2 id="VGG优点"><a href="#VGG优点" class="headerlink" title="VGG优点"></a>VGG优点</h2><ul>
+<li>VGG16和VGG19 的结构非常简洁，整个网络都使用了同样大小的卷积核尺寸（3x3）和最大池化尺寸（2x2）。</li>
+<li>几个小滤波器（3x3）卷积层的组合比一个大滤波器（5x5或7x7）卷积层好：</li>
+<li>验证了通过不断加深网络结构可以提升性能。</li>
+<li><p>VGG 是传统的串行结构，输出的内容例如左上角提取的就是原图像左上角的特征。<br><img src="https://img-blog.csdnimg.cn/img_convert/afe80f4458553cf142cd9a8f6b7cfc40.png#pic_center" alt="FeatureMap的提取情况"></p>
+</li>
+<li><p>VGG 的迁移学习能力很强，一般都用来做基础模型。我们只需要修改最后1层的输出结构，冻结前面所有在ImageNet上训练VGG后的参数，再拿自己的数据集来训练最后4096神经元和最后一层输出的参数即可。</p>
+</li>
+<li>采用多尺度训练方式，训练的数据可以有 224、256、384、[256，512]</li>
+<li>作者提出的 在test上改进的方法，将最后的全连接层改为全卷积层，但是作者训练的时候并没有这么用。这个方法可以实现多尺度输入，原始的 全神经网络的话 他层次的神经元是定死的 所以我没办法换个尺度的图片输入。<br><img src="https://img-blog.csdnimg.cn/img_convert/d2092e465499fab47e8e6587f744e396.png#pic_center" alt="test"></li>
+</ul>
+<h2 id="VGG缺点"><a href="#VGG缺点" class="headerlink" title="VGG缺点"></a>VGG缺点</h2><p>参数非常庞大。庞大在卷积层输出压平后与第一层全神经网络之间的参数。<br><img src="https://img-blog.csdnimg.cn/img_convert/5a91f370bba686cfa4003affe2a9eefc.png#pic_center" alt="参数计算"><br>首先看第二行，所谓的内存就是输出图片大小  而参数就是卷积核×通道数×卷积核个数64个。<br>注意这里是没有算上偏置量的，算的话就是每个卷积核一个偏置项，会增广成矩阵加上去的。</p>
+<h1 id="VGG的训练和测试"><a href="#VGG的训练和测试" class="headerlink" title="VGG的训练和测试"></a>VGG的训练和测试</h1><p> 论文首先将训练图像缩放到最小边长度的方形，设缩放后的训练图像的尺寸为S×S。网络训练时对训练图像进行随机裁剪，裁剪尺寸为网络的输入尺寸224×224。如果S=224，则输入网络的图像就是整个训练图像；如果S&gt;224，则随机裁剪训练图像包含目标的部分。</p>
+<p>对于训练集图像的尺寸设置，论文中使用了两种方法：</p>
+<p>固定尺寸训练，设置 <strong>S=256</strong> 和 <strong>S=384</strong><br>多尺度训练，每个训练图像从一定范围内 <strong>[Smin,Smax],(Smin=256,Smax=512)</strong> 进行随机采样。由于图像中的目标可能具有不同的大小，因此在训练期间考虑到这一点是有益的。这也可以看作是通过尺度抖动进行训练集增强，其中单个模型被训练在一定尺度范围内识别对象。</p>
+<h2 id="网络性能评估"><a href="#网络性能评估" class="headerlink" title="网络性能评估"></a>网络性能评估</h2><ul>
+<li><strong>单尺度评估，测试图像固定尺度。结果如下表</strong><br><img src="https://img-blog.csdnimg.cn/img_convert/c06443bd58d1867902a59902e0a5b2c7.png#pic_center" alt="单一尺度评估"><br>通过评估结果，可以看出：<ul>
+<li>局部归一化（A-LRN）网络，对网络A的结果并没有很大的提升。</li>
+<li>网络的性能随着网络的加深而提高。应该注意到B，C，D这个网络的性能。C网络好于B网络，说明额外添加的非线性激活函数，确实是有好处的；但是，D网络好于C网络，这说明也可以使用非平凡的感受野来捕获更多的信息更有用。</li>
+<li>当网络层数达到19层时，使用VGG架构的错误率就不再随着层数加深而提高了。更深的网络应该需要更多的数据集。</li>
+<li>论文还将网络B与具有5×5卷积层的浅层网络进行了比较，浅层网络可以通过用单个5×5卷积层替换B中每对3×3卷积层得到。测量的浅层网络top-1错误率比网络B的top-1错误率（在中心裁剪图像上）高7％，<strong>这证实了具有小滤波器的深层网络优于具有较大滤波器的浅层网络</strong>。</li>
+<li>训练时的尺寸抖动（训练图像大小S∈[256,512])得到的结果好于固定尺寸，这证实了通过尺度抖动进行的训练集增强确实有助于捕获多尺度图像统计。</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p><strong>多尺度评估，测试图像的尺度抖动对性能的影响</strong><br>  对同一张测试图像，将其缩放到不同的尺寸进行测试，然后取这几个测试结果的平均值，作为最终的结果（有点像集成学习，所不同的是，这里是测试图像的尺寸不同）。使用了三种尺寸的测试图像：Q表示测试图像，S表示训练是图像尺寸：Q=S−32，Q=S+32，前面两种是针对训练图像是固定大小的，对于训练时图像尺寸在一定范围内抖动的，则可以使用更大的测试图像尺寸。   Q={Smin,0.5(Smin+Smax),Smax}.<br>评估结果如下：<br><img src="https://img-blog.csdnimg.cn/img_convert/339fb07aaff8cf5e01ac2dab96205f39.png#pic_center" alt="多尺度评估，测试图像的尺度抖动对性能的影响"><br>评估结果表明，训练图像尺度抖动优于使用固定最小边S。</p>
+</li>
+<li><p><strong>稠密和多裁剪图像评估</strong><br>Dense（密集评估），即指全连接层替换为卷积层（第一FC层转换到7×7卷积层，最后两个FC层转换到1×1卷积层），最后得出一个预测的score map，再对结果求平均。<br>multi-crop，即对图像进行多样本的随机裁剪，将得到多张裁剪得到的图像输入到网络中，最终对所有结果平均.<br><img src="https://img-blog.csdnimg.cn/img_convert/925e5742f42b654fabe4bf03cf56f1b8.png#pic_center" alt="多裁剪与密度估计"><br>从上图可以看出，<strong>多裁剪的结果是好于密集估计的</strong>。而且这两种方法确实是互补的，因为它们的组合优于其中的每一种。<br>由于不同的卷积边界条件，多裁剪图像评估是密集评估的补充：当将ConvNet应用于裁剪图像时，卷积特征图用零填充，而在密集评估的情况下，相同裁剪图像的填充自然会来自于图像的相邻部分（由于卷积和空间池化），这大大增加了整个网络的感受野，因此捕获了更多的图像内容信息。</p>
+</li>
+</ul>
+<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><ul>
+<li>在训练时，可以使用多尺度抖动的训练图像，其精度好于固定尺寸的训练集。</li>
+<li>测试时，使用多裁剪和密集评估（卷积层替换全连接层）像结合的方法<img src="https://img-blog.csdnimg.cn/img_convert/d2092e465499fab47e8e6587f744e396.png#pic_center" alt="卷积层替换全连接层"></li>
+</ul>
+]]></content>
+      <categories>
+        <category>深度学习基础</category>
+      </categories>
+      <tags>
+        <tag>深度学习</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>深度学习基础 - Batch Normalization</title>
     <url>/2021/10/05/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80%20-%20Batch%20Normalization/</url>
     <content><![CDATA[<p>@<a href="深度学习基础 - Batch Normalization">TOC</a></p>
@@ -1418,6 +1503,67 @@
       </tags>
   </entry>
   <entry>
+    <title>神经网络与深度学习 学习笔记（第一章）</title>
+    <url>/2021/09/10/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E7%AC%AC%E4%B8%80%E7%AB%A0%EF%BC%89/</url>
+    <content><![CDATA[<p>@<a href="神经网络与深度学习 邱锡鹏 学习笔记（第一章）">TOC</a></p>
+<h1 id="机器学习"><a href="#机器学习" class="headerlink" title="机器学习"></a>机器学习</h1><h2 id="浅层学习"><a href="#浅层学习" class="headerlink" title="浅层学习"></a>浅层学习</h2><blockquote>
+<p>学习一个预测模型．一般需要首先将数据表示为一组特征（Feature），特征的表示形式可以是连续的数值、离散的符号或其他形式．然后将这些特征输入到预测模型，并输出预测结果．这类机器学习可以看作浅层学习（Shallow  Learning）</p>
+</blockquote>
+<h2 id="机器学习的步骤"><a href="#机器学习的步骤" class="headerlink" title="机器学习的步骤"></a>机器学习的步骤</h2><ol>
+<li>数据预处理：对数据的原始形式进行初步的数据清理（比如去掉一些有缺失特征的样本，或去掉一些冗余的数据特征等）和加工（对数值特征进行缩放和归一化等），并构建成可用于训练机器学习模型的数据集．</li>
+<li>特征提取：从数据的原始特征中提取一些对特定机器学习任务有用的高质量特征．比如在图像分类中提取边缘、尺度不变特征变换（Scale Invariant<br>Feature Transform，SIFT）特征，在文本分类中去除停用词等．</li>
+<li>特征转换：对特征进行进一步的加工，比如降维和升维． 很多特征转换方法也都是机器学习方法．降维包括特征抽取（Feature Extraction）和特征选择（FeatureSelection）两种途径．常用的特征转换方法有主成分分析（Principal Components Analysis，PCA）、 线性判别分析（Linear Discriminant Analysis，LDA）等．</li>
+<li>预测：机器学习的核心部分，学习一个函数并进行预测．</li>
+</ol>
+<p><img src="https://img-blog.csdnimg.cn/f3d73fb28f1342f48a6ca08638b8da68.png#pic_center" alt="传统机器学习的数据处理流程"><br>注：很多的机器学习问题变成了特征工程（Feature Engineering）问题．开发一个机器学习系统的主要工作量都消耗在了预处理、特征提取以及特征转换上。</p>
+<h1 id="表示学习"><a href="#表示学习" class="headerlink" title="表示学习"></a>表示学习</h1><p>在表示学习中，有两个核心问题：</p>
+<ul>
+<li>一是“什么是一个好的表示”；即表示 需要包含更高层的语义信息</li>
+<li>二是“如何学习到好的表示”．</li>
+</ul>
+<p>传统的特征学习一般是通过<font color="red">人为地设计一些准则</font>，然后根据这些准则来选取有效的特征。 所以 特征的学习是和最终预测模型的学习分开进行的，<font color="red">因此学习到的特征不一定可以提升最终模型的性能．</font></p>
+<h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>将输入信息转换为有效的特征。<br>如果有一种算法可以自动地学习出有效的特征，并提高最终机器学习模型的性能，那么这种学习就可以叫作表示学习（Representation Learning）．</p>
+<h2 id="语义鸿沟"><a href="#语义鸿沟" class="headerlink" title="语义鸿沟"></a>语义鸿沟</h2><p>语义鸿沟问题是指输入数据的底层特征和高层语义信息之间的不一致性和差异性。</p>
+<blockquote>
+<p>比如车，图片中每辆车的颜色和形状等属性都不尽相同，因此不同图片在像素级别上的表示（即底层特征）差异性也会非常大．但是我们理解这些图片是建立在比较抽象的高层语义概念上的</p>
+</blockquote>
+<h2 id="表示特征的方式"><a href="#表示特征的方式" class="headerlink" title="表示特征的方式"></a>表示特征的方式</h2><ol>
+<li>局部表示：例如，one-hot向量 表示颜色。 缺点在于多个颜色就多个列或者行 </li>
+<li>分布式表示：RGB 表示颜色</li>
+</ol>
+<p><img src="https://img-blog.csdnimg.cn/aa86242673364da09f8245d248914cbd.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="局部表示和分布式表示示例"></p>
+<h2 id="嵌入"><a href="#嵌入" class="headerlink" title="嵌入"></a>嵌入</h2><p>嵌入通常指将一个度量空间中的一些对象映射到另一个低维的度量空间中，并尽可能保持不同对象之间的拓扑关系．<font color="blue">比如自然语言中词的分布式表示，也经常叫作词嵌入 </font></p>
+<p><font color="red"><strong>例如：3维one-hot向量空间和一个2维嵌入空间的对比</strong></font><br><img src="https://img-blog.csdnimg.cn/007e99163fd044348e7061ebebc1af33.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_14,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="one-hot向量空间与嵌入空间"><br>在低维的嵌入空间中，每个样本都不在坐标轴上，样本之间可以计算相似度．</p>
+<h1 id="深度学习"><a href="#深度学习" class="headerlink" title="深度学习"></a>深度学习</h1><h2 id="什么是深度"><a href="#什么是深度" class="headerlink" title="什么是深度"></a>什么是深度</h2><p>“深度”是指原始数据进行非线性特征转换的次数</p>
+<h2 id="深度学习的优点"><a href="#深度学习的优点" class="headerlink" title="深度学习的优点"></a>深度学习的优点</h2><p>深度学习，其主要目的是从数据中<font color="red">自动学习到有效的特征表示 </font><br>其抽象在 数据通过多层的特征转换，学习到的表示可以代替人工设计的特征，从而避免“特征工程”<br><img src="https://img-blog.csdnimg.cn/f678fb27e01c4d989d099cfa06afe038.png#pic_center" alt="深度学习的数据处理流程"><br>其是 一种 <font color="red"><strong>端到端的学习方式</strong></font>   在学习过程中<strong>不进行分模块或分阶段训练</strong>，直接优化任务的总体目标．在端到端学习中，一般不需要明确地给出不同模块或阶段的功能，中间过程不需要人为干预</p>
+<h2 id="深度学习的关键问题"><a href="#深度学习的关键问题" class="headerlink" title="深度学习的关键问题"></a>深度学习的关键问题</h2><p>深度学习需要解决的关键问题是 <strong>贡献度分配问题</strong>，即一个系统中不同的 <strong>组件</strong> 或其 <strong>参数</strong> 对最终系统输出结果的贡献或影响 </p>
+<p>目前，深度学习采用的模型主要是神经网络模型，其主要原因是神经网络模型可以使用 <strong>误差反向传播算法</strong> ，从而可以比较好地解决贡献度分配问题</p>
+<h1 id="深度学习相关的学术会议"><a href="#深度学习相关的学术会议" class="headerlink" title="深度学习相关的学术会议"></a>深度学习相关的学术会议</h1><ul>
+<li>国际表示学习会议  ICLR ：主要聚焦于深度学习</li>
+<li>神经信息处理系统年会 NeurIPS ：交叉学科会议，但偏重于机器学习</li>
+<li>国际机器学习会议 ICML：机器学习顶级会议</li>
+<li>国际人工智能联合会议 IJCAI ：人工智能领域最顶尖的综合性会议</li>
+<li>美国人工智能协会年会  AAAI ：人工智能领域的顶级会议</li>
+</ul>
+<h2 id="计算机视觉领域"><a href="#计算机视觉领域" class="headerlink" title="计算机视觉领域"></a>计算机视觉领域</h2><ul>
+<li>计算机视觉与模式识别大会  CVPR</li>
+<li>国际计算机视觉会议  ICCV</li>
+</ul>
+<h2 id="自然语言处理领域"><a href="#自然语言处理领域" class="headerlink" title="自然语言处理领域"></a>自然语言处理领域</h2><ul>
+<li>计算语言学年会 ACL</li>
+<li>自然语言处理实证方法大会  EMNLP</li>
+</ul>
+]]></content>
+      <categories>
+        <category>机器学习基础</category>
+      </categories>
+      <tags>
+        <tag>深度学习</tag>
+        <tag>邱锡鹏</tag>
+        <tag>神经网络</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>目标检测的中的指标的含义及其实现</title>
     <url>/2021/10/04/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B%E7%9A%84%E4%B8%AD%E7%9A%84%E6%8C%87%E6%A0%87%E7%9A%84%E5%90%AB%E4%B9%89%E5%8F%8A%E5%85%B6%E5%AE%9E%E7%8E%B0/</url>
     <content><![CDATA[<p>@<a href="目标检测的中的指标的含义及其实现">TOC</a></p>
@@ -1446,92 +1592,6 @@
       </categories>
       <tags>
         <tag>深度学习</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>线性回归Regression 案例一：宝可梦进化CP值</title>
-    <url>/2021/07/31/%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92Regression%20%E6%A1%88%E4%BE%8B%E4%B8%80%EF%BC%9A%E5%AE%9D%E5%8F%AF%E6%A2%A6%E8%BF%9B%E5%8C%96CP%E5%80%BC/</url>
-    <content><![CDATA[<p>@<a href="线性回归Regression 案例一：宝可梦进化CP值">TOC</a></p>
-<blockquote>
-<p>本栗子：预测Pokemon精灵攻击力。<br>输入：进化前的CP值、物种（Bulbasaur）、血量（HP）、重量（Weight）、高度（Height）<br>输出：进化后的CP值</p>
-</blockquote>
-<p><img src="https://img-blog.csdnimg.cn/img_convert/d53b2b95d30c7af9574c7a0bbaba2c82.png#pic_center" alt="在这里插入图片描述"></p>
-<h1 id="实现回归的步骤（机器学习的步骤）"><a href="#实现回归的步骤（机器学习的步骤）" class="headerlink" title="实现回归的步骤（机器学习的步骤）"></a>实现回归的步骤（机器学习的步骤）</h1><h2 id="Step1-确定一个model-线性模型"><a href="#Step1-确定一个model-线性模型" class="headerlink" title="Step1 确定一个model - 线性模型"></a>Step1 确定一个model - 线性模型</h2><blockquote>
-<p>输入的特征包括：进化前的CP值（<em>Xcp</em>）、物种（Bulbasaur）（<em>Xs</em>）、血量（HP）（<em>Xhp</em>）、重量（Weight）（<em>Xw</em>）、高度（Height）（<em>Xh</em>）</p>
-</blockquote>
-<p>先从简单的<strong>单个特征</strong> 进化前的CP值（<em>Xcp</em>）开始（<strong>后面改进再考虑多个特征</strong>）。<br><img src="https://img-blog.csdnimg.cn/img_convert/5b4df493600379c7aa0372e103eb7d79.png#pic_center" alt="在这里插入图片描述"></p>
-<h2 id="Step2-goodness-of-function（函数优化）——损失函数"><a href="#Step2-goodness-of-function（函数优化）——损失函数" class="headerlink" title="Step2 goodness of function（函数优化）——损失函数"></a>Step2 goodness of function（函数优化）——损失函数</h2><ol>
-<li>确定model后（案例为线性模型），开始训练数据（使用的为训练样本集）<img src="https://img-blog.csdnimg.cn/img_convert/ebd00bf7bee79841d6c35eac2865fd61.png#pic_center" alt="在这里插入图片描述"></li>
-<li>训练10个训练样本后得到10个的预测进化CP值（<em>y</em>）如下图所示。左侧为训练样本本身真实的进化CP值，右侧为横轴为进化前CP值（<em>Xcp</em>）<img src="https://img-blog.csdnimg.cn/img_convert/fbba4351217b730cd11ca92a7427cd51.png#pic_center" alt="在这里插入图片描述"></li>
-<li><strong>确定损失函数</strong>。损失函数用于评价一个模型的好坏。损失函数的值越小，那么模型越好。<strong>对于本案例，损失函数采用最简单的距离表示</strong>。即求<strong>实际进化后的CP值与模型预测的CP值差</strong>，来判定模型的好坏。<img src="https://img-blog.csdnimg.cn/img_convert/3abae7108681dbad20cc15a952d20bba.png#pic_center" alt="在这里插入图片描述"><ol>
-<li>List item</li>
-</ol>
-</li>
-</ol>
-<h2 id="Step3-best-function（找出最好的一个函数-即调参）——使用梯度下降法"><a href="#Step3-best-function（找出最好的一个函数-即调参）——使用梯度下降法" class="headerlink" title="Step3 best function（找出最好的一个函数 即调参）——使用梯度下降法"></a>Step3 best function（找出最好的一个函数 即调参）——使用梯度下降法</h2><ol>
-<li>案例采用<strong>梯度下降法</strong>来帮助选择 <em>w</em> 和 <em>b</em> 两个参数取何值时损失函数最小，也就意味着构建的模型越准确。 <img src="https://img-blog.csdnimg.cn/img_convert/7d75962cbe0b2dc3c54f370383912138.png#pic_center" alt="在这里插入图片描述"><blockquote>
-<p>什么是梯度下降法？梯度指的是？<br>………………………………………………………………………………………………………<br>梯度？<br>在<strong>单变量的函数</strong>中，梯度其实就是对应点<strong>函数的微分</strong>，代表着这个函数在<strong>某个给定点的切线的斜率</strong><br>在<strong>多变量函数</strong>中，梯度是一个<strong>向量</strong>，向量有方向，梯度的方向就指出了函数在给定点的上升最快的方向  <strong>即例如二维就是 偏导 i + 偏导 j</strong><br>………………………………………………………………………………………………………<br>梯度下降法(SGD  Stochastic gradient descent）？答： “下山最快路径”的一种算法<br>我们是尝试使用偏导来衡量函数随自变量的值变化关系，选择变化更为平缓的那一处  对应的 <em>w</em> 和 <em>b</em> 作为调整后的参数</p>
-</blockquote>
-</li>
-</ol>
-<h3 id="一维视角：只考虑一个参数-w"><a href="#一维视角：只考虑一个参数-w" class="headerlink" title="一维视角：只考虑一个参数 w"></a>一维视角：只考虑一个参数 <em>w</em></h3><p><img src="https://img-blog.csdnimg.cn/3c72961665a942ac87f066a129a30183.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<blockquote>
-<p>如上图  learning rate（学习率）：移动的步长 一般用η来表示<br>………………………………………………………………………………………………………<br>如何寻找一个最合适的 <em>w</em> ？<br>步骤1：随机在横轴上选取一个 <em>w0</em> 。<br>步骤2：计算微分，也就是当前的斜率，根据斜率来判定移动的方向。微分大于0应向右移动（增加 <em>w</em> ）；微分小于0向左移动（减少 <em>w</em> ）<br>步骤3：根据学习率，按步骤2得到的方向移动<br>重复步骤2和步骤3，直到找到<strong>最低点</strong>。横轴即对于的最佳 <em>w</em>  参数<br>………………………………………………………………………………………………………<br>如下图，是经过迭代多次后找到的最佳点（得是全局最优解） 。注：大部分损失函数都为正<br><img src="https://img-blog.csdnimg.cn/588186b690dd43c38a10a80600802ab0.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="二维视角：考虑两个参数-w-和-b"><a href="#二维视角：考虑两个参数-w-和-b" class="headerlink" title="二维视角：考虑两个参数 w 和 b"></a>二维视角：考虑两个参数 <em>w</em> 和 <em>b</em></h3><p><img src="https://img-blog.csdnimg.cn/55f2f295750242bfa35f9ac576602194.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>如何寻找一个最合适的 <em>w</em> ？<br>步骤1：随机在横轴上选取一个 <em>w0</em> ，<em>b0</em> 。<br>步骤2：计算各偏导，也就是当前偏导的斜率，根据斜率来判定移动的方向。微分大于0应向右移动（增加 <em>w</em> 或 <em>b</em>）；微分小于0向左移动（减少 <em>w</em> 或 <em>b</em>）<img src="https://img-blog.csdnimg.cn/6a082b40869947c2a0723b298cd36027.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>步骤3：根据学习率，按步骤2得到的方向移动<br>重复步骤2和步骤3，直到找到<strong>最低点</strong>。横轴即对于的最佳 <em>w</em> 和 <em>b</em>  参数</p>
-</blockquote>
-<p>二维情况：梯度下降法的效果<br>颜色约深的区域代表的损失函数越小？ <strong>为什么呢？</strong><br><img src="https://img-blog.csdnimg.cn/299d0d615f6640a6ae092e51579d09ea.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h3 id="梯度算法的优缺点"><a href="#梯度算法的优缺点" class="headerlink" title="梯度算法的优缺点"></a>梯度算法的优缺点</h3><blockquote>
-<p>总结一下梯度下降法：<br>　　　我们要解决使<strong>损失函数<em>L(w,b)</em></strong> 最小时参数的最佳值，梯度下降法是每次update参数值，直到损失函数最小时找到对应最佳的参数<em>w，b</em></p>
-</blockquote>
-<p><strong>缺点1</strong>：求解的未必是全局最优解，有可能是局部最优解。</p>
-<blockquote>
-<p><strong>用下山的例子讲</strong>：<br>　　　比如我们在一座大山上的某处位置，由于我们不知道怎么下山，于是决定走一步算一步，也就是在<strong>每走到一个位置的时候</strong>，<strong>求解当前位置的梯度</strong>，沿着<strong>梯度的负方向</strong>，也就是<strong>当前最陡峭的位置向下走一步</strong>，然后继续求解当前位置梯度，向这一步所在位置沿着最陡峭最易下山的位置走一步。这样一步步的走下去，一直走到觉得我们已经到了山脚。当然这样走下去，<strong>有可能我们不能走到山脚，而是到了某一个局部的山峰低处。</strong><br>………………………………………………………………………………………………………<br>　　　从上面的解释可以看出，<strong>梯度下降不一定能够找到全局的最优解，有可能是一个局部最优解</strong>。当然，如果损失函数是<strong>凸函数</strong>，梯度下降法得到的解就<strong>一定是</strong>全局最优解。</p>
-</blockquote>
-<p><strong>优点1</strong>：无论随机从哪个点出发，得到的最佳参数一定是同一组</p>
-<blockquote>
-<p><strong>用下山的例子讲</strong>：<br>　　　因为山只有一处是最低点，在确保能找到全局最优解的情况下，无论人从山上哪一点出发，一定能找到这特定一处的最低洼处。</p>
-</blockquote>
-<h2 id="Step4-回归结果分析"><a href="#Step4-回归结果分析" class="headerlink" title="Step4 回归结果分析"></a>Step4 回归结果分析</h2><blockquote>
-<p>经过上述三个步骤后，得到了<strong>训练后</strong>的“最佳参数<em>w</em>，<em>b</em>”，那么现在这个模型在<strong>测试集</strong>上是什么表现呢？<br>得到的结果是：<br><strong>测试集的误差比在训练集上得到的损失值大</strong> 这个事非常正常。因为你训练集里面可能有些数据是不典型的，同样测试集中很多也包含了训练集中没有的因素。所以一个函数模型在实际应用中，效果基本上时打折扣的。<strong>一般会采用两种方式来加强这个函数模型</strong>：<br>　　　select another model（选择另一个模型）即增加维度，增加高此项多项式<br>　　　consider the hidden factors（考虑其他隐藏因素）</p>
-</blockquote>
-<h3 id="优化模型方法一：增加高次项（一般用于拟合度不够的情况）"><a href="#优化模型方法一：增加高次项（一般用于拟合度不够的情况）" class="headerlink" title="优化模型方法一：增加高次项（一般用于拟合度不够的情况）"></a>优化模型方法一：增加高次项（一般用于拟合度不够的情况）</h3><p><strong>回到Step1</strong></p>
-<ol>
-<li>尝试二次项、三次项、四次项、五次项…… 右上图为训练集损失，下图是测试集的损失。第五次<strong>过拟合</strong>导致了，测试集损失度很高。<img src="https://img-blog.csdnimg.cn/c707638cef5c4d698813e6acfe4ec172.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/ce26490bbfc64ea6967cd7b8e1e8184d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/166aef516df14c339c45fee48a78e16a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/87e7491ce6a1464dad4c023dc9004274.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
-<li><strong>选择合适的模型</strong>，即我到底要加到几次项呢？</li>
-</ol>
-<blockquote>
-<p>越复杂的模型所包含的函数也就越多，那么它包含理想模型的可能性也就越大，但是如果过分地去拟合理想模型，就会出现<strong>过拟合</strong>的情况。<br><img src="https://img-blog.csdnimg.cn/6a394ba6b4a648a994472d8969668601.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-</blockquote>
-<ol>
-<li>横向比较各个多项次，训练集和测试集的失误。理论上，失误会随着高次项而变小，如果变大，则表示模型<strong>过拟合</strong>了。<img src="https://img-blog.csdnimg.cn/979417ba98f6475d941753e0cb71b91c.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>所以，如上图所示，在为3次的时候，训练集和测试集的误差差值最小。并且4次开始，以及存在过拟合现象了。因此本案例可选择3次项线性模型。</li>
-</ol>
-<h3 id="优化模型方法二：考虑其他隐藏因素"><a href="#优化模型方法二：考虑其他隐藏因素" class="headerlink" title="优化模型方法二：考虑其他隐藏因素"></a>优化模型方法二：考虑其他隐藏因素</h3><p><strong>回到Step1</strong></p>
-<blockquote>
-<p>输入的特征包括：进化前的CP值（<em>Xcp</em>）、物种（Bulbasaur）（<em>Xs</em>）、血量（HP）（<em>Xhp</em>）、重量（Weight）（<em>Xw</em>）、高度（Height）（<em>Xh</em>）<br>除了之前考虑的进化前的CP值（<em>Xcp</em>），其他均为隐藏因素<br>………………………………………………………………………………<br><strong>这里另外考虑的是神奇宝贝的种类</strong>？因为，有时候一个模型恰恰只能符合一种神奇宝贝，也就是<strong>不同神奇宝贝应该有不同的预测模型</strong>。<img src="https://img-blog.csdnimg.cn/72a4aadb2ba24aefb4584a8a8ca2801e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-</blockquote>
-<ol>
-<li>不同的神奇宝贝有不同的预测模型<img src="https://img-blog.csdnimg.cn/46fe5297bddb46a4bd511a7cea422e3a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
-<li>拟合这个模型的曲线，可以看出不同神奇宝贝拟合成了不同的类线性直线<img src="https://img-blog.csdnimg.cn/7a55f95269d642038715e355437600f2.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
-<li>如果还考虑了其他隐藏元素。如图是横轴是对应的隐藏元素，纵轴是对应进化后的CP值。<img src="https://img-blog.csdnimg.cn/591a6aa5537443428687ba15886ab11d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
-<li>如果都采用最高二次项，考虑所有其他的隐藏因素。该案例的数学模型就变成 如图所示的式子。<img src="https://img-blog.csdnimg.cn/0a80407d715e4dcc978bd86dee3451a3.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><blockquote>
-<p> 考虑更多的因素反而出现了过拟合的问题，<strong>说明有些因素跟本次实验的CP值预测没有关系</strong>！<br>………………………………………………………………………………<br><strong>过拟合这么讨厌，到底如何减少过拟合问题呢？往下看！</strong></p>
-</blockquote>
-</li>
-</ol>
-<h3 id="优化模型：防止过拟合（为损失函数加一个正则项）"><a href="#优化模型：防止过拟合（为损失函数加一个正则项）" class="headerlink" title="优化模型：防止过拟合（为损失函数加一个正则项）"></a>优化模型：防止过拟合（为损失函数加一个正则项）</h3><h4 id="正则项是什么"><a href="#正则项是什么" class="headerlink" title="正则项是什么?"></a>正则项是什么?</h4><blockquote>
-<p><strong>方法：正则化</strong>?<br>比如先考虑一个参数w，正则化就是在损失函数上加上一个与w（斜率）相关的值（正则项），那么要是loss function越小的话，w也会越小，w越小就使function更加平滑（function没那么大跳跃）<img src="https://img-blog.csdnimg.cn/7a87a38ed54c438c8af37860e982f775.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h4 id="正则化的缺点"><a href="#正则化的缺点" class="headerlink" title="正则化的缺点"></a>正则化的缺点</h4><p>正则化虽然能够减少过拟合的现象，但是因为加在损失函数后面的值是平白无故加上去的，所以正则化过度的话会导致<strong>bias偏差增大</strong>   ？？？？<img src="https://img-blog.csdnimg.cn/f4c9ea7efb144c8a89b7fee964b75fa8.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>1）实现参数的稀疏有什么好处吗？<br>一个好处是可以简化模型，避免过拟合。<strong>因为一个模型中真正重要的参数可能并不多，如果考虑所有的参数起作用，那么可以对训练数据可以预测的很好，但是对测试数据表现性能极差</strong>。另一个好处是参数变少可以使整个模型获得更好的可解释性。<br>2）参数值越小代表模型越简单吗？<br>是的。为什么参数越小，说明模型越简单呢，这是因为越复杂的模型，<strong>越是会尝试对所有的样本进行拟合，甚至包括一些异常样本点</strong>，这就容易造成在<strong>较小的区间里预测值产生较大的波动</strong>，这种较大的波动也反映了在这个区间里的<strong>导数很大</strong>，而<strong>只有较大的参数值才能产生较大的导数。因此复杂的模型，其参数值会比较大。</strong></p>
-</blockquote>
-<p><img src="https://img-blog.csdnimg.cn/9dcfac9366564857a226de8d73bf512e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-]]></content>
-      <categories>
-        <category>机器学习基础</category>
-      </categories>
-      <tags>
-        <tag>李宏毅</tag>
-        <tag>机器学习</tag>
-        <tag>线性回归</tag>
       </tags>
   </entry>
   <entry>
@@ -1676,64 +1736,114 @@
       </tags>
   </entry>
   <entry>
-    <title>神经网络与深度学习 学习笔记（第一章）</title>
-    <url>/2021/09/10/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%20%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%88%E7%AC%AC%E4%B8%80%E7%AB%A0%EF%BC%89/</url>
-    <content><![CDATA[<p>@<a href="神经网络与深度学习 邱锡鹏 学习笔记（第一章）">TOC</a></p>
-<h1 id="机器学习"><a href="#机器学习" class="headerlink" title="机器学习"></a>机器学习</h1><h2 id="浅层学习"><a href="#浅层学习" class="headerlink" title="浅层学习"></a>浅层学习</h2><blockquote>
-<p>学习一个预测模型．一般需要首先将数据表示为一组特征（Feature），特征的表示形式可以是连续的数值、离散的符号或其他形式．然后将这些特征输入到预测模型，并输出预测结果．这类机器学习可以看作浅层学习（Shallow  Learning）</p>
-</blockquote>
-<h2 id="机器学习的步骤"><a href="#机器学习的步骤" class="headerlink" title="机器学习的步骤"></a>机器学习的步骤</h2><ol>
-<li>数据预处理：对数据的原始形式进行初步的数据清理（比如去掉一些有缺失特征的样本，或去掉一些冗余的数据特征等）和加工（对数值特征进行缩放和归一化等），并构建成可用于训练机器学习模型的数据集．</li>
-<li>特征提取：从数据的原始特征中提取一些对特定机器学习任务有用的高质量特征．比如在图像分类中提取边缘、尺度不变特征变换（Scale Invariant<br>Feature Transform，SIFT）特征，在文本分类中去除停用词等．</li>
-<li>特征转换：对特征进行进一步的加工，比如降维和升维． 很多特征转换方法也都是机器学习方法．降维包括特征抽取（Feature Extraction）和特征选择（FeatureSelection）两种途径．常用的特征转换方法有主成分分析（Principal Components Analysis，PCA）、 线性判别分析（Linear Discriminant Analysis，LDA）等．</li>
-<li>预测：机器学习的核心部分，学习一个函数并进行预测．</li>
-</ol>
-<p><img src="https://img-blog.csdnimg.cn/f3d73fb28f1342f48a6ca08638b8da68.png#pic_center" alt="传统机器学习的数据处理流程"><br>注：很多的机器学习问题变成了特征工程（Feature Engineering）问题．开发一个机器学习系统的主要工作量都消耗在了预处理、特征提取以及特征转换上。</p>
-<h1 id="表示学习"><a href="#表示学习" class="headerlink" title="表示学习"></a>表示学习</h1><p>在表示学习中，有两个核心问题：</p>
-<ul>
-<li>一是“什么是一个好的表示”；即表示 需要包含更高层的语义信息</li>
-<li>二是“如何学习到好的表示”．</li>
-</ul>
-<p>传统的特征学习一般是通过<font color="red">人为地设计一些准则</font>，然后根据这些准则来选取有效的特征。 所以 特征的学习是和最终预测模型的学习分开进行的，<font color="red">因此学习到的特征不一定可以提升最终模型的性能．</font></p>
-<h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>将输入信息转换为有效的特征。<br>如果有一种算法可以自动地学习出有效的特征，并提高最终机器学习模型的性能，那么这种学习就可以叫作表示学习（Representation Learning）．</p>
-<h2 id="语义鸿沟"><a href="#语义鸿沟" class="headerlink" title="语义鸿沟"></a>语义鸿沟</h2><p>语义鸿沟问题是指输入数据的底层特征和高层语义信息之间的不一致性和差异性。</p>
+    <title>线性回归Regression 案例一：宝可梦进化CP值</title>
+    <url>/2021/07/31/%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92Regression%20%E6%A1%88%E4%BE%8B%E4%B8%80%EF%BC%9A%E5%AE%9D%E5%8F%AF%E6%A2%A6%E8%BF%9B%E5%8C%96CP%E5%80%BC/</url>
+    <content><![CDATA[<p>@<a href="线性回归Regression 案例一：宝可梦进化CP值">TOC</a></p>
 <blockquote>
-<p>比如车，图片中每辆车的颜色和形状等属性都不尽相同，因此不同图片在像素级别上的表示（即底层特征）差异性也会非常大．但是我们理解这些图片是建立在比较抽象的高层语义概念上的</p>
+<p>本栗子：预测Pokemon精灵攻击力。<br>输入：进化前的CP值、物种（Bulbasaur）、血量（HP）、重量（Weight）、高度（Height）<br>输出：进化后的CP值</p>
 </blockquote>
-<h2 id="表示特征的方式"><a href="#表示特征的方式" class="headerlink" title="表示特征的方式"></a>表示特征的方式</h2><ol>
-<li>局部表示：例如，one-hot向量 表示颜色。 缺点在于多个颜色就多个列或者行 </li>
-<li>分布式表示：RGB 表示颜色</li>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/d53b2b95d30c7af9574c7a0bbaba2c82.png#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="实现回归的步骤（机器学习的步骤）"><a href="#实现回归的步骤（机器学习的步骤）" class="headerlink" title="实现回归的步骤（机器学习的步骤）"></a>实现回归的步骤（机器学习的步骤）</h1><h2 id="Step1-确定一个model-线性模型"><a href="#Step1-确定一个model-线性模型" class="headerlink" title="Step1 确定一个model - 线性模型"></a>Step1 确定一个model - 线性模型</h2><blockquote>
+<p>输入的特征包括：进化前的CP值（<em>Xcp</em>）、物种（Bulbasaur）（<em>Xs</em>）、血量（HP）（<em>Xhp</em>）、重量（Weight）（<em>Xw</em>）、高度（Height）（<em>Xh</em>）</p>
+</blockquote>
+<p>先从简单的<strong>单个特征</strong> 进化前的CP值（<em>Xcp</em>）开始（<strong>后面改进再考虑多个特征</strong>）。<br><img src="https://img-blog.csdnimg.cn/img_convert/5b4df493600379c7aa0372e103eb7d79.png#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="Step2-goodness-of-function（函数优化）——损失函数"><a href="#Step2-goodness-of-function（函数优化）——损失函数" class="headerlink" title="Step2 goodness of function（函数优化）——损失函数"></a>Step2 goodness of function（函数优化）——损失函数</h2><ol>
+<li>确定model后（案例为线性模型），开始训练数据（使用的为训练样本集）<img src="https://img-blog.csdnimg.cn/img_convert/ebd00bf7bee79841d6c35eac2865fd61.png#pic_center" alt="在这里插入图片描述"></li>
+<li>训练10个训练样本后得到10个的预测进化CP值（<em>y</em>）如下图所示。左侧为训练样本本身真实的进化CP值，右侧为横轴为进化前CP值（<em>Xcp</em>）<img src="https://img-blog.csdnimg.cn/img_convert/fbba4351217b730cd11ca92a7427cd51.png#pic_center" alt="在这里插入图片描述"></li>
+<li><strong>确定损失函数</strong>。损失函数用于评价一个模型的好坏。损失函数的值越小，那么模型越好。<strong>对于本案例，损失函数采用最简单的距离表示</strong>。即求<strong>实际进化后的CP值与模型预测的CP值差</strong>，来判定模型的好坏。<img src="https://img-blog.csdnimg.cn/img_convert/3abae7108681dbad20cc15a952d20bba.png#pic_center" alt="在这里插入图片描述"><ol>
+<li>List item</li>
 </ol>
-<p><img src="https://img-blog.csdnimg.cn/aa86242673364da09f8245d248914cbd.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="局部表示和分布式表示示例"></p>
-<h2 id="嵌入"><a href="#嵌入" class="headerlink" title="嵌入"></a>嵌入</h2><p>嵌入通常指将一个度量空间中的一些对象映射到另一个低维的度量空间中，并尽可能保持不同对象之间的拓扑关系．<font color="blue">比如自然语言中词的分布式表示，也经常叫作词嵌入 </font></p>
-<p><font color="red"><strong>例如：3维one-hot向量空间和一个2维嵌入空间的对比</strong></font><br><img src="https://img-blog.csdnimg.cn/007e99163fd044348e7061ebebc1af33.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBAamtzODg5OTU2NTY=,size_14,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="one-hot向量空间与嵌入空间"><br>在低维的嵌入空间中，每个样本都不在坐标轴上，样本之间可以计算相似度．</p>
-<h1 id="深度学习"><a href="#深度学习" class="headerlink" title="深度学习"></a>深度学习</h1><h2 id="什么是深度"><a href="#什么是深度" class="headerlink" title="什么是深度"></a>什么是深度</h2><p>“深度”是指原始数据进行非线性特征转换的次数</p>
-<h2 id="深度学习的优点"><a href="#深度学习的优点" class="headerlink" title="深度学习的优点"></a>深度学习的优点</h2><p>深度学习，其主要目的是从数据中<font color="red">自动学习到有效的特征表示 </font><br>其抽象在 数据通过多层的特征转换，学习到的表示可以代替人工设计的特征，从而避免“特征工程”<br><img src="https://img-blog.csdnimg.cn/f678fb27e01c4d989d099cfa06afe038.png#pic_center" alt="深度学习的数据处理流程"><br>其是 一种 <font color="red"><strong>端到端的学习方式</strong></font>   在学习过程中<strong>不进行分模块或分阶段训练</strong>，直接优化任务的总体目标．在端到端学习中，一般不需要明确地给出不同模块或阶段的功能，中间过程不需要人为干预</p>
-<h2 id="深度学习的关键问题"><a href="#深度学习的关键问题" class="headerlink" title="深度学习的关键问题"></a>深度学习的关键问题</h2><p>深度学习需要解决的关键问题是 <strong>贡献度分配问题</strong>，即一个系统中不同的 <strong>组件</strong> 或其 <strong>参数</strong> 对最终系统输出结果的贡献或影响 </p>
-<p>目前，深度学习采用的模型主要是神经网络模型，其主要原因是神经网络模型可以使用 <strong>误差反向传播算法</strong> ，从而可以比较好地解决贡献度分配问题</p>
-<h1 id="深度学习相关的学术会议"><a href="#深度学习相关的学术会议" class="headerlink" title="深度学习相关的学术会议"></a>深度学习相关的学术会议</h1><ul>
-<li>国际表示学习会议  ICLR ：主要聚焦于深度学习</li>
-<li>神经信息处理系统年会 NeurIPS ：交叉学科会议，但偏重于机器学习</li>
-<li>国际机器学习会议 ICML：机器学习顶级会议</li>
-<li>国际人工智能联合会议 IJCAI ：人工智能领域最顶尖的综合性会议</li>
-<li>美国人工智能协会年会  AAAI ：人工智能领域的顶级会议</li>
-</ul>
-<h2 id="计算机视觉领域"><a href="#计算机视觉领域" class="headerlink" title="计算机视觉领域"></a>计算机视觉领域</h2><ul>
-<li>计算机视觉与模式识别大会  CVPR</li>
-<li>国际计算机视觉会议  ICCV</li>
-</ul>
-<h2 id="自然语言处理领域"><a href="#自然语言处理领域" class="headerlink" title="自然语言处理领域"></a>自然语言处理领域</h2><ul>
-<li>计算语言学年会 ACL</li>
-<li>自然语言处理实证方法大会  EMNLP</li>
-</ul>
+</li>
+</ol>
+<h2 id="Step3-best-function（找出最好的一个函数-即调参）——使用梯度下降法"><a href="#Step3-best-function（找出最好的一个函数-即调参）——使用梯度下降法" class="headerlink" title="Step3 best function（找出最好的一个函数 即调参）——使用梯度下降法"></a>Step3 best function（找出最好的一个函数 即调参）——使用梯度下降法</h2><ol>
+<li>案例采用<strong>梯度下降法</strong>来帮助选择 <em>w</em> 和 <em>b</em> 两个参数取何值时损失函数最小，也就意味着构建的模型越准确。 <img src="https://img-blog.csdnimg.cn/img_convert/7d75962cbe0b2dc3c54f370383912138.png#pic_center" alt="在这里插入图片描述"><blockquote>
+<p>什么是梯度下降法？梯度指的是？<br>………………………………………………………………………………………………………<br>梯度？<br>在<strong>单变量的函数</strong>中，梯度其实就是对应点<strong>函数的微分</strong>，代表着这个函数在<strong>某个给定点的切线的斜率</strong><br>在<strong>多变量函数</strong>中，梯度是一个<strong>向量</strong>，向量有方向，梯度的方向就指出了函数在给定点的上升最快的方向  <strong>即例如二维就是 偏导 i + 偏导 j</strong><br>………………………………………………………………………………………………………<br>梯度下降法(SGD  Stochastic gradient descent）？答： “下山最快路径”的一种算法<br>我们是尝试使用偏导来衡量函数随自变量的值变化关系，选择变化更为平缓的那一处  对应的 <em>w</em> 和 <em>b</em> 作为调整后的参数</p>
+</blockquote>
+</li>
+</ol>
+<h3 id="一维视角：只考虑一个参数-w"><a href="#一维视角：只考虑一个参数-w" class="headerlink" title="一维视角：只考虑一个参数 w"></a>一维视角：只考虑一个参数 <em>w</em></h3><p><img src="https://img-blog.csdnimg.cn/3c72961665a942ac87f066a129a30183.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<blockquote>
+<p>如上图  learning rate（学习率）：移动的步长 一般用η来表示<br>………………………………………………………………………………………………………<br>如何寻找一个最合适的 <em>w</em> ？<br>步骤1：随机在横轴上选取一个 <em>w0</em> 。<br>步骤2：计算微分，也就是当前的斜率，根据斜率来判定移动的方向。微分大于0应向右移动（增加 <em>w</em> ）；微分小于0向左移动（减少 <em>w</em> ）<br>步骤3：根据学习率，按步骤2得到的方向移动<br>重复步骤2和步骤3，直到找到<strong>最低点</strong>。横轴即对于的最佳 <em>w</em>  参数<br>………………………………………………………………………………………………………<br>如下图，是经过迭代多次后找到的最佳点（得是全局最优解） 。注：大部分损失函数都为正<br><img src="https://img-blog.csdnimg.cn/588186b690dd43c38a10a80600802ab0.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="二维视角：考虑两个参数-w-和-b"><a href="#二维视角：考虑两个参数-w-和-b" class="headerlink" title="二维视角：考虑两个参数 w 和 b"></a>二维视角：考虑两个参数 <em>w</em> 和 <em>b</em></h3><p><img src="https://img-blog.csdnimg.cn/55f2f295750242bfa35f9ac576602194.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>如何寻找一个最合适的 <em>w</em> ？<br>步骤1：随机在横轴上选取一个 <em>w0</em> ，<em>b0</em> 。<br>步骤2：计算各偏导，也就是当前偏导的斜率，根据斜率来判定移动的方向。微分大于0应向右移动（增加 <em>w</em> 或 <em>b</em>）；微分小于0向左移动（减少 <em>w</em> 或 <em>b</em>）<img src="https://img-blog.csdnimg.cn/6a082b40869947c2a0723b298cd36027.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>步骤3：根据学习率，按步骤2得到的方向移动<br>重复步骤2和步骤3，直到找到<strong>最低点</strong>。横轴即对于的最佳 <em>w</em> 和 <em>b</em>  参数</p>
+</blockquote>
+<p>二维情况：梯度下降法的效果<br>颜色约深的区域代表的损失函数越小？ <strong>为什么呢？</strong><br><img src="https://img-blog.csdnimg.cn/299d0d615f6640a6ae092e51579d09ea.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h3 id="梯度算法的优缺点"><a href="#梯度算法的优缺点" class="headerlink" title="梯度算法的优缺点"></a>梯度算法的优缺点</h3><blockquote>
+<p>总结一下梯度下降法：<br>　　　我们要解决使<strong>损失函数<em>L(w,b)</em></strong> 最小时参数的最佳值，梯度下降法是每次update参数值，直到损失函数最小时找到对应最佳的参数<em>w，b</em></p>
+</blockquote>
+<p><strong>缺点1</strong>：求解的未必是全局最优解，有可能是局部最优解。</p>
+<blockquote>
+<p><strong>用下山的例子讲</strong>：<br>　　　比如我们在一座大山上的某处位置，由于我们不知道怎么下山，于是决定走一步算一步，也就是在<strong>每走到一个位置的时候</strong>，<strong>求解当前位置的梯度</strong>，沿着<strong>梯度的负方向</strong>，也就是<strong>当前最陡峭的位置向下走一步</strong>，然后继续求解当前位置梯度，向这一步所在位置沿着最陡峭最易下山的位置走一步。这样一步步的走下去，一直走到觉得我们已经到了山脚。当然这样走下去，<strong>有可能我们不能走到山脚，而是到了某一个局部的山峰低处。</strong><br>………………………………………………………………………………………………………<br>　　　从上面的解释可以看出，<strong>梯度下降不一定能够找到全局的最优解，有可能是一个局部最优解</strong>。当然，如果损失函数是<strong>凸函数</strong>，梯度下降法得到的解就<strong>一定是</strong>全局最优解。</p>
+</blockquote>
+<p><strong>优点1</strong>：无论随机从哪个点出发，得到的最佳参数一定是同一组</p>
+<blockquote>
+<p><strong>用下山的例子讲</strong>：<br>　　　因为山只有一处是最低点，在确保能找到全局最优解的情况下，无论人从山上哪一点出发，一定能找到这特定一处的最低洼处。</p>
+</blockquote>
+<h2 id="Step4-回归结果分析"><a href="#Step4-回归结果分析" class="headerlink" title="Step4 回归结果分析"></a>Step4 回归结果分析</h2><blockquote>
+<p>经过上述三个步骤后，得到了<strong>训练后</strong>的“最佳参数<em>w</em>，<em>b</em>”，那么现在这个模型在<strong>测试集</strong>上是什么表现呢？<br>得到的结果是：<br><strong>测试集的误差比在训练集上得到的损失值大</strong> 这个事非常正常。因为你训练集里面可能有些数据是不典型的，同样测试集中很多也包含了训练集中没有的因素。所以一个函数模型在实际应用中，效果基本上时打折扣的。<strong>一般会采用两种方式来加强这个函数模型</strong>：<br>　　　select another model（选择另一个模型）即增加维度，增加高此项多项式<br>　　　consider the hidden factors（考虑其他隐藏因素）</p>
+</blockquote>
+<h3 id="优化模型方法一：增加高次项（一般用于拟合度不够的情况）"><a href="#优化模型方法一：增加高次项（一般用于拟合度不够的情况）" class="headerlink" title="优化模型方法一：增加高次项（一般用于拟合度不够的情况）"></a>优化模型方法一：增加高次项（一般用于拟合度不够的情况）</h3><p><strong>回到Step1</strong></p>
+<ol>
+<li>尝试二次项、三次项、四次项、五次项…… 右上图为训练集损失，下图是测试集的损失。第五次<strong>过拟合</strong>导致了，测试集损失度很高。<img src="https://img-blog.csdnimg.cn/c707638cef5c4d698813e6acfe4ec172.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/ce26490bbfc64ea6967cd7b8e1e8184d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/166aef516df14c339c45fee48a78e16a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><img src="https://img-blog.csdnimg.cn/87e7491ce6a1464dad4c023dc9004274.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+<li><strong>选择合适的模型</strong>，即我到底要加到几次项呢？</li>
+</ol>
+<blockquote>
+<p>越复杂的模型所包含的函数也就越多，那么它包含理想模型的可能性也就越大，但是如果过分地去拟合理想模型，就会出现<strong>过拟合</strong>的情况。<br><img src="https://img-blog.csdnimg.cn/6a394ba6b4a648a994472d8969668601.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</blockquote>
+<ol>
+<li>横向比较各个多项次，训练集和测试集的失误。理论上，失误会随着高次项而变小，如果变大，则表示模型<strong>过拟合</strong>了。<img src="https://img-blog.csdnimg.cn/979417ba98f6475d941753e0cb71b91c.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>所以，如上图所示，在为3次的时候，训练集和测试集的误差差值最小。并且4次开始，以及存在过拟合现象了。因此本案例可选择3次项线性模型。</li>
+</ol>
+<h3 id="优化模型方法二：考虑其他隐藏因素"><a href="#优化模型方法二：考虑其他隐藏因素" class="headerlink" title="优化模型方法二：考虑其他隐藏因素"></a>优化模型方法二：考虑其他隐藏因素</h3><p><strong>回到Step1</strong></p>
+<blockquote>
+<p>输入的特征包括：进化前的CP值（<em>Xcp</em>）、物种（Bulbasaur）（<em>Xs</em>）、血量（HP）（<em>Xhp</em>）、重量（Weight）（<em>Xw</em>）、高度（Height）（<em>Xh</em>）<br>除了之前考虑的进化前的CP值（<em>Xcp</em>），其他均为隐藏因素<br>………………………………………………………………………………<br><strong>这里另外考虑的是神奇宝贝的种类</strong>？因为，有时候一个模型恰恰只能符合一种神奇宝贝，也就是<strong>不同神奇宝贝应该有不同的预测模型</strong>。<img src="https://img-blog.csdnimg.cn/72a4aadb2ba24aefb4584a8a8ca2801e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</blockquote>
+<ol>
+<li>不同的神奇宝贝有不同的预测模型<img src="https://img-blog.csdnimg.cn/46fe5297bddb46a4bd511a7cea422e3a.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+<li>拟合这个模型的曲线，可以看出不同神奇宝贝拟合成了不同的类线性直线<img src="https://img-blog.csdnimg.cn/7a55f95269d642038715e355437600f2.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+<li>如果还考虑了其他隐藏元素。如图是横轴是对应的隐藏元素，纵轴是对应进化后的CP值。<img src="https://img-blog.csdnimg.cn/591a6aa5537443428687ba15886ab11d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+<li>如果都采用最高二次项，考虑所有其他的隐藏因素。该案例的数学模型就变成 如图所示的式子。<img src="https://img-blog.csdnimg.cn/0a80407d715e4dcc978bd86dee3451a3.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><blockquote>
+<p> 考虑更多的因素反而出现了过拟合的问题，<strong>说明有些因素跟本次实验的CP值预测没有关系</strong>！<br>………………………………………………………………………………<br><strong>过拟合这么讨厌，到底如何减少过拟合问题呢？往下看！</strong></p>
+</blockquote>
+</li>
+</ol>
+<h3 id="优化模型：防止过拟合（为损失函数加一个正则项）"><a href="#优化模型：防止过拟合（为损失函数加一个正则项）" class="headerlink" title="优化模型：防止过拟合（为损失函数加一个正则项）"></a>优化模型：防止过拟合（为损失函数加一个正则项）</h3><h4 id="正则项是什么"><a href="#正则项是什么" class="headerlink" title="正则项是什么?"></a>正则项是什么?</h4><blockquote>
+<p><strong>方法：正则化</strong>?<br>比如先考虑一个参数w，正则化就是在损失函数上加上一个与w（斜率）相关的值（正则项），那么要是loss function越小的话，w也会越小，w越小就使function更加平滑（function没那么大跳跃）<img src="https://img-blog.csdnimg.cn/7a87a38ed54c438c8af37860e982f775.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h4 id="正则化的缺点"><a href="#正则化的缺点" class="headerlink" title="正则化的缺点"></a>正则化的缺点</h4><p>正则化虽然能够减少过拟合的现象，但是因为加在损失函数后面的值是平白无故加上去的，所以正则化过度的话会导致<strong>bias偏差增大</strong>   ？？？？<img src="https://img-blog.csdnimg.cn/f4c9ea7efb144c8a89b7fee964b75fa8.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>1）实现参数的稀疏有什么好处吗？<br>一个好处是可以简化模型，避免过拟合。<strong>因为一个模型中真正重要的参数可能并不多，如果考虑所有的参数起作用，那么可以对训练数据可以预测的很好，但是对测试数据表现性能极差</strong>。另一个好处是参数变少可以使整个模型获得更好的可解释性。<br>2）参数值越小代表模型越简单吗？<br>是的。为什么参数越小，说明模型越简单呢，这是因为越复杂的模型，<strong>越是会尝试对所有的样本进行拟合，甚至包括一些异常样本点</strong>，这就容易造成在<strong>较小的区间里预测值产生较大的波动</strong>，这种较大的波动也反映了在这个区间里的<strong>导数很大</strong>，而<strong>只有较大的参数值才能产生较大的导数。因此复杂的模型，其参数值会比较大。</strong></p>
+</blockquote>
+<p><img src="https://img-blog.csdnimg.cn/9dcfac9366564857a226de8d73bf512e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
 ]]></content>
       <categories>
         <category>机器学习基础</category>
       </categories>
       <tags>
+        <tag>李宏毅</tag>
+        <tag>机器学习</tag>
+        <tag>线性回归</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>针对 VOC2007和VOC2012 的具体用法</title>
+    <url>/2021/11/01/%E9%92%88%E5%AF%B9%20VOC2007%E3%80%81VOC2012%E5%92%8CCOCO%20%E7%9A%84%E5%85%B7%E4%BD%93%E7%94%A8%E6%B3%95/</url>
+    <content><![CDATA[<p>@<a href="针对 VOC2007、VOC2012和COCO 的具体用法">TOC</a></p>
+<p>目前广大研究者们普遍使用的是 VOC2007和VOC2012数据集，因为二者是互斥的，不相容的。</p>
+<p>论文中针对 VOC2007和VOC2012 的具体用法有以下几种：</p>
+<ul>
+<li>只用VOC2007的trainval 训练，使用VOC2007的test测试。</li>
+<li>只用VOC2012的trainval 训练，使用VOC2012的test测试，这种用法很少使用，因为大家都会结合VOC2007使用。</li>
+<li>使用 VOC2007 的 train+val 和 VOC2012的 train+val 训练，然后使用 VOC2007的test测试，这个用法是论文中经常看到的 <strong>07+12</strong> ，研究者可以自己测试在VOC2007上的结果，因为VOC2007的test是公开的。</li>
+<li>使用 VOC2007 的 train+val+test 和 VOC2012的 train+val训练，然后使用 VOC2012的test测试，这个用法是论文中经常看到的 <strong>07++12</strong> ，这种方法需提交到VOC官方服务器上评估结果，因为VOC2012 test没有公布。</li>
+<li>先在 MS COCO 的 trainval 上预训练，再使用 VOC2007 的 train+val、 VOC2012的 train+val 微调训练，然后使用 VOC2007的test测试，这个用法是论文中经常看到的 <strong>07+12+COCO</strong> 。</li>
+<li>先在 MS COCO 的 trainval 上预训练，再使用 VOC2007 的 train+val+test 、 VOC2012的 train+val 微调训练，然后使用 VOC2012的test测试 ，这个用法是论文中经常看到的 <strong>07++12+COCO</strong>，这种方法需提交到VOC官方服务器上评估结果，因为VOC2012 test没有公布。</li>
+</ul>
+<h1 id="代码分离-VOC训练集-的-val-和-train-数据"><a href="#代码分离-VOC训练集-的-val-和-train-数据" class="headerlink" title="代码分离 VOC训练集 的 val 和 train 数据"></a>代码分离 VOC训练集 的 val 和 train 数据</h1><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line">anchors =[<span class="number">0.57273</span>, <span class="number">0.677385</span>, <span class="number">1.87446</span>, <span class="number">2.06253</span>, <span class="number">3.33843</span>, <span class="number">5.47434</span>, <span class="number">7.88282</span>, <span class="number">3.52778</span>, <span class="number">9.77052</span>, <span class="number">9.16828</span>]</span><br><span class="line">anchors = np.array(anchors).reshape(-<span class="number">1</span>, <span class="number">2</span>) <span class="comment">#(5,2)</span></span><br><span class="line">input_shape = (<span class="number">416</span>, <span class="number">416</span>)</span><br><span class="line">batch_size = <span class="number">10</span></span><br><span class="line">epochs = <span class="number">100</span></span><br><span class="line">colors = [[<span class="number">255</span>,<span class="number">0</span>,<span class="number">255</span>],[<span class="number">218</span>,<span class="number">112</span>,<span class="number">214</span>],[<span class="number">100</span>,<span class="number">149</span>,<span class="number">237</span>],[<span class="number">95</span>,<span class="number">158</span>,<span class="number">160</span>],[<span class="number">0</span>,<span class="number">255</span>,<span class="number">255</span>],[<span class="number">0</span>,<span class="number">255</span>,<span class="number">127</span>],[<span class="number">107</span>,<span class="number">142</span>,<span class="number">35</span>],</span><br><span class="line">        [<span class="number">255</span>,<span class="number">255</span>,<span class="number">0</span>],[<span class="number">184</span>,<span class="number">134</span>,<span class="number">11</span>],[<span class="number">255</span>,<span class="number">165</span>,<span class="number">0</span>],[<span class="number">255</span>,<span class="number">0</span>,<span class="number">0</span>],[<span class="number">224</span>,<span class="number">255</span>,<span class="number">255</span>],[<span class="number">70</span>,<span class="number">130</span>,<span class="number">180</span>],[<span class="number">255</span>,<span class="number">192</span>,<span class="number">203</span>],[<span class="number">255</span>,<span class="number">240</span>,<span class="number">245</span>],[<span class="number">0</span>,<span class="number">255</span>,<span class="number">0</span>],</span><br><span class="line">        [<span class="number">240</span>,<span class="number">128</span>,<span class="number">128</span>],[<span class="number">220</span>,<span class="number">220</span>,<span class="number">220</span>],[<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>],[<span class="number">169</span>,<span class="number">169</span>,<span class="number">169</span>]]</span><br><span class="line">VOCdevkit_path = <span class="string">&#x27;./VOCdevkit&#x27;</span></span><br><span class="line">classes = [<span class="string">&#x27;aeroplane&#x27;</span>,<span class="string">&#x27;bicycle&#x27;</span>,<span class="string">&#x27;bird&#x27;</span>,<span class="string">&#x27;boat&#x27;</span>,<span class="string">&#x27;bottle&#x27;</span>,<span class="string">&#x27;bus&#x27;</span>,<span class="string">&#x27;car&#x27;</span>,<span class="string">&#x27;cat&#x27;</span>,</span><br><span class="line">           <span class="string">&#x27;chair&#x27;</span>,<span class="string">&#x27;cow&#x27;</span>,<span class="string">&#x27;diningtable&#x27;</span>,<span class="string">&#x27;dog&#x27;</span>,<span class="string">&#x27;horse&#x27;</span>,<span class="string">&#x27;motorbike&#x27;</span>,<span class="string">&#x27;person&#x27;</span>,</span><br><span class="line">           <span class="string">&#x27;pottedplant&#x27;</span>,<span class="string">&#x27;sheep&#x27;</span>,<span class="string">&#x27;sofa&#x27;</span>,<span class="string">&#x27;train&#x27;</span>,<span class="string">&#x27;tvmonitor&#x27;</span>]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 把数据集拆分成训练和测试集两部分</span></span><br><span class="line"><span class="comment"># 分别保存在 train.txt 和 val.txt 中</span></span><br><span class="line"><span class="comment"># 把数据集拆分成训练和测试集两部分</span></span><br><span class="line"><span class="comment"># 分别保存在val.txt和train.txt中</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> random</span><br><span class="line"><span class="keyword">import</span> xml.etree.ElementTree <span class="keyword">as</span> ET</span><br><span class="line"><span class="keyword">from</span> config <span class="keyword">import</span> classes,VOCdevkit_path</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">VOCdevkit_sets = [(<span class="string">&#x27;2012&#x27;</span>, <span class="string">&#x27;train&#x27;</span>), (<span class="string">&#x27;2012&#x27;</span>, <span class="string">&#x27;val&#x27;</span>)]</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">convert_annotation</span>(<span class="params">year, image_id, list_file</span>):</span></span><br><span class="line">    in_file = <span class="built_in">open</span>(os.path.join(VOCdevkit_path, <span class="string">&#x27;VOC%s/Annotations/%s.xml&#x27;</span> % (year, image_id)), encoding=<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line">    tree = ET.parse(in_file)</span><br><span class="line">    root = tree.getroot()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> obj <span class="keyword">in</span> root.<span class="built_in">iter</span>(<span class="string">&#x27;object&#x27;</span>):</span><br><span class="line">        difficult = <span class="number">0</span></span><br><span class="line">        <span class="keyword">if</span> obj.find(<span class="string">&#x27;difficult&#x27;</span>) != <span class="literal">None</span>:</span><br><span class="line">            difficult = obj.find(<span class="string">&#x27;difficult&#x27;</span>).text</span><br><span class="line">        cls = obj.find(<span class="string">&#x27;name&#x27;</span>).text</span><br><span class="line">        <span class="keyword">if</span> cls <span class="keyword">not</span> <span class="keyword">in</span> classes <span class="keyword">or</span> <span class="built_in">int</span>(difficult) == <span class="number">1</span>:</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        cls_id = classes.index(cls)</span><br><span class="line">        xmlbox = obj.find(<span class="string">&#x27;bndbox&#x27;</span>)</span><br><span class="line">        b = (<span class="built_in">int</span>(<span class="built_in">float</span>(xmlbox.find(<span class="string">&#x27;xmin&#x27;</span>).text)), <span class="built_in">int</span>(<span class="built_in">float</span>(xmlbox.find(<span class="string">&#x27;ymin&#x27;</span>).text)),</span><br><span class="line">             <span class="built_in">int</span>(<span class="built_in">float</span>(xmlbox.find(<span class="string">&#x27;xmax&#x27;</span>).text)), <span class="built_in">int</span>(<span class="built_in">float</span>(xmlbox.find(<span class="string">&#x27;ymax&#x27;</span>).text)))</span><br><span class="line">        list_file.write(<span class="string">&quot; &quot;</span> + <span class="string">&quot;,&quot;</span>.join([<span class="built_in">str</span>(a) <span class="keyword">for</span> a <span class="keyword">in</span> b]) + <span class="string">&#x27;,&#x27;</span> + <span class="built_in">str</span>(cls_id))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    random.seed(<span class="number">0</span>)</span><br><span class="line">    <span class="keyword">for</span> year, image_set <span class="keyword">in</span> VOCdevkit_sets:  <span class="comment">#[(&#x27;2012&#x27;, &#x27;train&#x27;), (&#x27;2012&#x27;, &#x27;val&#x27;)]</span></span><br><span class="line">        image_ids = <span class="built_in">open</span>(os.path.join(VOCdevkit_path, <span class="string">&#x27;VOC%s/ImageSets/Main/%s.txt&#x27;</span> % (year, image_set)),</span><br><span class="line">                         encoding=<span class="string">&#x27;utf-8&#x27;</span>).read().strip().split()</span><br><span class="line">        <span class="built_in">print</span>(image_ids)</span><br><span class="line">        list_file = <span class="built_in">open</span>(<span class="string">&#x27;%s_%s.txt&#x27;</span> % (year, image_set), <span class="string">&#x27;w&#x27;</span>, encoding=<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line">        <span class="keyword">for</span> image_id <span class="keyword">in</span> image_ids:</span><br><span class="line">            list_file.write(<span class="string">&#x27;%s/VOC%s/JPEGImages/%s.jpg&#x27;</span> % (os.path.abspath(VOCdevkit_path), year, image_id))</span><br><span class="line">            convert_annotation(year, image_id, list_file)</span><br><span class="line">            list_file.write(<span class="string">&#x27;\n&#x27;</span>)</span><br><span class="line">        list_file.close()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>数据集</category>
+      </categories>
+      <tags>
         <tag>深度学习</tag>
-        <tag>邱锡鹏</tag>
-        <tag>神经网络</tag>
+        <tag>数据集</tag>
       </tags>
   </entry>
   <entry>
@@ -1836,31 +1946,6 @@
       </tags>
   </entry>
   <entry>
-    <title>针对 VOC2007和VOC2012 的具体用法</title>
-    <url>/2021/11/01/%E9%92%88%E5%AF%B9%20VOC2007%E3%80%81VOC2012%E5%92%8CCOCO%20%E7%9A%84%E5%85%B7%E4%BD%93%E7%94%A8%E6%B3%95/</url>
-    <content><![CDATA[<p>@<a href="针对 VOC2007、VOC2012和COCO 的具体用法">TOC</a></p>
-<p>目前广大研究者们普遍使用的是 VOC2007和VOC2012数据集，因为二者是互斥的，不相容的。</p>
-<p>论文中针对 VOC2007和VOC2012 的具体用法有以下几种：</p>
-<ul>
-<li>只用VOC2007的trainval 训练，使用VOC2007的test测试。</li>
-<li>只用VOC2012的trainval 训练，使用VOC2012的test测试，这种用法很少使用，因为大家都会结合VOC2007使用。</li>
-<li>使用 VOC2007 的 train+val 和 VOC2012的 train+val 训练，然后使用 VOC2007的test测试，这个用法是论文中经常看到的 <strong>07+12</strong> ，研究者可以自己测试在VOC2007上的结果，因为VOC2007的test是公开的。</li>
-<li>使用 VOC2007 的 train+val+test 和 VOC2012的 train+val训练，然后使用 VOC2012的test测试，这个用法是论文中经常看到的 <strong>07++12</strong> ，这种方法需提交到VOC官方服务器上评估结果，因为VOC2012 test没有公布。</li>
-<li>先在 MS COCO 的 trainval 上预训练，再使用 VOC2007 的 train+val、 VOC2012的 train+val 微调训练，然后使用 VOC2007的test测试，这个用法是论文中经常看到的 <strong>07+12+COCO</strong> 。</li>
-<li>先在 MS COCO 的 trainval 上预训练，再使用 VOC2007 的 train+val+test 、 VOC2012的 train+val 微调训练，然后使用 VOC2012的test测试 ，这个用法是论文中经常看到的 <strong>07++12+COCO</strong>，这种方法需提交到VOC官方服务器上评估结果，因为VOC2012 test没有公布。</li>
-</ul>
-<h1 id="代码分离-VOC训练集-的-val-和-train-数据"><a href="#代码分离-VOC训练集-的-val-和-train-数据" class="headerlink" title="代码分离 VOC训练集 的 val 和 train 数据"></a>代码分离 VOC训练集 的 val 和 train 数据</h1><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line">anchors =[<span class="number">0.57273</span>, <span class="number">0.677385</span>, <span class="number">1.87446</span>, <span class="number">2.06253</span>, <span class="number">3.33843</span>, <span class="number">5.47434</span>, <span class="number">7.88282</span>, <span class="number">3.52778</span>, <span class="number">9.77052</span>, <span class="number">9.16828</span>]</span><br><span class="line">anchors = np.array(anchors).reshape(-<span class="number">1</span>, <span class="number">2</span>) <span class="comment">#(5,2)</span></span><br><span class="line">input_shape = (<span class="number">416</span>, <span class="number">416</span>)</span><br><span class="line">batch_size = <span class="number">10</span></span><br><span class="line">epochs = <span class="number">100</span></span><br><span class="line">colors = [[<span class="number">255</span>,<span class="number">0</span>,<span class="number">255</span>],[<span class="number">218</span>,<span class="number">112</span>,<span class="number">214</span>],[<span class="number">100</span>,<span class="number">149</span>,<span class="number">237</span>],[<span class="number">95</span>,<span class="number">158</span>,<span class="number">160</span>],[<span class="number">0</span>,<span class="number">255</span>,<span class="number">255</span>],[<span class="number">0</span>,<span class="number">255</span>,<span class="number">127</span>],[<span class="number">107</span>,<span class="number">142</span>,<span class="number">35</span>],</span><br><span class="line">        [<span class="number">255</span>,<span class="number">255</span>,<span class="number">0</span>],[<span class="number">184</span>,<span class="number">134</span>,<span class="number">11</span>],[<span class="number">255</span>,<span class="number">165</span>,<span class="number">0</span>],[<span class="number">255</span>,<span class="number">0</span>,<span class="number">0</span>],[<span class="number">224</span>,<span class="number">255</span>,<span class="number">255</span>],[<span class="number">70</span>,<span class="number">130</span>,<span class="number">180</span>],[<span class="number">255</span>,<span class="number">192</span>,<span class="number">203</span>],[<span class="number">255</span>,<span class="number">240</span>,<span class="number">245</span>],[<span class="number">0</span>,<span class="number">255</span>,<span class="number">0</span>],</span><br><span class="line">        [<span class="number">240</span>,<span class="number">128</span>,<span class="number">128</span>],[<span class="number">220</span>,<span class="number">220</span>,<span class="number">220</span>],[<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>],[<span class="number">169</span>,<span class="number">169</span>,<span class="number">169</span>]]</span><br><span class="line">VOCdevkit_path = <span class="string">&#x27;./VOCdevkit&#x27;</span></span><br><span class="line">classes = [<span class="string">&#x27;aeroplane&#x27;</span>,<span class="string">&#x27;bicycle&#x27;</span>,<span class="string">&#x27;bird&#x27;</span>,<span class="string">&#x27;boat&#x27;</span>,<span class="string">&#x27;bottle&#x27;</span>,<span class="string">&#x27;bus&#x27;</span>,<span class="string">&#x27;car&#x27;</span>,<span class="string">&#x27;cat&#x27;</span>,</span><br><span class="line">           <span class="string">&#x27;chair&#x27;</span>,<span class="string">&#x27;cow&#x27;</span>,<span class="string">&#x27;diningtable&#x27;</span>,<span class="string">&#x27;dog&#x27;</span>,<span class="string">&#x27;horse&#x27;</span>,<span class="string">&#x27;motorbike&#x27;</span>,<span class="string">&#x27;person&#x27;</span>,</span><br><span class="line">           <span class="string">&#x27;pottedplant&#x27;</span>,<span class="string">&#x27;sheep&#x27;</span>,<span class="string">&#x27;sofa&#x27;</span>,<span class="string">&#x27;train&#x27;</span>,<span class="string">&#x27;tvmonitor&#x27;</span>]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 把数据集拆分成训练和测试集两部分</span></span><br><span class="line"><span class="comment"># 分别保存在 train.txt 和 val.txt 中</span></span><br><span class="line"><span class="comment"># 把数据集拆分成训练和测试集两部分</span></span><br><span class="line"><span class="comment"># 分别保存在val.txt和train.txt中</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> random</span><br><span class="line"><span class="keyword">import</span> xml.etree.ElementTree <span class="keyword">as</span> ET</span><br><span class="line"><span class="keyword">from</span> config <span class="keyword">import</span> classes,VOCdevkit_path</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">VOCdevkit_sets = [(<span class="string">&#x27;2012&#x27;</span>, <span class="string">&#x27;train&#x27;</span>), (<span class="string">&#x27;2012&#x27;</span>, <span class="string">&#x27;val&#x27;</span>)]</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">convert_annotation</span>(<span class="params">year, image_id, list_file</span>):</span></span><br><span class="line">    in_file = <span class="built_in">open</span>(os.path.join(VOCdevkit_path, <span class="string">&#x27;VOC%s/Annotations/%s.xml&#x27;</span> % (year, image_id)), encoding=<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line">    tree = ET.parse(in_file)</span><br><span class="line">    root = tree.getroot()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> obj <span class="keyword">in</span> root.<span class="built_in">iter</span>(<span class="string">&#x27;object&#x27;</span>):</span><br><span class="line">        difficult = <span class="number">0</span></span><br><span class="line">        <span class="keyword">if</span> obj.find(<span class="string">&#x27;difficult&#x27;</span>) != <span class="literal">None</span>:</span><br><span class="line">            difficult = obj.find(<span class="string">&#x27;difficult&#x27;</span>).text</span><br><span class="line">        cls = obj.find(<span class="string">&#x27;name&#x27;</span>).text</span><br><span class="line">        <span class="keyword">if</span> cls <span class="keyword">not</span> <span class="keyword">in</span> classes <span class="keyword">or</span> <span class="built_in">int</span>(difficult) == <span class="number">1</span>:</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        cls_id = classes.index(cls)</span><br><span class="line">        xmlbox = obj.find(<span class="string">&#x27;bndbox&#x27;</span>)</span><br><span class="line">        b = (<span class="built_in">int</span>(<span class="built_in">float</span>(xmlbox.find(<span class="string">&#x27;xmin&#x27;</span>).text)), <span class="built_in">int</span>(<span class="built_in">float</span>(xmlbox.find(<span class="string">&#x27;ymin&#x27;</span>).text)),</span><br><span class="line">             <span class="built_in">int</span>(<span class="built_in">float</span>(xmlbox.find(<span class="string">&#x27;xmax&#x27;</span>).text)), <span class="built_in">int</span>(<span class="built_in">float</span>(xmlbox.find(<span class="string">&#x27;ymax&#x27;</span>).text)))</span><br><span class="line">        list_file.write(<span class="string">&quot; &quot;</span> + <span class="string">&quot;,&quot;</span>.join([<span class="built_in">str</span>(a) <span class="keyword">for</span> a <span class="keyword">in</span> b]) + <span class="string">&#x27;,&#x27;</span> + <span class="built_in">str</span>(cls_id))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    random.seed(<span class="number">0</span>)</span><br><span class="line">    <span class="keyword">for</span> year, image_set <span class="keyword">in</span> VOCdevkit_sets:  <span class="comment">#[(&#x27;2012&#x27;, &#x27;train&#x27;), (&#x27;2012&#x27;, &#x27;val&#x27;)]</span></span><br><span class="line">        image_ids = <span class="built_in">open</span>(os.path.join(VOCdevkit_path, <span class="string">&#x27;VOC%s/ImageSets/Main/%s.txt&#x27;</span> % (year, image_set)),</span><br><span class="line">                         encoding=<span class="string">&#x27;utf-8&#x27;</span>).read().strip().split()</span><br><span class="line">        <span class="built_in">print</span>(image_ids)</span><br><span class="line">        list_file = <span class="built_in">open</span>(<span class="string">&#x27;%s_%s.txt&#x27;</span> % (year, image_set), <span class="string">&#x27;w&#x27;</span>, encoding=<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line">        <span class="keyword">for</span> image_id <span class="keyword">in</span> image_ids:</span><br><span class="line">            list_file.write(<span class="string">&#x27;%s/VOC%s/JPEGImages/%s.jpg&#x27;</span> % (os.path.abspath(VOCdevkit_path), year, image_id))</span><br><span class="line">            convert_annotation(year, image_id, list_file)</span><br><span class="line">            list_file.write(<span class="string">&#x27;\n&#x27;</span>)</span><br><span class="line">        list_file.close()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>数据集</category>
-      </categories>
-      <tags>
-        <tag>深度学习</tag>
-        <tag>数据集</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>yolov3 详解</title>
     <url>/2021/10/23/yolov3%20%E8%AF%A6%E8%A7%A3/</url>
     <content><![CDATA[<p>@<a href="同济子豪兄 之 yolov3 详解">TOC</a></p>
@@ -1949,6 +2034,131 @@
         <tag>深度学习</tag>
         <tag>yolo</tag>
         <tag>目标检测</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>卷积神经网络CNN（Convolutional Neural Network）</title>
+    <url>/2021/08/12/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9CCNN%EF%BC%88Convolutional%20Neural%20Network%EF%BC%89/</url>
+    <content><![CDATA[<p>@<a href="卷积神经网络CNN（Convolutional Neural Network）">TOC</a></p>
+<blockquote>
+<p>总结CNN的要点：<br>Q1：什么是CNN？为什么要用CNN？为什么图像处理一般都采用CNN？<br>Q2：实现CNN的步骤？</p>
+<p><font color="red">input——&gt;convolution——&gt;max pooling——&gt;…——&gt;flatten——&gt;fully connected network——&gt;output </font><br>Q3：如何用 <em>keras</em> 搭建一个CNN?<br>Q4：CNN的应用?什么时候适用CNN效果最好？<br>满足三个图像三个特性的时候。但要考虑第三点取子样是否合理。</p>
+</blockquote>
+<h1 id="CNN的概述"><a href="#CNN的概述" class="headerlink" title="CNN的概述"></a>CNN的概述</h1><h2 id="什么是CNN？"><a href="#什么是CNN？" class="headerlink" title="什么是CNN？"></a>什么是CNN？</h2><p>CNN也叫convnet，中文名称为卷积神经网络，是计算机视觉领域常用的一种深度学习模型。</p>
+<h2 id="为什么要用CNN？"><a href="#为什么要用CNN？" class="headerlink" title="为什么要用CNN？"></a>为什么要用CNN？</h2><p>其可以简化DNN模型，可以减少不必要的神经元节点。特别是用在图像处理上。</p>
+<h3 id="为什么图像处理一般都采用CNN？"><a href="#为什么图像处理一般都采用CNN？" class="headerlink" title="为什么图像处理一般都采用CNN？"></a>为什么图像处理一般都采用CNN？</h3><font color="green">**CNN的参数比全连接神经网络少得多**，为什么CNN只用较少的参数就可以用于处理图像呢？</font>
+
+<p>这是因为图像具有以下三点特征：<br>1、一些模式比整张图片小得多，例如“鸟喙”就比整张图片小得多；<img src="https://img-blog.csdnimg.cn/1e9efb0804a64876a33e2794d96039a0.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt=""><br>2、同样的模式可能出现在图像的不同区域，例如“鸟喙”可能出现在图片的左上方也可能出现在图像的中间；<img src="https://img-blog.csdnimg.cn/c4a2de1adb4d4573865ec9f20b9e4a96.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt=""><br>3、对图像的降采样不会改变图像中的物体。<img src="https://img-blog.csdnimg.cn/3e746d5fef0140029fe62095452d8389.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt=""><br><strong>CNN的卷积层的设计对应着前两点，池化层的设计对应着第三点。</strong> 如下图所示：<br><img src="https://img-blog.csdnimg.cn/81dc5d9f161c47b4b7054b5964eda897.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt=""></p>
+<h1 id="实现CNN的步骤"><a href="#实现CNN的步骤" class="headerlink" title="实现CNN的步骤"></a>实现CNN的步骤</h1><p>input——&gt;convolution——&gt;max pooling——&gt;…——&gt;flatten（压平）——&gt;fully connected network——&gt;output</p>
+<h2 id="卷积层（减少训练参数）"><a href="#卷积层（减少训练参数）" class="headerlink" title="卷积层（减少训练参数）"></a>卷积层（减少训练参数）</h2><p><img src="https://img-blog.csdnimg.cn/81dc5d9f161c47b4b7054b5964eda897.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="CNN流程图"></p>
+<ul>
+<li><p>对应Property1：每一个Filter（待训练的参数，即卷积核）代表一个<strong>局部特征探测器</strong>（他是一个可以特点图形的表示器），假设现在两个特征探测器（<em>Filter1</em> 和 <em>Filter2</em>）</p>
+<ul>
+<li><p>卷积核1的结果 值最大的那个点所在的图片部分，就是我们要找的内容<br><img src="https://img-blog.csdnimg.cn/afe8e2823a47491bba71d054aa0ade85.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</li>
+<li><p>卷积核2的结果。与卷积核1的结构共同组成了 feature map<img src="https://img-blog.csdnimg.cn/c3841af956b24b6d8721af30d207cb4c.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>对应Property2：用 <em>Filter1</em> 就能探测出在不同位置的同一个flatten，而不需要用不同的Filter</li>
+</ul>
+<p>如果图片是彩色的，也就是说它是三通道的，还没卷积之前，可以说有3个通道（RGB），意味着每一个像素由3个数值表示。如下图所示：<br>卷积核是立方体3×3×3，图片为9×9×3。图片中同样选择卷积核大小，与卷积核累和，但要注意我们并不是把RGB三层，分开算，应该算合为一体的。<img src="https://img-blog.csdnimg.cn/991470ca8069474fabd2088db993f9eb.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="RGB卷积"></p>
+<h3 id="与全连接方式的对比"><a href="#与全连接方式的对比" class="headerlink" title="与全连接方式的对比"></a>与全连接方式的对比</h3><p>全连接层，图像处理的神经网络图如下所示，每个输入与各神经元都有链接（有固定的权值）<img src="https://img-blog.csdnimg.cn/b34b02cb98274e53a6600a5c685d3674.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="全连接层"><br>下面是CNN神经网络图，其主要的目的是减少参数（减少权值数量）。并且可以存在一定的共享权值，下面颜色相同的权值边值应该相同，这样调参可以更快。</p>
+<p><img src="https://img-blog.csdnimg.cn/250d06b21d4546dea59a0a6502d3a3c0.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="CNN"></p>
+<h2 id="池化层（Maxpooling）"><a href="#池化层（Maxpooling）" class="headerlink" title="池化层（Maxpooling）"></a>池化层（Maxpooling）</h2><p>目的是减少每一个特征的维度，也就是减少后面flatten的输入特征数量。Maxpooling这边我们取每个框内的最大点。<img src="https://img-blog.csdnimg.cn/f52e46c700fe492ab79a470370e223ff.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="Maxpooling的规程"><br>在整理一下，变成一个新的feature map</p>
+<p>合计上两步得到：<br><img src="https://img-blog.csdnimg.cn/8065213d0fff4e30b41d596b0cde4d65.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>做一次卷积+池化后，把原来的 <em>6 × 6</em> 图像变成了 <em>2 × 2</em> 图像，<em>2 × 2</em>图像的深度（每个像素点用多少个值表示）<strong>取决于有多少个过滤器，如果有 <em>50</em> 个过滤器，<em>2 × 2</em> 图像就有 <em>50</em> 维</strong>，上图是只用两个过滤器，那就是 <em>2</em> 维。<br>所以上图右边，就是一个新的比较小的图像，每个过滤器代表了一个channel(通道)。</p>
+<h2 id="重复上两步操作"><a href="#重复上两步操作" class="headerlink" title="重复上两步操作"></a>重复上两步操作</h2><p>可多次重复上述两个步骤，将输出的结果变得最小化。</p>
+<blockquote>
+<p><strong>Q: 假设我们第一次卷积的时候，我们有25个卷积核，那输出的结果 feature map中应该有25个矩阵。那请问，第二次卷积的时候，输出的feature map 应该是 25×25=625 个矩阵么？</strong><br>答：不对，做完第一次卷积得到25个矩阵，做完第二次后还是25个矩阵。例如输入是三个通道 <em>(RGB)</em> 的 <em>6 × 6</em> 矩阵数据（即一个立方体，6 × 6  × 3），有两个过滤器（也是立方体，三个通道，<em>3 × 3 × 3</em>），则输出为<em>4  × 4 × 2</em>。（<em>4 = 6-2 ； 2</em>是过滤器个数  <strong>过滤器决定通道数</strong>）<img src="https://img-blog.csdnimg.cn/a4aeaa3dd23d4ff48bce2e89c97553c3.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+</blockquote>
+<p><img src="https://img-blog.csdnimg.cn/e634fad522fe498a9b5cb04557fe7a05.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt=""></p>
+<h2 id="Flatten（压平）"><a href="#Flatten（压平）" class="headerlink" title="Flatten（压平）"></a>Flatten（压平）</h2><p><img src="https://img-blog.csdnimg.cn/699741afda84434985ef450ad1cffeea.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="Flatten"><br>flatten(压平)的意思是，把特征图拉直，然后丢到一个全连接神经网络里。</p>
+<h1 id="CNN-in-Keras"><a href="#CNN-in-Keras" class="headerlink" title="CNN in Keras"></a>CNN in Keras</h1><ul>
+<li>卷积前，一个pixel用多少个数值表示，取决于通道数</li>
+<li>卷积后，一个pixel用多少个数值表示，取决于Filter个数，而通道数决定Filter的高</li>
+<li>上一个卷积层有多少个Filter，下一层卷积input就有多少个通道<br><img src="https://img-blog.csdnimg.cn/75db9d57e892418d9c68b6d52c714c4b.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/686fdcfd5a734bfa998f6d84def07fea.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model = Sequential()</span><br><span class="line">model.add(Conv2D(<span class="number">25</span>,<span class="number">3</span>,<span class="number">3</span>),input_shape=(<span class="number">1</span>,<span class="number">28</span>,<span class="number">28</span>))</span><br><span class="line">model.add(MaxPooling2D((<span class="number">2</span>,<span class="number">2</span>)))</span><br><span class="line">model.add(Conv2D(<span class="number">50</span>,<span class="number">3</span>,<span class="number">3</span>))</span><br><span class="line">model.add(MaxPooling2D((<span class="number">2</span>,<span class="number">2</span>)))</span><br><span class="line">model.add(Dense(output_dim=<span class="number">100</span>))</span><br><span class="line">model.add(Activation(<span class="string">&#x27;relu&#x27;</span>))</span><br><span class="line">model.add(Dense(output_dim=<span class="number">10</span>))</span><br><span class="line">model.add(Activation(<span class="string">&#x27;softmax&#x27;</span>))</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>Q：为什么上图第二次 每个卷积核的 参数是 225？</strong><br>答：因为是 3×3×25  那为什么是25而不是50呢？</p>
+</blockquote>
+<h1 id="CNN在学什么？"><a href="#CNN在学什么？" class="headerlink" title="CNN在学什么？"></a>CNN在学什么？</h1><h2 id="CNN卷积和池化部分在做什么？"><a href="#CNN卷积和池化部分在做什么？" class="headerlink" title="CNN卷积和池化部分在做什么？"></a>CNN卷积和池化部分在做什么？</h2><p><img src="https://img-blog.csdnimg.cn/919125d4f1964cb9b520a639ed94e2e6.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<ul>
+<li>分析第一个层的卷积核是比较容易的，里面每个卷积核就是一个3 <em> 3 的矩阵，对应3 </em> 3 范围内的9个像素点，<strong>只要看到矩阵的值，就知道在检测什么</strong>（有明显的特征）。</li>
+<li>第二层的卷积核没法知道在做什么，虽然也是 <em>3 × 3</em> 的矩阵，总共 50 个。<strong>但是这些卷积核的输入不是像素点，而是在上一层做完卷积和池化后的输出</strong>。就算知道第二层卷积核的矩阵值，也不知道在检测什么。<strong>另外第二层卷积核考虑的不是原图 <em>3 × 3</em> 的像素点，而是比原图 <em>3 × 3</em> 像素点更大的范围，因为在第一层的池化后，压缩了原图 <em>3 × 3</em> 的区域，第二层卷积核是在压缩后的图像里再选取 <em>3 × 3</em>  像素点，相当于扩大了原图检测的范围。</strong></li>
+</ul>
+<blockquote>
+<font color="red">Q：那怎么分析第二层卷积核在做什么？</font>
+
+<p>第二层的50个卷积核，每个卷积核的输出是一个 <em>11 × 11</em> 的矩阵。把第k个卷积核输出拿出来如上图左下，矩阵元素表示为  $a_{ij}^{k}$  (第k个卷积核，第i个行，第j个列)。接下来 定义一个“<em>Degree of the activation of the k-th  filter</em>”（第k个卷积核的激活程度），值代表第k个卷积核的被激活程度（<strong>input和第k个卷积核侦测的东西有多匹配</strong>）。</p>
+<p>第k个卷积核被激活程度表示为：$a^{k}=\sum<em>{i=1}^{11}\sum</em>{j=1}^{11}a_{ij}^{k}$ ，<em>11 × 11</em> 矩阵所有元素值之和。</p>
+<p><strong>Q：找一张图像，可以让第k个卷积核被激活程度最大，如果做到这件事情？</strong><br><strong>称 <em>input</em> 的图像为 <em>x</em>，目标是找一个让 $a^{k}$ 最大的 <em>x</em>，如何找到这个 <em>x</em>？</strong></p>
+<p><font color="red">使用梯度上升</font>，因为我们的目标是最大化 $a^{k}$  。现在是把 <em>x</em> 当做我们要找的参数，对 <em>x</em> 用梯度上升。原来CNN的 <em>input</em> 是固定的，<em>model</em> 的参数使用梯度下降求解。现在反过来，<em>model</em> 的参数是固定的，使用个梯度上升更新 <em>x</em>，让被激活程度最大。</p>
+</blockquote>
+<p><img src="https://img-blog.csdnimg.cn/b5522ea6a04d49bfa39a3f94db140610.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述">上图左下，是随便取12个卷积核后对 <em>x</em> 做梯度上升后的结果，每个卷积核都找到一张图像，这张图像让这个卷积核的被激活程度最高。如果有50个卷积核，理论上可以找50张图像。</p>
+<blockquote>
+<p><strong>Q：这12张图像有一个共同的特征：是某种纹路在图上不断反复。为什么会这样？</strong><br>看第三张图像，都是小小的斜条纹，这意味着第三个卷积核是在检测是否有斜的条纹。因为卷积核考虑的范围是很小的，所以原图像上任何地方出现一个小小的斜纹的话，这个卷积核（过滤器）就会被激活，输出值就会很大。如果原图像所有范围都是这种小小的条纹，那这个卷积核的被激活程度就最大。</p>
+</blockquote>
+<p>你会发现每个过滤器都是在检测某一种图案（某一种线条），例如上图左下第3个过滤器是检测斜条纹，第4个是检测短、直的线条，第6个是检测斜成一定程度的线条等等。</p>
+<font color="red">每个卷积核（过滤器）都在检测不同角度的线条。</font>
+
+<h2 id="全连接的隐藏层都在干什么？"><a href="#全连接的隐藏层都在干什么？" class="headerlink" title="全连接的隐藏层都在干什么？"></a>全连接的隐藏层都在干什么？</h2><p><img src="https://img-blog.csdnimg.cn/cc01d0cb741b4bab93047f401e34b40f.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>做完卷积和池化后，会做flatten(压平)，把压平后的结果丢到神经网络里去。</p>
+<blockquote>
+<p><strong>Q：在这个神经网络的隐藏层里，每个神经元都在干什么？</strong><br>答：如法炮制之前的做法，定义第 <em>j</em> 个神经元的输出是 $a<em>{j}$ ，然后找一张图像 <em>x</em>，使 $a</em>{j}$ 最大。<br>找到的图像如上图左下所示，9张图像，是对应神经元的输出最大。你会发现跟刚才卷积核（过滤器）观察的图案很<strong>不一样</strong>，<font color="red"><strong>卷积核观察的是类似纹路的东西，因为卷积核只考虑了原图像的一部分区域</strong></font>。<br><strong>输出通过压平后，现在每个神经元是去看整张图像</strong>，能使神经元激活程度最高的图像不再是纹路这种小图案，而是一个完整的图形，虽然看起来完全不像是数字，但神经元被激活后也的确在侦测一个完整的数字。</p>
+</blockquote>
+<h2 id="考虑最后的输出？"><a href="#考虑最后的输出？" class="headerlink" title="考虑最后的输出？"></a>考虑最后的输出？</h2><p><img src="https://img-blog.csdnimg.cn/c02bf451565e4f01bacf11dc6922219c.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>如果最后的输出是10维的，每一维对应一个数字。把某一维拿出来，找一张图像使那个维度的输出最大。例如现在要找一张图像，使输出层上对应数字1的神经元的输出最大，理论上这张图像看起来就是数字1<br>但是实际的图像如上图左边所示，每张图像分别代表0,1,2,3,4,5,6,7,8</p>
+<blockquote>
+<p><strong>Q：那为什么是这种是乱七八糟的雪花状呢，而不是我们能看清的数字呢？</strong><br>答：因为神经网络的视角，他就是和人不一样的。他就认为这些雪花图像是不一样的，对于0-8数字。与我们人的思维不同。<br><img src="https://img-blog.csdnimg.cn/f84a6c6c9e4c468a805407e8bfee004c.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><strong>Q：能不能让这些图像看起来更像数字？</strong><br>我们知道，一张图像是不是一个数字，有一些基本的假设。比如上图左边，人类看起来显示不是数字。那么我们对x做一些<strong>正则项约束</strong>，告诉机器，虽然有些 <em>x</em>（图像） 可以让  <em>y</em>  很大，但是这些 <em>x</em> 的确不是数字。<br><strong>Q：那加些什么约束呢？</strong><br>比如最简单的想法，图像上的白点是有墨水（笔画）的地方，对一个数字来说，有白点的部分是有限的，数字的笔画只占图的一小部分，所以我们要对 <em>x</em> 做一些限制。<br>假设 $x<em>{ij}$ 是图像像素点的值，每张图像有 <em>28 × 28</em> 个像素点。<strong>把所有像素点的值取绝对值并求和（相当于L1正则）</strong>，我们希望找一个 <em>x</em> ，让 $y</em>{i}$ 越大的同时，也让像素点绝对值之和越小。那我们找出来的图像大部分的地方就不是白色的。<br>最后得到的结果如上图右边所示，和左边的图看起来，已经可以隐约看出来是个数字了。</p>
+</blockquote>
+<h1 id="CNN的应用"><a href="#CNN的应用" class="headerlink" title="CNN的应用"></a>CNN的应用</h1><h2 id="Deep-Dream"><a href="#Deep-Dream" class="headerlink" title="Deep Dream"></a>Deep Dream</h2><p>你给机器一张图像，<strong>机器会在这张图像里面，加上它学习到的东西</strong>。<br><img src="https://img-blog.csdnimg.cn/b3c9858f5d9849d8995dd1183150f92e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<p>比如把上图丢到CNN里面去，然后把某个卷积核或者某个全连接隐藏层拿出来（一个向量），假设是 $\begin{bmatrix}<br>3.9\<br>-1.5\<br>2.3\<br>:\<br>\end{bmatrix}$</p>
+<p>然后把3.9、2.3调大（本来是正的值调大），-1.5调小（负的值调小），正的更正，负的更负。找一个图像使卷积核或者隐藏层（拿出来的）的输出是调整后的向量。<strong>这么做的意思是让CNN夸大化它看到的东西。</strong><br><img src="https://img-blog.csdnimg.cn/0884c7de1c4e44b2ae5e302590b5ee18.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>找到的图像会变成上图所示，出现很多奇怪的东西。右边看起来是一头熊，原来是一颗石头。对机器来说，本来就觉得石头像一头熊，强化它的认知后，就学习出来更像一头熊的图案。这个就是Deep Dream。</p>
+<h2 id="Deep-Style"><a href="#Deep-Style" class="headerlink" title="Deep Style"></a>Deep Style</h2><p><em>input</em> 一张图像，然后让机器去修改这张图像，让它有另一张图的风格，比如让上图看起来是呐喊。<br><img src="https://img-blog.csdnimg.cn/153f1e11b39943d8b64e7f352c289410.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<blockquote>
+<p><img src="https://img-blog.csdnimg.cn/952a46ca31584df885c1722e5f79912d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><strong>Q：卷积核和过滤器的区别</strong></p>
+<ul>
+<li><p>卷积核就是由<strong>长和宽</strong>来指定的，是一个<strong>二维</strong>的概念。</p>
+<ul>
+<li>过滤器是是由<strong>长、宽和深度</strong>指定的，是一个<strong>三维</strong>的概念。</li>
+<li>过滤器可以看做是卷积核的集合。</li>
+<li>过滤器比卷积核高一个维度——深度。</li>
+</ul>
+<p>——————————————————————————————————</p>
+</li>
+</ul>
+<p><strong>Q：怎么做到图像风格转变呢？</strong><br><strong>把原来的图像丢给CNN，得到CNN过滤器的输出，代表一张图像里有什么样的内容</strong>。 然后把呐喊这张图也丢到CNN里，也得到过滤器的输出，但这时候考虑的不是过滤器输出的绝对值，而是考虑<strong>过滤器和过滤器输出之间的关系</strong>，<strong>这个关系代表了一张图像的风格</strong>。接下来用同一个CNN找一张图像，这张图像的内容像原图像的内容（过滤器的输出类似），同时这张图像的风格像呐喊的风格（过滤器输出之间的关系类似）。<br><strong>找一张图片同时<font color="red">最大化</font>内容和风格（使用<font color="red">梯度上升更新参数</font>），得到的结果就像两张图片结合一样。</strong></p>
+</blockquote>
+<h2 id="CNN应用在围棋上"><a href="#CNN应用在围棋上" class="headerlink" title="CNN应用在围棋上"></a>CNN应用在围棋上</h2><p><img src="https://img-blog.csdnimg.cn/d2233ab8dcdf4ca8ad1e4dc4ebf550b6.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>要让机器下围棋，不一定要用CNN，一般的神经网络也可以做这件事情。只要学习一个网络，也就是找一个函数，输入是棋盘，输出是棋盘上的位置，根据棋盘的盘势，判断下一步落子的位置。<br>输入是<em>19 ×19</em> 向量，向量每一维是棋盘上的一个位置（是黑子则值为1，是白子则值为-1，反之则为0），丢到一个全连接的神经网络，输出也是<em>19 ×19</em> 的向量（每一维对应棋盘一个位置），那这样机器就可以学会下围棋了。</p>
+<h3 id="为什么CNN可以用在下围棋上？"><a href="#为什么CNN可以用在下围棋上？" class="headerlink" title="为什么CNN可以用在下围棋上？"></a>为什么CNN可以用在下围棋上？</h3><p>但实际采用CNN会得到更好的效果！为什么呢？<br>之前举的例子都是把CNN用在图像上面，<em>input</em> 是一个矩阵。用到下棋上，只要把 <em>19 ×19</em>  的向量表示为 <em>19 ×19</em>  的矩阵。对CNN来说，<strong>就是把棋盘和棋子当成一个图像，然后输出下一步落子的位置</strong>。</p>
+<blockquote>
+<p><img src="https://img-blog.csdnimg.cn/604669df79b5475aa23db1f14d14b3e5.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>收集很多棋谱，告诉CNN，看到落子在5之五，输出天元的位置为1，其他位置为0<br>看到5之五和天元都有棋子，输出就是5之五的位置为1，其他位置为0<br>这个是监督的部分，AlphaGo还有强化学习的部分</p>
+</blockquote>
+<h2 id="总结一下什么时候用CNN-为什么围棋适用？"><a href="#总结一下什么时候用CNN-为什么围棋适用？" class="headerlink" title="总结一下什么时候用CNN?为什么围棋适用？"></a>总结一下什么时候用CNN?为什么围棋适用？</h2><p><strong>图像要有该有的特性，开头讲过的根据<font color="red">三个特性</font>设计出了CNN的网络结构，在处理图像的时候特别有效。</strong></p>
+<blockquote>
+<p><strong>Q：为什么围棋很适用CNN？</strong><img src="https://img-blog.csdnimg.cn/36ddc9027bbe4537b72ff41a6553c1dd.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>答：因为围棋有一些特性和图像处理是很相似的。</p>
+<p><font color="red">围棋是有图像的第一个和第二个特性</font></p>
+<ul>
+<li><p><strong>在一张图像上面，有一些图案是比整张图像小的，比如鸟嘴。在围棋也有同样的现象</strong>，比如看到一些棋子摆放的图案，就要做一些相应的事情（比如上图黑子叫吃的时候，白子要落在下方保证不被吃）。不需要看整个棋盘，只需要看一个小小的范围，就可以侦测白子是不是属于被叫吃的状态。<br>AlphaGo里第一层的过滤器就是用的 5 × 5 过滤器，显然设计这个过滤器的人觉得围棋上最基本的图案在 5 × 5 范围内就可以被侦测出来。</p>
+</li>
+<li><p>图<strong>像还有个特性是相同的图案会出现在不同的区域，在围棋上也有同样的特征。</strong>例如叫吃的图案，可以出现在棋盘左上角，也可以出现在棋盘右下角，图案代表了同样的意义（叫吃），所以可以用同一个检测器来处理这些在不同位置的图案。</p>
+</li>
+</ul>
+<p>Q：困惑的是图像的第三个特性，对原图像做子采样不会影响人看到的这张图像的样子，基于第三个特性有了池化层，但Alpha<br>并没有采用池化层（就是做子采样）？<br><strong>因为不能做子采样。比如丢弃棋盘的奇数行和偶数列，想想也应该是不可以的。</strong></p>
+<p>也许AlphaGo里的CNN架构有特殊的地方。AlphaGo论文附录里描述了它的网络结构，input是一个<em>19 ×19 ×48</em> 的图像，<em>19<br>×19</em> 是棋盘可以理解，<strong>但48是怎么来的？</strong><br>对AlphaGo来说，把每一个位置都用48个值来描述（卷积后有48个通道）。本来我们只要描述一个位置是不是白子、黑子就可以了，而AlphaGo加上了领域知识（看这个位置是不是出于叫吃的状态等等）。</p>
+<p>AlphaGo有做zero padding(零填充)，在原来<em>19 ×19</em> 的图像外围补上 <em>0</em> 值变成 <em>23 × 23</em> 的图像，第一层用的是 <em>5 × 5</em> 过滤器，总共 <em>k</em> 个过滤器（paper里用的是192个过滤器），步长<em>stride=1</em>，有用到 <em>ReLu</em> 作为激活函数，有2到12层的过滤器层，最后变成 <em>21 × 21</em> 的图像，接下来再使用 <em>3 × 3</em> 的过滤器，步长 <em>stride=1</em>。最后发现AlphaGo没有使用池化，针对围棋特性设计CNN结构的时候，是不需要池化这个结构的。</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>机器学习基础</category>
+      </categories>
+      <tags>
+        <tag>深度学习</tag>
+        <tag>CNN</tag>
+        <tag>李宏毅</tag>
       </tags>
   </entry>
   <entry>
@@ -2096,131 +2306,6 @@
         <tag>深度学习</tag>
         <tag>李宏毅</tag>
         <tag>半监督学习</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>卷积神经网络CNN（Convolutional Neural Network）</title>
-    <url>/2021/08/12/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9CCNN%EF%BC%88Convolutional%20Neural%20Network%EF%BC%89/</url>
-    <content><![CDATA[<p>@<a href="卷积神经网络CNN（Convolutional Neural Network）">TOC</a></p>
-<blockquote>
-<p>总结CNN的要点：<br>Q1：什么是CNN？为什么要用CNN？为什么图像处理一般都采用CNN？<br>Q2：实现CNN的步骤？</p>
-<p><font color="red">input——&gt;convolution——&gt;max pooling——&gt;…——&gt;flatten——&gt;fully connected network——&gt;output </font><br>Q3：如何用 <em>keras</em> 搭建一个CNN?<br>Q4：CNN的应用?什么时候适用CNN效果最好？<br>满足三个图像三个特性的时候。但要考虑第三点取子样是否合理。</p>
-</blockquote>
-<h1 id="CNN的概述"><a href="#CNN的概述" class="headerlink" title="CNN的概述"></a>CNN的概述</h1><h2 id="什么是CNN？"><a href="#什么是CNN？" class="headerlink" title="什么是CNN？"></a>什么是CNN？</h2><p>CNN也叫convnet，中文名称为卷积神经网络，是计算机视觉领域常用的一种深度学习模型。</p>
-<h2 id="为什么要用CNN？"><a href="#为什么要用CNN？" class="headerlink" title="为什么要用CNN？"></a>为什么要用CNN？</h2><p>其可以简化DNN模型，可以减少不必要的神经元节点。特别是用在图像处理上。</p>
-<h3 id="为什么图像处理一般都采用CNN？"><a href="#为什么图像处理一般都采用CNN？" class="headerlink" title="为什么图像处理一般都采用CNN？"></a>为什么图像处理一般都采用CNN？</h3><font color="green">**CNN的参数比全连接神经网络少得多**，为什么CNN只用较少的参数就可以用于处理图像呢？</font>
-
-<p>这是因为图像具有以下三点特征：<br>1、一些模式比整张图片小得多，例如“鸟喙”就比整张图片小得多；<img src="https://img-blog.csdnimg.cn/1e9efb0804a64876a33e2794d96039a0.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt=""><br>2、同样的模式可能出现在图像的不同区域，例如“鸟喙”可能出现在图片的左上方也可能出现在图像的中间；<img src="https://img-blog.csdnimg.cn/c4a2de1adb4d4573865ec9f20b9e4a96.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt=""><br>3、对图像的降采样不会改变图像中的物体。<img src="https://img-blog.csdnimg.cn/3e746d5fef0140029fe62095452d8389.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt=""><br><strong>CNN的卷积层的设计对应着前两点，池化层的设计对应着第三点。</strong> 如下图所示：<br><img src="https://img-blog.csdnimg.cn/81dc5d9f161c47b4b7054b5964eda897.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt=""></p>
-<h1 id="实现CNN的步骤"><a href="#实现CNN的步骤" class="headerlink" title="实现CNN的步骤"></a>实现CNN的步骤</h1><p>input——&gt;convolution——&gt;max pooling——&gt;…——&gt;flatten（压平）——&gt;fully connected network——&gt;output</p>
-<h2 id="卷积层（减少训练参数）"><a href="#卷积层（减少训练参数）" class="headerlink" title="卷积层（减少训练参数）"></a>卷积层（减少训练参数）</h2><p><img src="https://img-blog.csdnimg.cn/81dc5d9f161c47b4b7054b5964eda897.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="CNN流程图"></p>
-<ul>
-<li><p>对应Property1：每一个Filter（待训练的参数，即卷积核）代表一个<strong>局部特征探测器</strong>（他是一个可以特点图形的表示器），假设现在两个特征探测器（<em>Filter1</em> 和 <em>Filter2</em>）</p>
-<ul>
-<li><p>卷积核1的结果 值最大的那个点所在的图片部分，就是我们要找的内容<br><img src="https://img-blog.csdnimg.cn/afe8e2823a47491bba71d054aa0ade85.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-</li>
-<li><p>卷积核2的结果。与卷积核1的结构共同组成了 feature map<img src="https://img-blog.csdnimg.cn/c3841af956b24b6d8721af30d207cb4c.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-</li>
-</ul>
-</li>
-</ul>
-<ul>
-<li>对应Property2：用 <em>Filter1</em> 就能探测出在不同位置的同一个flatten，而不需要用不同的Filter</li>
-</ul>
-<p>如果图片是彩色的，也就是说它是三通道的，还没卷积之前，可以说有3个通道（RGB），意味着每一个像素由3个数值表示。如下图所示：<br>卷积核是立方体3×3×3，图片为9×9×3。图片中同样选择卷积核大小，与卷积核累和，但要注意我们并不是把RGB三层，分开算，应该算合为一体的。<img src="https://img-blog.csdnimg.cn/991470ca8069474fabd2088db993f9eb.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="RGB卷积"></p>
-<h3 id="与全连接方式的对比"><a href="#与全连接方式的对比" class="headerlink" title="与全连接方式的对比"></a>与全连接方式的对比</h3><p>全连接层，图像处理的神经网络图如下所示，每个输入与各神经元都有链接（有固定的权值）<img src="https://img-blog.csdnimg.cn/b34b02cb98274e53a6600a5c685d3674.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="全连接层"><br>下面是CNN神经网络图，其主要的目的是减少参数（减少权值数量）。并且可以存在一定的共享权值，下面颜色相同的权值边值应该相同，这样调参可以更快。</p>
-<p><img src="https://img-blog.csdnimg.cn/250d06b21d4546dea59a0a6502d3a3c0.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="CNN"></p>
-<h2 id="池化层（Maxpooling）"><a href="#池化层（Maxpooling）" class="headerlink" title="池化层（Maxpooling）"></a>池化层（Maxpooling）</h2><p>目的是减少每一个特征的维度，也就是减少后面flatten的输入特征数量。Maxpooling这边我们取每个框内的最大点。<img src="https://img-blog.csdnimg.cn/f52e46c700fe492ab79a470370e223ff.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="Maxpooling的规程"><br>在整理一下，变成一个新的feature map</p>
-<p>合计上两步得到：<br><img src="https://img-blog.csdnimg.cn/8065213d0fff4e30b41d596b0cde4d65.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>做一次卷积+池化后，把原来的 <em>6 × 6</em> 图像变成了 <em>2 × 2</em> 图像，<em>2 × 2</em>图像的深度（每个像素点用多少个值表示）<strong>取决于有多少个过滤器，如果有 <em>50</em> 个过滤器，<em>2 × 2</em> 图像就有 <em>50</em> 维</strong>，上图是只用两个过滤器，那就是 <em>2</em> 维。<br>所以上图右边，就是一个新的比较小的图像，每个过滤器代表了一个channel(通道)。</p>
-<h2 id="重复上两步操作"><a href="#重复上两步操作" class="headerlink" title="重复上两步操作"></a>重复上两步操作</h2><p>可多次重复上述两个步骤，将输出的结果变得最小化。</p>
-<blockquote>
-<p><strong>Q: 假设我们第一次卷积的时候，我们有25个卷积核，那输出的结果 feature map中应该有25个矩阵。那请问，第二次卷积的时候，输出的feature map 应该是 25×25=625 个矩阵么？</strong><br>答：不对，做完第一次卷积得到25个矩阵，做完第二次后还是25个矩阵。例如输入是三个通道 <em>(RGB)</em> 的 <em>6 × 6</em> 矩阵数据（即一个立方体，6 × 6  × 3），有两个过滤器（也是立方体，三个通道，<em>3 × 3 × 3</em>），则输出为<em>4  × 4 × 2</em>。（<em>4 = 6-2 ； 2</em>是过滤器个数  <strong>过滤器决定通道数</strong>）<img src="https://img-blog.csdnimg.cn/a4aeaa3dd23d4ff48bce2e89c97553c3.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-</blockquote>
-<p><img src="https://img-blog.csdnimg.cn/e634fad522fe498a9b5cb04557fe7a05.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt=""></p>
-<h2 id="Flatten（压平）"><a href="#Flatten（压平）" class="headerlink" title="Flatten（压平）"></a>Flatten（压平）</h2><p><img src="https://img-blog.csdnimg.cn/699741afda84434985ef450ad1cffeea.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="Flatten"><br>flatten(压平)的意思是，把特征图拉直，然后丢到一个全连接神经网络里。</p>
-<h1 id="CNN-in-Keras"><a href="#CNN-in-Keras" class="headerlink" title="CNN in Keras"></a>CNN in Keras</h1><ul>
-<li>卷积前，一个pixel用多少个数值表示，取决于通道数</li>
-<li>卷积后，一个pixel用多少个数值表示，取决于Filter个数，而通道数决定Filter的高</li>
-<li>上一个卷积层有多少个Filter，下一层卷积input就有多少个通道<br><img src="https://img-blog.csdnimg.cn/75db9d57e892418d9c68b6d52c714c4b.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></li>
-</ul>
-<p><img src="https://img-blog.csdnimg.cn/686fdcfd5a734bfa998f6d84def07fea.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model = Sequential()</span><br><span class="line">model.add(Conv2D(<span class="number">25</span>,<span class="number">3</span>,<span class="number">3</span>),input_shape=(<span class="number">1</span>,<span class="number">28</span>,<span class="number">28</span>))</span><br><span class="line">model.add(MaxPooling2D((<span class="number">2</span>,<span class="number">2</span>)))</span><br><span class="line">model.add(Conv2D(<span class="number">50</span>,<span class="number">3</span>,<span class="number">3</span>))</span><br><span class="line">model.add(MaxPooling2D((<span class="number">2</span>,<span class="number">2</span>)))</span><br><span class="line">model.add(Dense(output_dim=<span class="number">100</span>))</span><br><span class="line">model.add(Activation(<span class="string">&#x27;relu&#x27;</span>))</span><br><span class="line">model.add(Dense(output_dim=<span class="number">10</span>))</span><br><span class="line">model.add(Activation(<span class="string">&#x27;softmax&#x27;</span>))</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p><strong>Q：为什么上图第二次 每个卷积核的 参数是 225？</strong><br>答：因为是 3×3×25  那为什么是25而不是50呢？</p>
-</blockquote>
-<h1 id="CNN在学什么？"><a href="#CNN在学什么？" class="headerlink" title="CNN在学什么？"></a>CNN在学什么？</h1><h2 id="CNN卷积和池化部分在做什么？"><a href="#CNN卷积和池化部分在做什么？" class="headerlink" title="CNN卷积和池化部分在做什么？"></a>CNN卷积和池化部分在做什么？</h2><p><img src="https://img-blog.csdnimg.cn/919125d4f1964cb9b520a639ed94e2e6.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<ul>
-<li>分析第一个层的卷积核是比较容易的，里面每个卷积核就是一个3 <em> 3 的矩阵，对应3 </em> 3 范围内的9个像素点，<strong>只要看到矩阵的值，就知道在检测什么</strong>（有明显的特征）。</li>
-<li>第二层的卷积核没法知道在做什么，虽然也是 <em>3 × 3</em> 的矩阵，总共 50 个。<strong>但是这些卷积核的输入不是像素点，而是在上一层做完卷积和池化后的输出</strong>。就算知道第二层卷积核的矩阵值，也不知道在检测什么。<strong>另外第二层卷积核考虑的不是原图 <em>3 × 3</em> 的像素点，而是比原图 <em>3 × 3</em> 像素点更大的范围，因为在第一层的池化后，压缩了原图 <em>3 × 3</em> 的区域，第二层卷积核是在压缩后的图像里再选取 <em>3 × 3</em>  像素点，相当于扩大了原图检测的范围。</strong></li>
-</ul>
-<blockquote>
-<font color="red">Q：那怎么分析第二层卷积核在做什么？</font>
-
-<p>第二层的50个卷积核，每个卷积核的输出是一个 <em>11 × 11</em> 的矩阵。把第k个卷积核输出拿出来如上图左下，矩阵元素表示为  $a_{ij}^{k}$  (第k个卷积核，第i个行，第j个列)。接下来 定义一个“<em>Degree of the activation of the k-th  filter</em>”（第k个卷积核的激活程度），值代表第k个卷积核的被激活程度（<strong>input和第k个卷积核侦测的东西有多匹配</strong>）。</p>
-<p>第k个卷积核被激活程度表示为：$a^{k}=\sum<em>{i=1}^{11}\sum</em>{j=1}^{11}a_{ij}^{k}$ ，<em>11 × 11</em> 矩阵所有元素值之和。</p>
-<p><strong>Q：找一张图像，可以让第k个卷积核被激活程度最大，如果做到这件事情？</strong><br><strong>称 <em>input</em> 的图像为 <em>x</em>，目标是找一个让 $a^{k}$ 最大的 <em>x</em>，如何找到这个 <em>x</em>？</strong></p>
-<p><font color="red">使用梯度上升</font>，因为我们的目标是最大化 $a^{k}$  。现在是把 <em>x</em> 当做我们要找的参数，对 <em>x</em> 用梯度上升。原来CNN的 <em>input</em> 是固定的，<em>model</em> 的参数使用梯度下降求解。现在反过来，<em>model</em> 的参数是固定的，使用个梯度上升更新 <em>x</em>，让被激活程度最大。</p>
-</blockquote>
-<p><img src="https://img-blog.csdnimg.cn/b5522ea6a04d49bfa39a3f94db140610.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述">上图左下，是随便取12个卷积核后对 <em>x</em> 做梯度上升后的结果，每个卷积核都找到一张图像，这张图像让这个卷积核的被激活程度最高。如果有50个卷积核，理论上可以找50张图像。</p>
-<blockquote>
-<p><strong>Q：这12张图像有一个共同的特征：是某种纹路在图上不断反复。为什么会这样？</strong><br>看第三张图像，都是小小的斜条纹，这意味着第三个卷积核是在检测是否有斜的条纹。因为卷积核考虑的范围是很小的，所以原图像上任何地方出现一个小小的斜纹的话，这个卷积核（过滤器）就会被激活，输出值就会很大。如果原图像所有范围都是这种小小的条纹，那这个卷积核的被激活程度就最大。</p>
-</blockquote>
-<p>你会发现每个过滤器都是在检测某一种图案（某一种线条），例如上图左下第3个过滤器是检测斜条纹，第4个是检测短、直的线条，第6个是检测斜成一定程度的线条等等。</p>
-<font color="red">每个卷积核（过滤器）都在检测不同角度的线条。</font>
-
-<h2 id="全连接的隐藏层都在干什么？"><a href="#全连接的隐藏层都在干什么？" class="headerlink" title="全连接的隐藏层都在干什么？"></a>全连接的隐藏层都在干什么？</h2><p><img src="https://img-blog.csdnimg.cn/cc01d0cb741b4bab93047f401e34b40f.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>做完卷积和池化后，会做flatten(压平)，把压平后的结果丢到神经网络里去。</p>
-<blockquote>
-<p><strong>Q：在这个神经网络的隐藏层里，每个神经元都在干什么？</strong><br>答：如法炮制之前的做法，定义第 <em>j</em> 个神经元的输出是 $a<em>{j}$ ，然后找一张图像 <em>x</em>，使 $a</em>{j}$ 最大。<br>找到的图像如上图左下所示，9张图像，是对应神经元的输出最大。你会发现跟刚才卷积核（过滤器）观察的图案很<strong>不一样</strong>，<font color="red"><strong>卷积核观察的是类似纹路的东西，因为卷积核只考虑了原图像的一部分区域</strong></font>。<br><strong>输出通过压平后，现在每个神经元是去看整张图像</strong>，能使神经元激活程度最高的图像不再是纹路这种小图案，而是一个完整的图形，虽然看起来完全不像是数字，但神经元被激活后也的确在侦测一个完整的数字。</p>
-</blockquote>
-<h2 id="考虑最后的输出？"><a href="#考虑最后的输出？" class="headerlink" title="考虑最后的输出？"></a>考虑最后的输出？</h2><p><img src="https://img-blog.csdnimg.cn/c02bf451565e4f01bacf11dc6922219c.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p>如果最后的输出是10维的，每一维对应一个数字。把某一维拿出来，找一张图像使那个维度的输出最大。例如现在要找一张图像，使输出层上对应数字1的神经元的输出最大，理论上这张图像看起来就是数字1<br>但是实际的图像如上图左边所示，每张图像分别代表0,1,2,3,4,5,6,7,8</p>
-<blockquote>
-<p><strong>Q：那为什么是这种是乱七八糟的雪花状呢，而不是我们能看清的数字呢？</strong><br>答：因为神经网络的视角，他就是和人不一样的。他就认为这些雪花图像是不一样的，对于0-8数字。与我们人的思维不同。<br><img src="https://img-blog.csdnimg.cn/f84a6c6c9e4c468a805407e8bfee004c.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><strong>Q：能不能让这些图像看起来更像数字？</strong><br>我们知道，一张图像是不是一个数字，有一些基本的假设。比如上图左边，人类看起来显示不是数字。那么我们对x做一些<strong>正则项约束</strong>，告诉机器，虽然有些 <em>x</em>（图像） 可以让  <em>y</em>  很大，但是这些 <em>x</em> 的确不是数字。<br><strong>Q：那加些什么约束呢？</strong><br>比如最简单的想法，图像上的白点是有墨水（笔画）的地方，对一个数字来说，有白点的部分是有限的，数字的笔画只占图的一小部分，所以我们要对 <em>x</em> 做一些限制。<br>假设 $x<em>{ij}$ 是图像像素点的值，每张图像有 <em>28 × 28</em> 个像素点。<strong>把所有像素点的值取绝对值并求和（相当于L1正则）</strong>，我们希望找一个 <em>x</em> ，让 $y</em>{i}$ 越大的同时，也让像素点绝对值之和越小。那我们找出来的图像大部分的地方就不是白色的。<br>最后得到的结果如上图右边所示，和左边的图看起来，已经可以隐约看出来是个数字了。</p>
-</blockquote>
-<h1 id="CNN的应用"><a href="#CNN的应用" class="headerlink" title="CNN的应用"></a>CNN的应用</h1><h2 id="Deep-Dream"><a href="#Deep-Dream" class="headerlink" title="Deep Dream"></a>Deep Dream</h2><p>你给机器一张图像，<strong>机器会在这张图像里面，加上它学习到的东西</strong>。<br><img src="https://img-blog.csdnimg.cn/b3c9858f5d9849d8995dd1183150f92e.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<p>比如把上图丢到CNN里面去，然后把某个卷积核或者某个全连接隐藏层拿出来（一个向量），假设是 $\begin{bmatrix}<br>3.9\<br>-1.5\<br>2.3\<br>:\<br>\end{bmatrix}$</p>
-<p>然后把3.9、2.3调大（本来是正的值调大），-1.5调小（负的值调小），正的更正，负的更负。找一个图像使卷积核或者隐藏层（拿出来的）的输出是调整后的向量。<strong>这么做的意思是让CNN夸大化它看到的东西。</strong><br><img src="https://img-blog.csdnimg.cn/0884c7de1c4e44b2ae5e302590b5ee18.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>找到的图像会变成上图所示，出现很多奇怪的东西。右边看起来是一头熊，原来是一颗石头。对机器来说，本来就觉得石头像一头熊，强化它的认知后，就学习出来更像一头熊的图案。这个就是Deep Dream。</p>
-<h2 id="Deep-Style"><a href="#Deep-Style" class="headerlink" title="Deep Style"></a>Deep Style</h2><p><em>input</em> 一张图像，然后让机器去修改这张图像，让它有另一张图的风格，比如让上图看起来是呐喊。<br><img src="https://img-blog.csdnimg.cn/153f1e11b39943d8b64e7f352c289410.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<blockquote>
-<p><img src="https://img-blog.csdnimg.cn/952a46ca31584df885c1722e5f79912d.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br><strong>Q：卷积核和过滤器的区别</strong></p>
-<ul>
-<li><p>卷积核就是由<strong>长和宽</strong>来指定的，是一个<strong>二维</strong>的概念。</p>
-<ul>
-<li>过滤器是是由<strong>长、宽和深度</strong>指定的，是一个<strong>三维</strong>的概念。</li>
-<li>过滤器可以看做是卷积核的集合。</li>
-<li>过滤器比卷积核高一个维度——深度。</li>
-</ul>
-<p>——————————————————————————————————</p>
-</li>
-</ul>
-<p><strong>Q：怎么做到图像风格转变呢？</strong><br><strong>把原来的图像丢给CNN，得到CNN过滤器的输出，代表一张图像里有什么样的内容</strong>。 然后把呐喊这张图也丢到CNN里，也得到过滤器的输出，但这时候考虑的不是过滤器输出的绝对值，而是考虑<strong>过滤器和过滤器输出之间的关系</strong>，<strong>这个关系代表了一张图像的风格</strong>。接下来用同一个CNN找一张图像，这张图像的内容像原图像的内容（过滤器的输出类似），同时这张图像的风格像呐喊的风格（过滤器输出之间的关系类似）。<br><strong>找一张图片同时<font color="red">最大化</font>内容和风格（使用<font color="red">梯度上升更新参数</font>），得到的结果就像两张图片结合一样。</strong></p>
-</blockquote>
-<h2 id="CNN应用在围棋上"><a href="#CNN应用在围棋上" class="headerlink" title="CNN应用在围棋上"></a>CNN应用在围棋上</h2><p><img src="https://img-blog.csdnimg.cn/d2233ab8dcdf4ca8ad1e4dc4ebf550b6.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>要让机器下围棋，不一定要用CNN，一般的神经网络也可以做这件事情。只要学习一个网络，也就是找一个函数，输入是棋盘，输出是棋盘上的位置，根据棋盘的盘势，判断下一步落子的位置。<br>输入是<em>19 ×19</em> 向量，向量每一维是棋盘上的一个位置（是黑子则值为1，是白子则值为-1，反之则为0），丢到一个全连接的神经网络，输出也是<em>19 ×19</em> 的向量（每一维对应棋盘一个位置），那这样机器就可以学会下围棋了。</p>
-<h3 id="为什么CNN可以用在下围棋上？"><a href="#为什么CNN可以用在下围棋上？" class="headerlink" title="为什么CNN可以用在下围棋上？"></a>为什么CNN可以用在下围棋上？</h3><p>但实际采用CNN会得到更好的效果！为什么呢？<br>之前举的例子都是把CNN用在图像上面，<em>input</em> 是一个矩阵。用到下棋上，只要把 <em>19 ×19</em>  的向量表示为 <em>19 ×19</em>  的矩阵。对CNN来说，<strong>就是把棋盘和棋子当成一个图像，然后输出下一步落子的位置</strong>。</p>
-<blockquote>
-<p><img src="https://img-blog.csdnimg.cn/604669df79b5475aa23db1f14d14b3e5.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>收集很多棋谱，告诉CNN，看到落子在5之五，输出天元的位置为1，其他位置为0<br>看到5之五和天元都有棋子，输出就是5之五的位置为1，其他位置为0<br>这个是监督的部分，AlphaGo还有强化学习的部分</p>
-</blockquote>
-<h2 id="总结一下什么时候用CNN-为什么围棋适用？"><a href="#总结一下什么时候用CNN-为什么围棋适用？" class="headerlink" title="总结一下什么时候用CNN?为什么围棋适用？"></a>总结一下什么时候用CNN?为什么围棋适用？</h2><p><strong>图像要有该有的特性，开头讲过的根据<font color="red">三个特性</font>设计出了CNN的网络结构，在处理图像的时候特别有效。</strong></p>
-<blockquote>
-<p><strong>Q：为什么围棋很适用CNN？</strong><img src="https://img-blog.csdnimg.cn/36ddc9027bbe4537b72ff41a6553c1dd.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2prczg4OTk1NjU2,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>答：因为围棋有一些特性和图像处理是很相似的。</p>
-<p><font color="red">围棋是有图像的第一个和第二个特性</font></p>
-<ul>
-<li><p><strong>在一张图像上面，有一些图案是比整张图像小的，比如鸟嘴。在围棋也有同样的现象</strong>，比如看到一些棋子摆放的图案，就要做一些相应的事情（比如上图黑子叫吃的时候，白子要落在下方保证不被吃）。不需要看整个棋盘，只需要看一个小小的范围，就可以侦测白子是不是属于被叫吃的状态。<br>AlphaGo里第一层的过滤器就是用的 5 × 5 过滤器，显然设计这个过滤器的人觉得围棋上最基本的图案在 5 × 5 范围内就可以被侦测出来。</p>
-</li>
-<li><p>图<strong>像还有个特性是相同的图案会出现在不同的区域，在围棋上也有同样的特征。</strong>例如叫吃的图案，可以出现在棋盘左上角，也可以出现在棋盘右下角，图案代表了同样的意义（叫吃），所以可以用同一个检测器来处理这些在不同位置的图案。</p>
-</li>
-</ul>
-<p>Q：困惑的是图像的第三个特性，对原图像做子采样不会影响人看到的这张图像的样子，基于第三个特性有了池化层，但Alpha<br>并没有采用池化层（就是做子采样）？<br><strong>因为不能做子采样。比如丢弃棋盘的奇数行和偶数列，想想也应该是不可以的。</strong></p>
-<p>也许AlphaGo里的CNN架构有特殊的地方。AlphaGo论文附录里描述了它的网络结构，input是一个<em>19 ×19 ×48</em> 的图像，<em>19<br>×19</em> 是棋盘可以理解，<strong>但48是怎么来的？</strong><br>对AlphaGo来说，把每一个位置都用48个值来描述（卷积后有48个通道）。本来我们只要描述一个位置是不是白子、黑子就可以了，而AlphaGo加上了领域知识（看这个位置是不是出于叫吃的状态等等）。</p>
-<p>AlphaGo有做zero padding(零填充)，在原来<em>19 ×19</em> 的图像外围补上 <em>0</em> 值变成 <em>23 × 23</em> 的图像，第一层用的是 <em>5 × 5</em> 过滤器，总共 <em>k</em> 个过滤器（paper里用的是192个过滤器），步长<em>stride=1</em>，有用到 <em>ReLu</em> 作为激活函数，有2到12层的过滤器层，最后变成 <em>21 × 21</em> 的图像，接下来再使用 <em>3 × 3</em> 的过滤器，步长 <em>stride=1</em>。最后发现AlphaGo没有使用池化，针对围棋特性设计CNN结构的时候，是不需要池化这个结构的。</p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>机器学习基础</category>
-      </categories>
-      <tags>
-        <tag>深度学习</tag>
-        <tag>CNN</tag>
-        <tag>李宏毅</tag>
       </tags>
   </entry>
   <entry>
