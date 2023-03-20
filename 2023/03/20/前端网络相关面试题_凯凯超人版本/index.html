@@ -1,0 +1,565 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>一只柴犬 | 一只柴犬</title><meta name="author" content="凯凯超人"><meta name="copyright" content="凯凯超人"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="前端网络相关面试题考点1:  http 协议面试题：浏览器Http请求和响应过程浏览器端构建HTTP请求，并发送 -&gt; 服务器端接收到HTTP请求，并进行解析 -&gt; 服务器端发送HTTP响应 -&gt; 浏览器端接收到响应，解析Http响应，而后进行页面渲染。 面试题：客户端渲染 与 服务器渲染的区别客户端渲染 SPA（单页面）是客户端渲染的 用户输入地址，客户端向服务器发送请求  &#x3D;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一只柴犬">
+<meta property="og:url" content="http://example.com/2023/03/20/%E5%89%8D%E7%AB%AF%E7%BD%91%E7%BB%9C%E7%9B%B8%E5%85%B3%E9%9D%A2%E8%AF%95%E9%A2%98_%E5%87%AF%E5%87%AF%E8%B6%85%E4%BA%BA%E7%89%88%E6%9C%AC/index.html">
+<meta property="og:site_name" content="一只柴犬">
+<meta property="og:description" content="前端网络相关面试题考点1:  http 协议面试题：浏览器Http请求和响应过程浏览器端构建HTTP请求，并发送 -&gt; 服务器端接收到HTTP请求，并进行解析 -&gt; 服务器端发送HTTP响应 -&gt; 浏览器端接收到响应，解析Http响应，而后进行页面渲染。 面试题：客户端渲染 与 服务器渲染的区别客户端渲染 SPA（单页面）是客户端渲染的 用户输入地址，客户端向服务器发送请求  &#x3D;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/14.jpg">
+<meta property="article:published_time" content="2023-03-20T10:12:35.965Z">
+<meta property="article:modified_time" content="2023-02-28T08:55:36.000Z">
+<meta property="article:author" content="凯凯超人">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/14.jpg"><link rel="shortcut icon" href="/img/favicon2.png"><link rel="canonical" href="http://example.com/2023/03/20/%E5%89%8D%E7%AB%AF%E7%BD%91%E7%BB%9C%E7%9B%B8%E5%85%B3%E9%9D%A2%E8%AF%95%E9%A2%98_%E5%87%AF%E5%87%AF%E8%B6%85%E4%BA%BA%E7%89%88%E6%9C%AC/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '一只柴犬',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-02-28 16:55:36'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/mycss.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/StaticFile_HEXO@latest/butterfly/css/pool.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/StaticFile_HEXO@latest/butterfly/css/iconfont.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/css/flink.min.css"><meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="一只柴犬" type="application/atom+xml">
+</head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/admin.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">68</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">37</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">7</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 清单</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/%E9%9F%B3%E4%B9%90"><i class="fa-fw /music/"></i><span> 0</span></a></li><li><a class="site-page child" href="/%E7%94%B5%E5%BD%B1"><i class="fa-fw /movies/"></i><span> 1</span></a></li><li><a class="site-page child" href="/%E7%85%A7%E7%89%87"><i class="fa-fw /Gallery/"></i><span> 2</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/14.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">一只柴犬</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 清单</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/%E9%9F%B3%E4%B9%90"><i class="fa-fw /music/"></i><span> 0</span></a></li><li><a class="site-page child" href="/%E7%94%B5%E5%BD%B1"><i class="fa-fw /movies/"></i><span> 1</span></a></li><li><a class="site-page child" href="/%E7%85%A7%E7%89%87"><i class="fa-fw /Gallery/"></i><span> 2</span></a></li></ul></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">无题</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-03-20T10:12:35.965Z" title="发表于 2023-03-20 18:12:35">2023-03-20</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-02-28T08:55:36.000Z" title="更新于 2023-02-28 16:55:36">2023-02-28</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h3 id="前端网络相关面试题"><a href="#前端网络相关面试题" class="headerlink" title="前端网络相关面试题"></a>前端网络相关面试题</h3><h3 id="考点1-http-协议"><a href="#考点1-http-协议" class="headerlink" title="考点1:  http 协议"></a>考点1:  http 协议</h3><h4 id="面试题：浏览器Http请求和响应过程"><a href="#面试题：浏览器Http请求和响应过程" class="headerlink" title="面试题：浏览器Http请求和响应过程"></a>面试题：<strong>浏览器Http请求和响应过程</strong></h4><p>浏览器端构建HTTP请求，并发送 -&gt; 服务器端接收到HTTP请求，并进行解析 -&gt; 服务器端发送HTTP响应 -&gt; 浏览器端接收到响应，解析Http响应，而后进行页面渲染。</p>
+<h4 id="面试题：客户端渲染-与-服务器渲染的区别"><a href="#面试题：客户端渲染-与-服务器渲染的区别" class="headerlink" title="面试题：客户端渲染 与 服务器渲染的区别"></a>面试题：客户端渲染 与 服务器渲染的区别</h4><p><strong>客户端渲染</strong></p>
+<p><strong>SPA（单页面）</strong>是客户端渲染的</p>
+<p>用户输入地址，客户端向服务器发送请求</p>
+<p> =&gt; 服务器传给浏览器相应的网页文件 </p>
+<p>  =&gt; 浏览器解析文件 </p>
+<p>  =&gt; 遇到ajax请求则向服务器再次请求一些数据 </p>
+<p>  =&gt; 服务器再次向浏览器发送相应的数据 </p>
+<p>  =&gt; 浏览器拿到ajax请求返回的数据后，将数据渲染在页面上</p>
+<p><strong>优点</strong>：</p>
+<ul>
+<li>可以向用户快速展示页面的内容，增加用户体验</li>
+<li>给别人爬虫爬取相应的内容增加一定的困难</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li>可能需要向服务器请求多次数据</li>
+<li><strong>不利于</strong><font color="red">SEO（搜索引擎优化）</font>，即百度、搜狗等搜索引擎搜索不到客户端渲染的数据</li>
+</ul>
+<p><strong>服务器渲染</strong></p>
+<p>客户端向服务器发送一次请求  </p>
+<p>   =&gt; 服务器接收请求，并在服务端操作网页文件，将对应数据导入文件  </p>
+<p>   =&gt; <strong>服务器在服务端渲染好整个网页，发送给客户端</strong>  </p>
+<p>   =&gt; <strong>客户端</strong>接收服务器发送过来的网页文件，<strong>不需要做任何操作，直接呈现</strong></p>
+<p><strong>优点</strong></p>
+<ul>
+<li>只需要向服务器请求一次</li>
+<li><strong>利于</strong><font color="red">SEO 搜索引擎优化</font>，即能被搜索引擎搜索到，能向用户展示你网页的东西</li>
+</ul>
+<p><strong>缺点</strong></p>
+<ul>
+<li>如果数据量过大，在服务器渲染的时间就会过长，造成浏览器暂时的空白</li>
+<li>容易被爬虫爬取</li>
+</ul>
+<p><strong>如何区分客户端渲染和服务器渲染</strong></p>
+<ul>
+<li>若页面做整体的刷新，即网址发生改变，就是服务器渲染</li>
+<li>若页面做了局部刷新，即网址没发生改变，就是客户端渲染</li>
+</ul>
+<h4 id="面试题：常见http-status"><a href="#面试题：常见http-status" class="headerlink" title="面试题：常见http status"></a>面试题：常见http status</h4><p><strong>1XX系列</strong>：<font color="font">指定客户端应相应的某些动作，代表请求已被接受，需要继续处理。</font>由于 HTTP/1.0 协议中没有定义任何 1xx 状态码，所以除非在某些试验条件下，服务器禁止向此类客户端发送 1xx 响应。</p>
+<p><strong>2XX系列</strong>：<font color="blue"><strong>代表请求已成功被服务器接收、理解、并接受。</strong></font>这系列中最常见的有200、201状态码。</p>
+<p><strong>3XX系列</strong>：<strong>代表需要客户端采取进一步的操作才能完成请求</strong>，这些状态码用来重定向，后续的请求地址（重定向目标）在本次响应的 Location 域中指明。这系列中最常见的有301、302状态码。</p>
+<p><strong>4XX系列</strong>：<strong>表示请求错误</strong>。代表了客户端看起来可能发生了错误，妨碍了服务器的处理。常见有：401、404状态码。</p>
+<p><strong>5xx系列</strong>：<strong>代表了服务器在处理请求的过程中有错误或者异常状态发生</strong>，也有可能是服务器意识到以当前的软硬件资源无法完成对请求的处理。常见有500、503状态码。</p>
+<p><strong>2开头 （请求成功）表示成功处理了请求的状态代码。</strong></p>
+<ul>
+<li><strong>200 （成功） 服务器已成功处理了请求。 通常，这表示服务器提供了请求的网页。</strong></li>
+<li><strong>201 （已创建） 请求成功并且服务器创建了新的资源。</strong></li>
+<li><strong>202 （已接受） 服务器已接受请求，但尚未处理。</strong></li>
+<li>203 （非授权信息） 服务器已成功处理了请求，但返回的信息可能来自另一来源。</li>
+<li>204 （无内容） 服务器成功处理了请求，但没有返回任何内容。</li>
+<li>205 （重置内容） 服务器成功处理了请求，但没有返回任何内容。</li>
+<li>206 （部分内容） 服务器成功处理了部分 GET 请求。</li>
+</ul>
+<p><strong>3开头 （请求被重定向）表示要完成请求，需要进一步操作。 通常，这些状态代码用来重定向。</strong></p>
+<ul>
+<li>300 （多种选择） 针对请求，服务器可执行多种操作。 服务器可根据请求者 (user agent) 选择一项操作，或提供操作列表供请求者选择。</li>
+<li><strong>301 （永久移动） 请求的网页已永久移动到新位置。 服务器返回此响应（对 GET 或 HEAD 请求的响应）时，会自动将请求者转到新位置。</strong></li>
+<li><strong>302 （临时移动） 服务器目前从不同位置的网页响应请求，但请求者应继续使用原有位置来进行以后的请求。</strong></li>
+<li>303 （查看其他位置） 请求者应当对不同的位置使用单独的 GET 请求来检索响应时，服务器返回此代码。</li>
+<li>304 （未修改） 自从上次请求后，请求的网页未修改过。 服务器返回此响应时，不会返回网页内容。</li>
+<li>305 （使用代理） 请求者只能使用代理访问请求的网页。 如果服务器返回此响应，还表示请求者应使用代理。</li>
+<li>307 （临时重定向） 服务器目前从不同位置的网页响应请求，但请求者应继续使用原有位置来进行以后的请求。</li>
+</ul>
+<p><strong>4开头 （请求错误）这些状态代码表示请求可能出错，妨碍了服务器的处理。</strong></p>
+<ul>
+<li>400 （错误请求） 服务器不理解请求的语法。</li>
+<li><strong>401 （未授权） 请求要求身份验证。 对于需要登录的网页，服务器可能返回此响应。</strong></li>
+<li>403 （禁止） 服务器拒绝请求。</li>
+<li><strong>404 （未找到） 服务器找不到请求的网页。</strong></li>
+<li>405 （方法禁用） 禁用请求中指定的方法。</li>
+<li>406 （不接受） 无法使用请求的内容特性响应请求的网页。</li>
+<li>407 （需要代理授权） 此状态代码与 401（未授权）类似，但指定请求者应当授权使用代理。</li>
+<li>408 （请求超时） 服务器等候请求时发生超时。</li>
+<li>409 （冲突） 服务器在完成请求时发生冲突。 服务器必须在响应中包含有关冲突的信息。</li>
+<li>410 （已删除） 如果请求的资源已永久删除，服务器就会返回此响应。</li>
+<li>411 （需要有效长度） 服务器不接受不含有效内容长度标头字段的请求。</li>
+<li>412 （未满足前提条件） 服务器未满足请求者在请求中设置的其中一个前提条件。</li>
+<li>413 （请求实体过大） 服务器无法处理请求，因为请求实体过大，超出服务器的处理能力。</li>
+<li>414 （请求的 URI 过长） 请求的 URI（通常为网址）过长，服务器无法处理。</li>
+<li>415 （不支持的媒体类型） 请求的格式不受请求页面的支持。</li>
+<li>416 （请求范围不符合要求） 如果页面无法提供请求的范围，则服务器会返回此状态代码。</li>
+<li>417 （未满足期望值） 服务器未满足”期望”请求标头字段的要求。</li>
+</ul>
+<p><strong>5开头（服务器错误）这些状态代码表示服务器在尝试处理请求时发生内部错误。 这些错误可能是服务器本身的错误，而不是请求出错。</strong></p>
+<ul>
+<li><strong>500 （服务器内部错误） 服务器遇到错误，无法完成请求。</strong></li>
+<li>501 （尚未实施） 服务器不具备完成请求的功能。 例如，服务器无法识别请求方法时可能会返回此代码。</li>
+<li>502 （错误网关） 服务器作为网关或代理，从上游服务器收到无效响应。</li>
+<li><strong>503 （服务不可用） 服务器目前无法使用（由于超载或停机维护）。 通常，这只是暂时状态。</strong></li>
+<li>504 （网关超时） 服务器作为网关或代理，但是没有及时从上游服务器收到请求。</li>
+<li>505 （HTTP 版本不受支持） 服务器不支持请求中所用的 HTTP 协议版本。</li>
+</ul>
+<h4 id="面试题：http-和-https-的区别"><a href="#面试题：http-和-https-的区别" class="headerlink" title="面试题：http 和 https 的区别"></a>面试题：http 和 https 的区别</h4><ul>
+<li><p>HTTP协议传输的数据都是<strong>未加密的</strong>，也就是<strong>明文</strong>的，因此使用HTTP协议传输隐私信息非常不安全</p>
+</li>
+<li><p>HTTPS协议 引入了<strong>数据加密</strong>（对称加密和非对称加密相结合的方式实现）和<strong>身份验证机制</strong>（数字证书来验证服务器身份）。在开始传输数据之前，通过安全可靠的 TLS 协议进行加密，从而保证后续加密传输数据的安全性。</p>
+<blockquote>
+<ol>
+<li>数据加密：HTTPS使用SSL/TLS协议对传输的数据进行加密，从而防止第三方窃听、篡改或伪造数据。<strong>SSL/TLS协议使用对称加密和非对称加密相结合的方式，对传输的数据进行加密和解密</strong>，确保数据的机密性和完整性。</li>
+<li>证书验证：HTTPS使用SSL/TLS协议中的<strong>数字证书来验证服务器的身份，防止中间人攻击和伪造服务器</strong>。数字证书是由可信的第三方机构颁发的，它包含了服务器的公钥和其他相关信息，客户端可以通过验证数字证书来确认服务器的身份和信任服务器。</li>
+<li>安全性强：HTTPS使用SSL/TLS协议对数据进行加密和解密，加密强度高，具有一定的抵抗攻击的能力。同时，HTTPS还可以使用数字证书来验证服务器的身份，可以避免中间人攻击和伪造服务器。</li>
+</ol>
+<p>原来是 SSL，现在 已经被废弃，使用 TLS协议了</p>
+<p><strong>TLS 协议</strong>：<strong>传输层安全性协议</strong>（Transport Layer Security，<strong>TLS</strong>）及其前身<strong>安全套接层</strong>（Secure Sockets Layer，<strong>SSL</strong>）是一种安全协议，目的是为了保证<strong>网络通信安全</strong>和<strong>数据完整性</strong>。</p>
+</blockquote>
+</li>
+</ul>
+<p><strong>HTTPS和HTTP的区别主要如下：</strong></p>
+<p>1、https协议需要到ca申请证书，一般免费证书较少，因而需要一定费用。</p>
+<p>2、http是超文本传输协议，信息是<strong>明文传输</strong>，https则是具有安全性的 SSL 加密传输协议。</p>
+<p>3、http和https使用的是<strong>完全不同的连接方式</strong>，用的<strong>端口也不一样</strong>，<strong>前者是80，后者是443</strong>。</p>
+<p>4、http的连接很简单，是无状态的；HTTPS协议是由 TLS+HTTP协议构建的可进行加密传输、身份认证的网络协议，比http协议安全。</p>
+<h4 id="面试题：http协议-各版本的区别"><a href="#面试题：http协议-各版本的区别" class="headerlink" title="面试题：http协议 各版本的区别"></a>面试题：http协议 各版本的区别</h4><ul>
+<li><p>HTTP/0.9：功能捡漏，只支持GET方法，只能发送HTML格式字符串。   </p>
+</li>
+<li><p>HTTP/1.0：支持多种数据格式，增加POST、HEAD等方法，增加头信息，每次只能发送一个请求（无持久连接）   </p>
+</li>
+<li><p>HTTP/1.1：默认持久连接、请求管道化、增加缓存处理、增加Host字段、支持断点传输分块传输等。   </p>
+</li>
+<li><p>HTTP/2.0：<strong>二进制分帧、多路复用(解决了HTTP阻塞线头)、头部压缩、服务器推送</strong></p>
+<p>并没有解决<font color="red"> <strong>TCP 队头阻塞的问题</strong></font></p>
+</li>
+</ul>
+<p>​       采用HTTP/2时，浏览器一般会在单个TCP连接中创建并行的几十个乃至上百个传输。如果HTTP/2连接双方的网络中有一个数据包丢失，或者任何一方的网络出现中断，整个TCP连接就会暂停，丢失的数据包需要被重新传输。因为TCP是一个按序传输的链条，因此如果其中一个点丢失了，链路上之后的内容就都需要等待。</p>
+<p>http2.0 各个特点展开说就是：</p>
+<ol>
+<li><p><strong>HTTP2使用的是二进制传送，HTTP1.X是文本（字符串）传送。</strong></p>
+<p><strong>二进制传送的单位是帧和流。帧组成了流，同时流还有流ID标示</strong></p>
+</li>
+<li><p><strong>HTTP2支持多路复用</strong></p>
+<p>因为有流ID，所以通过同一个http请求实现多个http请求传输变成了可能，可以通过流ID来标示究竟是哪个流从而定位到是哪个http请求</p>
+</li>
+<li><p><strong>HTTP2头部压缩</strong></p>
+<p>HTTP2通过gzip和compress压缩头部然后再发送，同时客户端和服务器端同时维护一张头信息表，所有字段都记录在这张表中，这样后面每次传输只需要传输表里面的索引Id就行，通过索引ID查询表头的值</p>
+</li>
+<li><p><strong>HTTP2支持服务器推送</strong></p>
+<p>HTTP2支持在未经客户端许可的情况下，主动向客户端推送内容</p>
+</li>
+</ol>
+<h4 id="面试题：http-的请求方式-有哪几种"><a href="#面试题：http-的请求方式-有哪几种" class="headerlink" title="面试题：http 的请求方式 有哪几种"></a>面试题：http 的请求方式 有哪几种</h4><ul>
+<li><p>OPTIONS</p>
+<p>查询服务器支持的请求方式，OPTIONS请求用于查询服务器支持的请求方式，客户端可以用这个方法来测试服务器的功能性。</p>
+<font color="blue">具体的说：客户端可以对特定的 URL 使用 OPTIONS 方法，也可以对整站（通过将 URL 设置为“*”）使用该方法</font>
+</li>
+<li><p>HEAD</p>
+<p>与GET请求类似，但是不返回响应体，只返回响应头。</p>
+</li>
+<li><p>GET</p>
+<p>从服务器获取资源，GET请求是最常用的请求方式，用于请求服务器上的数据。</p>
+<p>注意：GET方法不应当被用于产生“副作用”的操作中，例如在Web Application中，其中一个原因是GET可能会被网络蜘蛛等随意访问。Loadrunner中对应get请求函数：web_link和web_url</p>
+</li>
+<li><p>POST</p>
+<p>向服务器提交数据，用于向服务器发送数据，例如表单数据等。）。数据被包含在请求体中。POST请求可能会导致新的资源的建立和/或已有资源的修改。 Loadrunner中对应POST请求函数：web_submit_data,web_submit_form</p>
+</li>
+<li><p>PUT</p>
+<p>更新服务器上的资源，PUT请求用于更新服务器上的指定资源，客户端需要提供完整的资源数据。</p>
+</li>
+<li><p>DELETE</p>
+<p>删除服务器上的资源，DELETE请求用于删除服务器上的指定资源。</p>
+</li>
+<li><p>TRACE</p>
+<p>追踪请求-响应的传输路径，TRACE请求用于追踪请求-响应的传输路径，客户端可以用这个方法来诊断网络连接问题。</p>
+</li>
+<li><p>CONNECT </p>
+<p>这个比较特殊。它不是通过传输数据来操作服务器资源，而是建立一个管道，从而支持客户端和服务器之间的数据传输。因为 CONNECT 请求方法的作用比较特殊，所以一般不在普通的 Web 应用程序中使用。</p>
+</li>
+</ul>
+<h4 id="面试题：GET和POST区别"><a href="#面试题：GET和POST区别" class="headerlink" title="面试题：GET和POST区别"></a>面试题：GET和POST区别</h4><ol>
+<li>get用来获取数据，post用来提交数据</li>
+<li><font color="red">**get参数有长度限制（受限于url长度，具体的数值取决于浏览器和服务器的限制，最长2048字节），而post无限制**</font></li>
+<li><font color="blue">**get请求的数据会附加在url之 ，以 " ？ "分割url和传输数据，多个参数用 "&"连接，而post请求会把请求的数据放在http请求体中。**</font></li>
+<li>get是明文传输，post是放在请求体中，但是开发者可以通过抓包工具看到，也相当于是明文的。</li>
+<li><strong>get请求会保存在浏览器历史记录中，还可能保存在web服务器的日志中</strong></li>
+</ol>
+<h3 id="考点2：-TCP-协议-与-UDP-协议"><a href="#考点2：-TCP-协议-与-UDP-协议" class="headerlink" title="考点2： TCP 协议 与 UDP 协议"></a>考点2： TCP 协议 与 UDP 协议</h3><h4 id="面试题：TCP的三次握手建立连接的过程"><a href="#面试题：TCP的三次握手建立连接的过程" class="headerlink" title="面试题：TCP的三次握手建立连接的过程"></a>面试题：TCP的三次握手建立连接的过程</h4><p>TCP三次握手的过程如下：</p>
+<ol>
+<li>第一次握手（SYN）：客户端向服务器发送一个SYN（Synchronize Sequence Number）报文段，表示客户端请求建立连接。SYN报文段包含一个随机的初始序列号（ISN）。</li>
+<li>第二次握手（SYN+ACK）：服务器收到客户端的SYN报文段之后，会向客户端发送一个SYN+ACK报文段，表示服务器已经收到了客户端的请求，并且同意建立连接。SYN+ACK报文段包含服务器的初始序列号（ISN）和确认号（ACK）。</li>
+<li>第三次握手（ACK）：客户端收到服务器的SYN+ACK报文段之后，会向服务器发送一个ACK（Acknowledgment）报文段，表示客户端已经收到了服务器的响应，并且同意建立连接。<strong>ACK报文段包含确认号（ACK），确认号的值为服务器的初始序列号（ISN）+1</strong>。</li>
+</ol>
+<p><img src="https://uploadfiles.nowcoder.com/images/20230131/473144517_1675143912477/F19F744F8530FAD5C8EAA62339751D08" alt="img"></p>
+<p>完成三次握手后，TCP连接就建立起来了，客户端和服务器可以开始进行数据传输。三次握手的过程中，主要是为了确保客户端和服务器都知道对方的存在，并且建立一个可靠的连接，以保证数据传输的安全性和可靠性<strong>。如果有任何一次握手失败，连接就会建立失败，需要重新发起三次握手建立连接。</strong></p>
+<h4 id="面试题：TCP的四次握手释放连接的过程"><a href="#面试题：TCP的四次握手释放连接的过程" class="headerlink" title="面试题：TCP的四次握手释放连接的过程"></a>面试题：TCP的四次握手释放连接的过程</h4><font color="red">**注意 客户端和服务端 都可以提出释放连接的请求**</font>。**因为 TCP是一种全双工（full-duplex）协议**
+
+1. **发起关闭连接的一方（称为主动关闭方，Active Close）**发送一个**FIN报文段**（也就是连接释放报文段），表示停止发送数据，并请求关闭连接。主动关闭方进入FIN_WAIT_1状态，等待另一方的确认。
+2. **接收到关闭请求的另一方（称为被动关闭方，Passive Close）**收到**FIN报文段**后，它会**发送一个ACK报文段**作为确认，并进入CLOSE_WAIT状态，等待关闭请求的另一方关闭连接。
+3. **被动关闭方在发送完所有数据之后，也发送一个FIN报文段**，表示它已经没有数据要发送了，并请求关闭连接。被动关闭方进入LAST_ACK状态。
+4. **主动关闭方收到被动关闭方的FIN报文段后，发送一个ACK报文段作为确认**，并进入TIME_WAIT状态。**在这个状态下，主动关闭方等待2倍的最长报文段寿命（Maximum Segment Lifetime, MSL）后，连接彻底关闭。**
+
+![img](https://uploadfiles.nowcoder.com/images/20230131/473144517_1675142925083/D2B5CA33BD970F64A6301FA75AE2EB22)
+
+#### 面试题：TCP vs UDP的区别
+
+- TCP是一种**面向连接的**、可靠的、基于字节流的传输层通信协议，是专门为了**在不可靠的网络中提供一个可靠的端对端字节流而设计的，面向字节流。**
+- UDP（用户数据报协议）是iso参考模型中一种**无连接的传输层协议**，提供**简单不可靠的非连接传输层服务**，**面向报文**
+
+**区别：**
+
+1. TCP是面向连接的，可靠性高；UDP是基于非连接的，可靠性低
+
+2. 由于TCP是连接的通信，需要有三次握手、重新确认等连接过程，会有延时，实时性差，同时过程复杂，也使其易于攻击；UDP没有建立连接的过程，因而实时性较强，也稍安全
+
+3. 在传输相同大小的数据时，
+
+   TCP首部开销20字节；实际数据最多为 60字节
+
+   UDP首部开销8字节，**TCP报头比UDP复杂，故实际包含的用户数据较少**。TCP在IP协议的基础上添加了序号机制、确认机制、超时重传机制等，保证了传输的可靠性，不会出现丢包或乱序，而UDP有丢包，故**TCP开销大，UDP开销较小**
+
+4. 每条TCP连接只能时点到点的；
+
+   UDP支持一对一、一对多、多对一、多对多的交互通信，即可多播
+
+**应用场景选择**
+
+- 对实时性要求高和高速传输的场合下使用UDP;在可靠性要求低，追求效率的情况下使用UDP;
+- 需要传输大量数据且对可靠性要求高的情况下使用TCP
+
+
+
+
+
+
+
+#### 面试题：七层模型和五层模型 及其对应协议
+
+![](https://gitee.com/kaikai-superman/imgs/raw/master/img/QQ截图20230117200355.png)
+
+- DNS (Domain Name Service 域名服务) 协议基于 UDP协议
+- FTP (File Transfer Protocol 文件传输协议) 基于 TCP协议
+- DNS和FTP都是应用层协议
+
+**1.应用层**
+
+作用：它是与其他计算机进行通信的应用，它是对应应用程序的通信服务的。各种应用软件，包括web应用。
+
+协议：DNS、FTP、HTTP、SMTP、TELNET、IRC、WHOIS
+
+**2.表示层**
+
+作用：这一层的主要作用是定义数据格式和加密。
+
+**3.会话层**
+
+作用：控制应用程序的会话能力，它定义了一段会话的开始、控制和结束，包括对多个双向消息的控制和管理，以便在只完成一部分消息时可以通知应用。
+
+协议：
+
+HTTP（Hyper text Transfer Protocol）协议：超文本传输协议使用TCP的80端口
+
+FTP（File Transfer Protocol）文本传输协议
+
+SMTP（Simple Mail Transfer Protocol）简单邮件传输协议，TCP是我25端口用户发邮件。
+
+POP3（Post Office Protocol version3）邮局协议版本3，TCP的110号端口，用于收邮件的。
+
+DNS（Domain Name System）域名解析协议。使用TCP和UDP的53号端口，作用是把www的域名解析成IP地址。
+
+**4.传输层**
+
+作用：对差错恢复协议和无差错恢复协议的选择，对同一主机上不同数据流的输入进行复用，对数据包进行重新排序。是最关键的一层，是唯一负责整体的数据传输和数据控制的。对上三层提供可靠的传输服务，对网络层提供可靠的目的地信息。在这一层数据的单位被称为数据段。
+
+协议：TCP、UDP等
+
+**5.网络层**
+
+作用：主要负责寻找地址和路由选择，网络层还可以实现阻塞控制、网际互联等。
+
+协议：IP、IPX、RIP、OSPF等
+
+**6.数据链路层**
+
+作用：负责物理层面上的互联的、节点间的通信传输；该层的作用包括：物理地址寻址、数据的成帧、流量控制、数据的检错、重发等。在这一层，数据的单位称为帧（frame）
+
+协议：ARP、RARP、SDLC、HDLC、PPP、STP、帧中继等
+
+**7.物理层**
+
+作用：负责0、1 比特流（0/1序列）与电压的高低、逛的闪灭之间的转换 规定了激活、维持、关闭通信端点之间的机械特性、电气特性、功能特性以及过程特性；该层为上层协议提供了一个传输数据的物理媒体。在这一层，数据的单位称为比特（bit）。
+
+典型规范：EIA/TIA RS-232、EIA/TIA RS-449、V.35、RJ-45、fddi令牌环网等
+
+
+
+#### 面试题：DNS解析的过程
+
+DNS是应用层协议，事实上他是为其他应用层协议工作的，包括不限于HTTP和SMTP以及FTP，用于将用户提供的主机名解析为ip地址。
+具体过程如下：
+
+1. 客户机提出域名解析请求 , 并将该请求发送给本地的域名服务器 ;
+2. 当本地的域名服务器收到请求后 , 就先查询本地的缓存 , 如果有该纪录项 , 则本地的域名服务器就直接把查询的结果返回 ;
+3. 如果本地的缓存中没有该纪录 , 则本地域名服务器就直接把请求发给根域名服务器 , 然后根域名服务器再返回给本地域名服务器一个所查询域 (根的子域) 的主域名服务器的地址 ;
+4. 本地服务器再向上一步返回的域名服务器发送请求 , 然后接受请求的服务器查询自己的缓存 , 如果没有该纪录 , 则返回相关的下级的域名服务器的地址 ;
+5. 重复第四步 , 直到找到正确的纪录 ;
+6. 本地域名服务器把返回的结果保存到缓存 , 以备下一次使用 , 同时还将结果返回给客户机 ;
+
+
+
+### 考点3： URL
+
+#### 面试题：URL 路径包含什么, URI 是什么
+
+**URL 路径包含什么**
+
+通常情况下，一个URL的格式是：
+
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">protocol :// hostname[:port] / path / [;parameters][?query]#fragment</span><br></pre></td></tr></table></figure>
+
+protocol 协议 hostname主机名 port端口号 path路径 parameters 参数 query查询 
+
+协议：//主机：端口/路径名称?搜索条件#哈希标识
+
+
+
+**URI 是什么**
+
+**URI**是一个用于标识互联网资源名称的字符串。 该种标识允许用户对网络中（一般指[万维网](https://link.jianshu.com/?t=https://zh.wikipedia.org/wiki/万维网)）的资源通过特定的协议进行交互操作。URI的最常见的形式是统一资源定位符（URL），经常指定为非正式的网址。更罕见的用法是统一资源名称（URN），其目的是通过提供一种途径。用于在特定的命名空间资源的标识，以补充网址。
+
+
+
+
+
+#### 面试题：浏览器地址栏输入 URL 敲下回车后发生了什么？
+
+##### Step 1：浏览器解析URL
+
+一个`url`的结构解析如下：
+
+![](https://gitee.com/kaikai-superman/imgs/raw/master/img/url解析.png)
+
+##### **Step 2： DNS查询**
+
+浏览器检查本地缓存，如果有的话，直接使用缓存中的副本。
+
+没有就要进行 DNS查询的内容，这个部分看上面的 DNS解析过程。
+
+<font color="red">**此步骤目的是为了，获取到了域名对应的目标服务器`IP`地址**</font>
+
+
+
+<h5 id="Step-3：建立-TCP-连接"><a href="#Step-3：建立-TCP-连接" class="headerlink" title="Step 3：建立 TCP 连接"></a>Step 3：建立 TCP 连接</h5><p>在确定目标服务器服务器的<code>IP</code>地址后，则经历三次握手建立<code>TCP</code>连接。具体三次连接的步骤看上面。</p>
+<h5 id="Step-4：客户端（浏览器）发送-HTTP-请求"><a href="#Step-4：客户端（浏览器）发送-HTTP-请求" class="headerlink" title="Step 4：客户端（浏览器）发送 HTTP 请求"></a>Step 4：客户端（浏览器）发送 HTTP 请求</h5><p>当建立<code>tcp</code>连接之后，就可以在这基础上进行通信，浏览器发送 <code>http</code> 请求到目标服务器</p>
+<p>请求的内容包括：</p>
+<ul>
+<li>请求行：包含请求方法、URL、HTTP版本信息</li>
+<li>请求头</li>
+<li>请求主体（请求数据）</li>
+</ul>
+<p><img src="https://gitee.com/kaikai-superman/imgs/raw/master/img/111http请求2.png" alt=""></p>
+<p><img src="C:\Users\96356\Desktop\前端学习\前端面试题\上传图片\111http请求2.png" alt="111http请求2" style="zoom:50%;" /></p>
+<h5 id="Step-5：服务器响应请求"><a href="#Step-5：服务器响应请求" class="headerlink" title="Step 5：服务器响应请求"></a>Step 5：服务器响应请求</h5><p>当服务器接收到浏览器的请求之后，就会进行逻辑操作，处理完成之后返回一个<code>HTTP</code>响应消息，包括：</p>
+<ul>
+<li>状态行：包含HTTP版本、状态码、状态码的原因短语</li>
+<li>响应头</li>
+<li>响应正文</li>
+</ul>
+<p>​    <img src="https://gitee.com/kaikai-superman/imgs/raw/master/img/响应请求.png" style="zoom: 50%;" /></p>
+<p>在服务器响应之后，由于现在<code>http</code>默认开始长连接<code>keep-alive</code>，当页面关闭之后，<code>tcp</code>链接则会经过四次挥手完成断开</p>
+<h5 id="Step-6-页面渲染"><a href="#Step-6-页面渲染" class="headerlink" title="Step 6 : 页面渲染"></a>Step 6 : 页面渲染</h5><p><strong>当浏览器接收到服务器响应的资源后，首先会对资源进行解析</strong>：</p>
+<ul>
+<li>查看响应头的信息，根据不同的指示做对应处理，比如重定向，存储cookie，解压gzip，缓存资源等等</li>
+<li>查看响应头的 Content-Type的值，根据不同的资源类型采用不同的解析方式</li>
+</ul>
+<p>关于页面的渲染过程如下：</p>
+<ul>
+<li>解析 HTML 和 CSS：浏览器首先将 HTML 和 CSS 解析成 DOM（文档对象模型）和 CSSOM（CSS 对象模型）两个树形结构，这两个结构合并后便构成了渲染树（Render Tree）。</li>
+<li>布局：浏览器根据渲染树中每个元素的位置和大小计算出它们在屏幕上的实际位置，这个过程叫做布局（Layout），也称为回流（Reflow）。</li>
+<li>绘制：浏览器根据渲染树和布局计算出来的元素位置和大小，将它们绘制到屏幕上，这个过程叫做绘制（Paint）。</li>
+<li>合成：浏览器将绘制好的层按照它们的层级关系合成成最终的图像，并显示在屏幕上。</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">凯凯超人</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2023/03/20/%E5%89%8D%E7%AB%AF%E7%BD%91%E7%BB%9C%E7%9B%B8%E5%85%B3%E9%9D%A2%E8%AF%95%E9%A2%98_%E5%87%AF%E5%87%AF%E8%B6%85%E4%BA%BA%E7%89%88%E6%9C%AC/">http://example.com/2023/03/20/%E5%89%8D%E7%AB%AF%E7%BD%91%E7%BB%9C%E7%9B%B8%E5%85%B3%E9%9D%A2%E8%AF%95%E9%A2%98_%E5%87%AF%E5%87%AF%E8%B6%85%E4%BA%BA%E7%89%88%E6%9C%AC/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">一只柴犬</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/14.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2023/03/20/%E5%89%8D%E7%AB%AF%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E9%9D%A2%E8%AF%95%E9%A2%98_%E5%87%AF%E5%87%AF%E8%B6%85%E4%BA%BA%E7%89%88%E6%9C%AC/"><img class="prev-cover" src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/14.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info"></div></div></a></div><div class="next-post pull-right"><a href="/2023/03/20/%E5%89%8D%E7%AB%AF%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E9%9D%A2%E8%AF%95%E9%A2%98_%E5%87%AF%E5%87%AF%E8%B6%85%E4%BA%BA%E7%89%88%E6%9C%AC/"><img class="next-cover" src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/14.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info"></div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/admin.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">凯凯超人</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">68</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">37</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">7</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/xxxxx" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:xxxxxx@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://gitee.com/×××" target="_blank" title="Gitee"><i class="iconfont gitee"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E7%AB%AF%E7%BD%91%E7%BB%9C%E7%9B%B8%E5%85%B3%E9%9D%A2%E8%AF%95%E9%A2%98"><span class="toc-number">1.</span> <span class="toc-text">前端网络相关面试题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%80%83%E7%82%B91-http-%E5%8D%8F%E8%AE%AE"><span class="toc-number">2.</span> <span class="toc-text">考点1:  http 协议</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%9D%A2%E8%AF%95%E9%A2%98%EF%BC%9A%E6%B5%8F%E8%A7%88%E5%99%A8Http%E8%AF%B7%E6%B1%82%E5%92%8C%E5%93%8D%E5%BA%94%E8%BF%87%E7%A8%8B"><span class="toc-number">2.1.</span> <span class="toc-text">面试题：浏览器Http请求和响应过程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%9D%A2%E8%AF%95%E9%A2%98%EF%BC%9A%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%B8%B2%E6%9F%93-%E4%B8%8E-%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%B8%B2%E6%9F%93%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">2.2.</span> <span class="toc-text">面试题：客户端渲染 与 服务器渲染的区别</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%9D%A2%E8%AF%95%E9%A2%98%EF%BC%9A%E5%B8%B8%E8%A7%81http-status"><span class="toc-number">2.3.</span> <span class="toc-text">面试题：常见http status</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%9D%A2%E8%AF%95%E9%A2%98%EF%BC%9Ahttp-%E5%92%8C-https-%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">2.4.</span> <span class="toc-text">面试题：http 和 https 的区别</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%9D%A2%E8%AF%95%E9%A2%98%EF%BC%9Ahttp%E5%8D%8F%E8%AE%AE-%E5%90%84%E7%89%88%E6%9C%AC%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">2.5.</span> <span class="toc-text">面试题：http协议 各版本的区别</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%9D%A2%E8%AF%95%E9%A2%98%EF%BC%9Ahttp-%E7%9A%84%E8%AF%B7%E6%B1%82%E6%96%B9%E5%BC%8F-%E6%9C%89%E5%93%AA%E5%87%A0%E7%A7%8D"><span class="toc-number">2.6.</span> <span class="toc-text">面试题：http 的请求方式 有哪几种</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%9D%A2%E8%AF%95%E9%A2%98%EF%BC%9AGET%E5%92%8CPOST%E5%8C%BA%E5%88%AB"><span class="toc-number">2.7.</span> <span class="toc-text">面试题：GET和POST区别</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%80%83%E7%82%B92%EF%BC%9A-TCP-%E5%8D%8F%E8%AE%AE-%E4%B8%8E-UDP-%E5%8D%8F%E8%AE%AE"><span class="toc-number">3.</span> <span class="toc-text">考点2： TCP 协议 与 UDP 协议</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%9D%A2%E8%AF%95%E9%A2%98%EF%BC%9ATCP%E7%9A%84%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E5%BB%BA%E7%AB%8B%E8%BF%9E%E6%8E%A5%E7%9A%84%E8%BF%87%E7%A8%8B"><span class="toc-number">3.1.</span> <span class="toc-text">面试题：TCP的三次握手建立连接的过程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%9D%A2%E8%AF%95%E9%A2%98%EF%BC%9ATCP%E7%9A%84%E5%9B%9B%E6%AC%A1%E6%8F%A1%E6%89%8B%E9%87%8A%E6%94%BE%E8%BF%9E%E6%8E%A5%E7%9A%84%E8%BF%87%E7%A8%8B"><span class="toc-number">3.2.</span> <span class="toc-text">面试题：TCP的四次握手释放连接的过程</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Step-3%EF%BC%9A%E5%BB%BA%E7%AB%8B-TCP-%E8%BF%9E%E6%8E%A5"><span class="toc-number">3.2.1.</span> <span class="toc-text">Step 3：建立 TCP 连接</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Step-4%EF%BC%9A%E5%AE%A2%E6%88%B7%E7%AB%AF%EF%BC%88%E6%B5%8F%E8%A7%88%E5%99%A8%EF%BC%89%E5%8F%91%E9%80%81-HTTP-%E8%AF%B7%E6%B1%82"><span class="toc-number">3.2.2.</span> <span class="toc-text">Step 4：客户端（浏览器）发送 HTTP 请求</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Step-5%EF%BC%9A%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%93%8D%E5%BA%94%E8%AF%B7%E6%B1%82"><span class="toc-number">3.2.3.</span> <span class="toc-text">Step 5：服务器响应请求</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Step-6-%E9%A1%B5%E9%9D%A2%E6%B8%B2%E6%9F%93"><span class="toc-number">3.2.4.</span> <span class="toc-text">Step 6 : 页面渲染</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2023/03/20/axios%20%E7%9A%84%E4%BA%8C%E6%AC%A1%E5%B0%81%E8%A3%85_%E5%87%AF%E5%87%AF%E8%B6%85%E4%BA%BA%E7%89%88%E6%9C%AC/" title="无题"><img src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/14.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"/></a><div class="content"><a class="title" href="/2023/03/20/axios%20%E7%9A%84%E4%BA%8C%E6%AC%A1%E5%B0%81%E8%A3%85_%E5%87%AF%E5%87%AF%E8%B6%85%E4%BA%BA%E7%89%88%E6%9C%AC/" title="无题">无题</a><time datetime="2023-03-20T10:12:35.973Z" title="发表于 2023-03-20 18:12:35">2023-03-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/03/20/%E5%89%8D%E7%AB%AF%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E9%9D%A2%E8%AF%95%E9%A2%98_%E5%87%AF%E5%87%AF%E8%B6%85%E4%BA%BA%E7%89%88%E6%9C%AC/" title="无题"><img src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/14.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"/></a><div class="content"><a class="title" href="/2023/03/20/%E5%89%8D%E7%AB%AF%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E9%9D%A2%E8%AF%95%E9%A2%98_%E5%87%AF%E5%87%AF%E8%B6%85%E4%BA%BA%E7%89%88%E6%9C%AC/" title="无题">无题</a><time datetime="2023-03-20T10:12:35.969Z" title="发表于 2023-03-20 18:12:35">2023-03-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/03/20/%E5%89%8D%E7%AB%AF%E7%BD%91%E7%BB%9C%E7%9B%B8%E5%85%B3%E9%9D%A2%E8%AF%95%E9%A2%98_%E5%87%AF%E5%87%AF%E8%B6%85%E4%BA%BA%E7%89%88%E6%9C%AC/" title="无题"><img src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/14.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"/></a><div class="content"><a class="title" href="/2023/03/20/%E5%89%8D%E7%AB%AF%E7%BD%91%E7%BB%9C%E7%9B%B8%E5%85%B3%E9%9D%A2%E8%AF%95%E9%A2%98_%E5%87%AF%E5%87%AF%E8%B6%85%E4%BA%BA%E7%89%88%E6%9C%AC/" title="无题">无题</a><time datetime="2023-03-20T10:12:35.965Z" title="发表于 2023-03-20 18:12:35">2023-03-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/03/20/%E5%89%8D%E7%AB%AF%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E9%9D%A2%E8%AF%95%E9%A2%98_%E5%87%AF%E5%87%AF%E8%B6%85%E4%BA%BA%E7%89%88%E6%9C%AC/" title="无题"><img src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/14.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"/></a><div class="content"><a class="title" href="/2023/03/20/%E5%89%8D%E7%AB%AF%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E9%9D%A2%E8%AF%95%E9%A2%98_%E5%87%AF%E5%87%AF%E8%B6%85%E4%BA%BA%E7%89%88%E6%9C%AC/" title="无题">无题</a><time datetime="2023-03-20T10:12:35.961Z" title="发表于 2023-03-20 18:12:35">2023-03-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/03/20/%E5%89%8D%E7%AB%AF%EF%BC%88JS%EF%BC%89%E4%BB%A3%E7%A0%81%E7%BC%96%E7%A8%8B%E9%A2%98/" title="无题"><img src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/media/image/14.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"/></a><div class="content"><a class="title" href="/2023/03/20/%E5%89%8D%E7%AB%AF%EF%BC%88JS%EF%BC%89%E4%BB%A3%E7%A0%81%E7%BC%96%E7%A8%8B%E9%A2%98/" title="无题">无题</a><time datetime="2023-03-20T10:12:35.954Z" title="发表于 2023-03-20 18:12:35">2023-03-20</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2023 By 凯凯超人</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.2
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        insertScript: [200, () => {
+          document.querySelectorAll('mjx-container:not\([display]\)').forEach(node => {
+            const target = node.parentNode
+            if (target.nodeName.toLowerCase() === 'li') {
+              target.parentNode.classList.add('has-jax')
+            } else {
+              target.classList.add('has-jax')
+            }
+          });
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/StaticFile_HEXO@latest/butterfly/js/pool.min.js"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/js/mouse_snow.min.js"><script src="https://cdn.jsdelivr.net/gh/sviptzk/StaticFile_HEXO@latest/butterfly/js/pool.min.js"></script><script src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/js/mouse_snow.min.js"></script><script src="https://cdn.jsdelivr.net/gh/sviptzk/HexoStaticFile@latest/Hexo/js/hideMobileSidebar.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
